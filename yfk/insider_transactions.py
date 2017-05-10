@@ -1,3 +1,5 @@
+import json
+
 import requests_cache
 import requests
 
@@ -13,16 +15,19 @@ class InsiderTransactions():
 		self._make_request()
 
 	def _make_request(self):
-		self.response = requests.get(self.url)
+		self.response = json.loads(requests.get(self.url).text)
 		self._parse_response()
 
 	def _parse_response(self):
-		data = {}
-		data['insiderHolders'] = map(, self.response['quoteSummary']['result'][0]['insiderHolders'])
+		data = {}	
+		print self.response['quoteSummary']['result'][0]['insiderHolders']['holders'][0]
+		data['insiderHolders'] = map(lambda x: {'name': x['name'], 'relation': x['relation'], 'transaction': x['transactionDescription'], 'lastestTransDate': x['latestTransDate']['fmt'], 'positionIndirect': x['positionIndirect']['raw'], 'positionIndirectDate': x['positionIndirectDate']['fmt']}, self.response['quoteSummary']['result'][0]['insiderHolders']['holders'])
+		mhb = self.response['quoteSummary']['result'][0]['majorHoldersBreakdown']
+		data['majorHoldersBreakdown'] = {'insidersPercentHeld': mhb['insidersPercentHeld']['raw'], 'institutionsPercentHeld': mhb['institutionsPercentHeld']['raw'], 'institutionsFloatPercentHeld': mhb['institutionsFloatPercentHeld']['raw'], 'institutionsCount': mhb['institutionsCount']['raw']}
+
+		self.data = data
 
 	def get_data(self):
-		if not self.data:
-			pass
 		return self.data
 
 

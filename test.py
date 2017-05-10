@@ -7,3 +7,4 @@ from yfk import Quote, InsiderTransactions
 # 	print d
 
 it = InsiderTransactions('FB')
+print it.get_data()
