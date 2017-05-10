@@ -6,5 +6,10 @@ from yfk import Quote, InsiderTransactions
 # for d in q.get_data()['data']:
 # 	print d
 
-it = InsiderTransactions('FB')
-print it.get_data()
+# it = InsiderTransactions('FB')
+# print it.get_data()
+
+
+from DataGather import gather
+
+gather()
