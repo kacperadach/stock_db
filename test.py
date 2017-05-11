@@ -12,4 +12,9 @@ from yfk import Quote, InsiderTransactions
 
 from DataGather import gather
 
-gather()
+#gather()
+
+from Database import FinanceDB
+
+fdb = FinanceDB()
+fdb.insert('test', 'fuck')
