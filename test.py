@@ -10,7 +10,7 @@ from yfk import Quote, InsiderTransactions
 # print it.get_data()
 
 
-from DataGather import gather
+from acquisition import gather
 
 #gather()
 
@@ -20,7 +20,7 @@ from DataGather import gather
 # data = o.get_data()
 # print data
 from datetime import date
-from Database import ScheduleDB
+from db import ScheduleDB
 
 s = ScheduleDB(host='localhost', user='root', pwd='mobydick420', db='test')
 # s.create_options_task('aapl', date(year=2017, month=5, day=12))

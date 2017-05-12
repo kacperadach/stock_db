@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import *
 
-from Database.models.base import Base
+from db.models.base import Base
 
 class OptionTask(Base):
     __tablename__ = 'optiontask'

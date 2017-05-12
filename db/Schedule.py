@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-from Database.models import *
-from Database.models.base import Base
+from db.models import *
+from db.models.base import Base
 
 MYSQL_URI = 'mysql://{}:{}@{}/{}'
 
