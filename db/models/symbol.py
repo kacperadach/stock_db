@@ -4,7 +4,7 @@ from sqlalchemy import *
 
 from db.models import Base
 
-class OptionTask(Base):
+class StockTicker(Base):
     __tablename__ = 'optiontask'
 
     symbol = Column(String(30), primary_key=True)

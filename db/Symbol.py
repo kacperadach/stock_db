@@ -3,15 +3,15 @@ from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-from db.models.schedule import *
-from db.models import Base
+from db.models.symbol import *
+from db.models.base import Base
 
 MYSQL_URI = 'mysql://{}:{}@{}/{}'
 
 class ScheduleDBError(Exception):
 	pass
 
-class ScheduleDB():
+class SymbolDB():
 
 	def __init__(self, user, pwd, host, db):
 		self.options_schedule = None
