@@ -3,9 +3,7 @@ from datetime import datetime
 import itertools
 import calendar
 
-import requests_cache
 import requests
-from IPython.core.debugger import Tracer
 
 VALID_RANGES = ("1d","5d","1mo","3mo","6mo","1y","2y","5y","10y","ytd","max")
 VALID_INTERVALS = ("1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo")
@@ -14,7 +12,6 @@ BASE_URL = "https://query2.finance.yahoo.com/v7/finance/chart/{}?"
 QUERY_URL = "period1={}&period2={}&interval={}"
 END_URL = "&indicators=quote&includeTimestamps=true&includePrePost=true&events=div%7Csplit%7Cearn&corsDomain=finance.yahoo.com"
 
-requests_cache.install_cache('quote_cache')
 
 class QuoteError(Exception):
 	pass
@@ -62,12 +59,13 @@ class QuoteResponse():
 	def __init__(self, response):
 		self.response = response
 		self.data = None
+		self.parse_data()
 
 	def is_valid_quote(self):
 		response = self.response['chart']['result']
 		return bool(response)
 
-	def scrape_data(self):
+	def parse_data(self):
 		data = {}
 		data['symbol'] = self.response['chart']['result'][0]['meta']['symbol']
 		data['currency'] = self.response['chart']['result'][0]['meta']['currency']
@@ -100,7 +98,7 @@ class QuoteResponse():
 
 	def get_data(self):
 		if not self.data:
-			self.scrape_data()
+			self.parse_data()
 		return self.data
 
 

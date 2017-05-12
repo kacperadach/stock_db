@@ -14,7 +14,15 @@ from DataGather import gather
 
 #gather()
 
-from Database import FinanceDB
+# from yfk.options import Options
+#
+# o = Options('aapl', auto_query=True)
+# data = o.get_data()
+# print data
+from datetime import date
+from Database import ScheduleDB
 
-fdb = FinanceDB()
-fdb.insert('test', 'fuck')
+s = ScheduleDB(host='localhost', user='root', pwd='mobydick420', db='test')
+# s.create_options_task('aapl', date(year=2017, month=5, day=12))
+# s.commit_options_tasks()
+s.complete_options_task('aapl', date(year=2017, month=5, day=12))
