@@ -1,3 +1,4 @@
-from acquisition.symbol.tickers import get_all_tickers_from_ftp
+from acquisition.symbol.tickers import StockTickers
 
-get_all_tickers_from_ftp()
+a = StockTickers()
+print a.get_all()

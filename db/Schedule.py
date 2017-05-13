@@ -63,3 +63,14 @@ class ScheduleDB():
 				raise ScheduleDBError('OptionsTask does not exist: {} {}'.format(symbol, trading_date))
 			task.completed = True
 			session.add(task)
+
+	def create_tickers_task(self, trading_date):
+		self.add_to_schedule(TickerTask(trading_date=trading_date))
+
+	def complete_tickers_task(self, trading_date):
+		with self.session_scope() as session:
+			task = session.query(TickerTask).filter_by(trading_date=trading_date).first()
+			if not task:
+				raise ScheduleDB('TickerTask does not exist for date: {}'.format(trading_date))
+			task.completed = True
+			session.add(task)
