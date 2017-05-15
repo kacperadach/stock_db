@@ -1,9 +1,12 @@
 import sys
 
-from app.service import main_service
+from service import MainService
+
+def run():
+	if len(sys.argv) >= 2:
+		MainService(sys.argv[1])
+	else:
+		MainService()
 
 if __name__ == '__main__':
-	if len(sys.argv) >= 2:
-		main_service(sys.argv[1])
-	else:
-		main_service()
+	run()

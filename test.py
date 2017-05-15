@@ -1,4 +1,4 @@
-from acquisition.symbol.tickers import StockTickers
+from app.run import run
 
-a = StockTickers()
-print a.get_all()
+if __name__ == '__main__':
+	run()
