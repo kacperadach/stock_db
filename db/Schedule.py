@@ -1,3 +1,4 @@
+from os import environ
 from contextlib import contextmanager
 
 from sqlalchemy.orm import sessionmaker
@@ -13,14 +14,14 @@ class ScheduleDBError(Exception):
 
 class ScheduleDB():
 
-	def __init__(self, user, pwd, host, db):
+	def __init__(self):
 		self.options_schedule = None
 
-		self.user = user
-		self.pwd = pwd
-		self.host = host
-		self.db = db
-		self.mysql_uri = MYSQL_URI.format(user, pwd, host, db)
+		self.user = environ['SCHEDULE_DB_USER']
+		self.pwd = environ['SCHEDULE_DB_PWD']
+		self.host = environ['SCHEDULE_DB_HOST']
+		self.db = environ['SCHEDULE_DB_NAME']
+		self.mysql_uri = MYSQL_URI.format(self.user, self.pwd, self.host, self.db)
 
 		engine = create_engine(self.mysql_uri)
 		if not database_exists(engine.url):

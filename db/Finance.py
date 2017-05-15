@@ -1,3 +1,5 @@
+from os import environ
+
 from pymongo import MongoClient
 
 class FinanceDBError(Exception):
@@ -5,12 +7,12 @@ class FinanceDBError(Exception):
 
 class FinanceDB():
 
-	def __init__(self, host='localhost', port=27017, db_name='test_db'):
-		self.host = host
-		self.port = port
-		self.db_name = db_name
+	def __init__(self):
+		self.host =  environ['FINANCE_DB_HOST']
+		self.port = int(environ['FINANCE_DB_PORT'])
+		self.db_name = environ['FINANCE_DB_NAME']
 		self.collection = None
-		self.client = MongoClient(host, port)
+		self.client = MongoClient(self.host, self.port)
 		self.db = self.client[self.db_name]
 
 	def set_collection(self, collection_name):
