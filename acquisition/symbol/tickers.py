@@ -82,6 +82,16 @@ class StockTickers():
 		with open(file_path, 'w') as f:
 			f.write(file_data_string)
 
+
+def _filter_all_tickers(self, all_tickers):
+	filtered_list = []
+	for ticker in all_tickers:
+		if not any(sym in ticker for sym in FILTERED_SYMBOLS):
+			filtered_list.append(ticker)
+	filtered_list.sort()
+	return filtered_list
+
+
 def _get_file_path_list():
 	paths = []
 	full_path = path.join(DIRNAME, 'tickers')

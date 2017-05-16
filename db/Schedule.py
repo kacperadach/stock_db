@@ -38,7 +38,7 @@ class ScheduleDB():
 			session.commit()
 		except:
 			session.rollback()
-			raise
+			print 'Database Rollback' # add logging
 		finally:
 			session.close()
 
@@ -48,6 +48,10 @@ class ScheduleDB():
 				session.add_all(obj)
 			else:
 				session.add(obj)
+
+	def query(self, table, filter_dict):
+		with self.session_scope() as session:
+			return session.query(table).filter_by(filter_dict).all()
 
 	def create_options_task(self, symbol, trading_date):
 		if not self.options_schedule:
