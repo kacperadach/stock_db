@@ -2,14 +2,15 @@ import time
 from datetime import datetime, timedelta, date
 
 from app.thread import FThread
-from tickers import schedule_tickers
+from tickers import schedule_tickers, tickers_task_complete
 from options import schedule_options
 
 class Scheduler(FThread):
 
 	def _run(self):
 		trading_date = date.today()
-		schedule_tickers(trading_date)
+		if not tickers_task_complete(trading_date):
+			schedule_tickers(trading_date)
 		schedule_options(trading_date)
 
 	def _sleep(self):

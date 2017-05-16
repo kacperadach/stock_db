@@ -6,6 +6,7 @@ from sqlalchemy_utils import database_exists, create_database
 
 from db.models.schedule import *
 from db.models import Base
+from logger import Logger
 
 MYSQL_URI = 'mysql://{}:{}@{}/{}'
 
@@ -36,9 +37,9 @@ class ScheduleDB():
 		try:
 			yield session
 			session.commit()
-		except:
+		except Exception as e:
 			session.rollback()
-			print 'Database Rollback' # add logging
+			Logger.log('Database Rollback: {}'.format(e.statement), 'warning')
 		finally:
 			session.close()
 
@@ -51,7 +52,7 @@ class ScheduleDB():
 
 	def query(self, table, filter_dict):
 		with self.session_scope() as session:
-			return session.query(table).filter_by(filter_dict).all()
+			return session.query(table).filter_by(**filter_dict)
 
 	def create_options_task(self, symbol, trading_date):
 		if not self.options_schedule:

@@ -1,2 +1,2 @@
-from db.Finance import *
-from db.Schedule import *
+from db.Finance import FinanceDB
+from db.Schedule import ScheduleDB 

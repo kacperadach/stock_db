@@ -1,1 +1,1 @@
-from tickers import schedule_tickers
+from tickers import schedule_tickers, tickers_task_complete

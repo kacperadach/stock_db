@@ -1,5 +1,6 @@
 import time
 from threading import Thread
+from logger import Logger
 
 class FThread(Thread):
 
@@ -7,9 +8,13 @@ class FThread(Thread):
 		super(FThread, self).__init__()
 
 	def run(self):
-		while 1:
-			self._run()
-			self._sleep()
+		try:
+			while 1:
+				self._run()
+				self._sleep()
+		except KeyboardInterrupt:
+			Logger.log('Keyboard Interrupt, closing thread')
+
 
 	def _run(self):
 		pass

@@ -1,6 +1,6 @@
 import sys
 
-from service import MainService
+from app.service import MainService
 
 def run():
 	if len(sys.argv) >= 2:
