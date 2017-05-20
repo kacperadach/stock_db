@@ -9,23 +9,13 @@ DIRNAME, _ = path.split(path.abspath(__file__))
 BASE_PATH = path.dirname(path.abspath(__file__))
 
 FTP_ADDRESS = 'ftp.nasdaqtrader.com'
-
 FTP_CWD = 'SymbolDirectory'
-
 NASDAQ_FILE = 'nasdaqlisted.txt'
-
 OTHER_FILE = 'otherlisted.txt'
-
 FTP_DELIMITER = '|'
-
 IGNORED_STRINGS = ('SYMBOL', )
-
 FILTERED_SYMBOLS = ('^', '.', '$')
-
-
-
 FILES = ["amex.txt", "nasdaq.txt", "nyse.txt"]
-
 TICKERS_FOLDER = 'tickers'
 
 EXCHANGES = ('nasdaq', 'nyse', 'amex')
@@ -66,7 +56,7 @@ class StockTickers():
 	def _filter_all_tickers(self, all_tickers):
 		filtered_list = []
 		for ticker in all_tickers:
-			if not any(sym in ticker for sym in FILTERED_SYMBOLS):
+			if not any(sym in ticker for sym in FILTERED_SYMBOLS) and ticker.upper() not in IGNORED_STRINGS:
 				filtered_list.append(ticker)
 		filtered_list.sort()
 		return filtered_list

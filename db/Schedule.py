@@ -16,7 +16,7 @@ class ScheduleDBError(Exception):
 class ScheduleDB():
 
 	def __init__(self):
-		self.options_schedule = None
+		self.options_task = None
 
 		self.user = environ['SCHEDULE_DB_USER']
 		self.pwd = environ['SCHEDULE_DB_PWD']
@@ -33,13 +33,18 @@ class ScheduleDB():
 
 	@contextmanager
 	def session_scope(self):
+		self.error = False
 		session = self.Session()
 		try:
 			yield session
 			session.commit()
 		except Exception as e:
+			self.error = True
 			session.rollback()
-			Logger.log('Database Rollback: {}'.format(e.statement), 'warning')
+			error_msg = e.statement
+			for param in e.params:
+				error_msg = error_msg.replace('%s', str(param), 1)
+			Logger.log('Schedule Database Rollback: {}'.format(error_msg), 'warning')
 		finally:
 			session.close()
 
@@ -55,12 +60,9 @@ class ScheduleDB():
 			return session.query(table).filter_by(**filter_dict)
 
 	def create_options_task(self, symbol, trading_date):
-		if not self.options_schedule:
-			self.options_schedule = []
-		self.options_schedule.append(OptionTask(symbol=symbol, trading_date=trading_date))
-
-	def commit_options_tasks(self):
-		self.add_to_schedule(self.options_schedule)
+		self.options_task = OptionTask(symbol=symbol, trading_date=trading_date)
+		self.add_to_schedule(self.options_task)
+		return self.error
 
 	def complete_options_task(self, symbol, trading_date):
 		with self.session_scope() as session:

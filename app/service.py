@@ -16,7 +16,9 @@ class MainService():
 		self.main_service()
 
 	def main_service(self):
-		self.Scheduler = Scheduler().start()
+		self.Scheduler = Scheduler()
+		self.Scheduler.start()
+
 
 	def initialize_env_vars(self):
 		environment_vars = PROD_ENV_VARS if self.official else DEV_ENV_VARS

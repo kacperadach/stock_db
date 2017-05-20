@@ -13,3 +13,8 @@ def tickers_task_complete(trading_date):
 	schedule_db = ScheduleDB()
 	ticker_task = schedule_db.query(TickerTask, {'trading_date': trading_date}).first()
 	return ticker_task.completed if hasattr(ticker_task, 'completed') else False
+
+def tickers_task_exists(trading_date):
+	schedule_db = ScheduleDB()
+	ticker_task = schedule_db.query(TickerTask, {'trading_date': trading_date}).first()
+	return bool(ticker_task)
