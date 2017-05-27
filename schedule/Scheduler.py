@@ -14,7 +14,7 @@ class Scheduler(FThread):
 	def _run(self):
 		trading_date = date.today()
 		if trading_date.weekday() > 4:
-			Logger.log('Not running scheduler on weekend: {}'.format(trading_date))
+			Logger.log('{}: Not running scheduler on weekend: {}'.format(self.thread_name, trading_date))
 		else:
 			Logger.log('{}: using {} as trading day'.format(self.thread_name, trading_date))
 			if not tickers_task_exists(trading_date):

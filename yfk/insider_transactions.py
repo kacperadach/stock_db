@@ -1,11 +1,8 @@
 import json
 
-import requests_cache
 import requests
 
 BASE_URL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{}?formatted=true&crumb=cdjFLauo4.a&lang=en-US&region=US&modules=institutionOwnership%2CfundOwnership%2CmajorDirectHolders%2CmajorHoldersBreakdown%2CinsiderTransactions%2CinsiderHolders%2CnetSharePurchaseActivity&corsDomain=finance.yahoo.com"
-
-requests_cache.install_cache('insider_transcation_cache')
 
 class InsiderTransactions():
 
@@ -24,10 +21,7 @@ class InsiderTransactions():
 		data['insiderHolders'] = map(lambda x: {'name': x['name'], 'relation': x['relation'], 'transaction': x['transactionDescription'], 'lastestTransDate': x['latestTransDate']['fmt'], 'positionIndirect': x['positionIndirect']['raw'], 'positionIndirectDate': x['positionIndirectDate']['fmt']}, self.response['quoteSummary']['result'][0]['insiderHolders']['holders'])
 		mhb = self.response['quoteSummary']['result'][0]['majorHoldersBreakdown']
 		data['majorHoldersBreakdown'] = {'insidersPercentHeld': mhb['insidersPercentHeld']['raw'], 'institutionsPercentHeld': mhb['institutionsPercentHeld']['raw'], 'institutionsFloatPercentHeld': mhb['institutionsFloatPercentHeld']['raw'], 'institutionsCount': mhb['institutionsCount']['raw']}
-
 		self.data = data
 
 	def get_data(self):
 		return self.data
-
-

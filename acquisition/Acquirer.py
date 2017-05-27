@@ -11,6 +11,7 @@ class Acquirer(FThread):
         super(Acquirer, self).__init__()
         self.thread_name = 'Acquirer'
 
+
     def _run(self):
         trading_date = datetime.now()
         if trading_date.weekday() > 4:
