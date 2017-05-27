@@ -28,7 +28,7 @@ class StockTickers():
 		self.all_tickers = []
 		self._make_requests()
 
-	def _make_requests(self, writeToFile=True):
+	def _make_requests(self, writeToFile=False):
 		for exchange in EXCHANGES:
 			try:
 				response = urlopen(Request(API_URL.format(exchange)))

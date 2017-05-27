@@ -10,7 +10,6 @@ def schedule_options(trading_date):
 		transactions.append({'error': error, 'ticker': ticker})
 	return transactions
 
-
 def complete_options(symbol, trading_date):
 	schedule_db = ScheduleDB()
 	schedule_db.complete_options_task(symbol, trading_date)

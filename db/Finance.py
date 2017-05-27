@@ -7,11 +7,11 @@ class FinanceDBError(Exception):
 
 class FinanceDB():
 
-	def __init__(self):
+	def __init__(self, collection=None):
 		self.host =  environ['FINANCE_DB_HOST']
 		self.port = int(environ['FINANCE_DB_PORT'])
 		self.db_name = environ['FINANCE_DB_NAME']
-		self.collection = None
+		self.collection = collection
 		self.client = MongoClient(self.host, self.port)
 		self.db = self.client[self.db_name]
 

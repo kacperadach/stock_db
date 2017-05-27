@@ -17,6 +17,7 @@ class ScheduleDB():
 
 	def __init__(self):
 		self.options_task = None
+		self.error = None
 
 		self.user = environ['SCHEDULE_DB_USER']
 		self.pwd = environ['SCHEDULE_DB_PWD']
@@ -44,7 +45,7 @@ class ScheduleDB():
 			error_msg = e.statement
 			for param in e.params:
 				error_msg = error_msg.replace('%s', str(param), 1)
-			Logger.log('Schedule Database Rollback: {}'.format(error_msg), 'warning')
+			#Logger.log('Schedule Database Rollback: {}'.format(error_msg), 'warning')
 		finally:
 			session.close()
 
@@ -82,3 +83,9 @@ class ScheduleDB():
 				raise ScheduleDB('TickerTask does not exist for date: {}'.format(trading_date))
 			task.completed = True
 			session.add(task)
+
+	def get_incomplete_options_tasks(self, trading_date):
+		with self.session_scope() as session:
+			tasks = session.query(OptionTask.symbol).filter_by(trading_date=trading_date, completed=False)
+			for task in tasks:
+				yield task.symbol

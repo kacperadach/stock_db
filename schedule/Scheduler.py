@@ -13,15 +13,18 @@ class Scheduler(FThread):
 
 	def _run(self):
 		trading_date = date.today()
-		Logger.log('{}: using {} as trading day'.format(self.thread_name, trading_date))
-		if not tickers_task_exists(trading_date):
-			schedule_tickers(trading_date)
-			Logger.log('{}')
+		if trading_date.weekday() > 4:
+			Logger.log('Not running scheduler on weekend: {}'.format(trading_date))
 		else:
-			Logger.log('{}: tickers task already exists for date {}'.format(self.thread_name, trading_date))
-		transactions = schedule_options(trading_date)
-		Logger.log('{}: {} options tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
-		Logger.log('{}: {} options tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))
+			Logger.log('{}: using {} as trading day'.format(self.thread_name, trading_date))
+			if not tickers_task_exists(trading_date):
+				schedule_tickers(trading_date)
+				Logger.log('{}')
+			else:
+				Logger.log('{}: tickers task already exists for date {}'.format(self.thread_name, trading_date), 'warning')
+			transactions = schedule_options(trading_date)
+			Logger.log('{}: {} options tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
+			Logger.log('{}: {} options tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))
 
 	def _sleep(self):
 		# Sleep until next day

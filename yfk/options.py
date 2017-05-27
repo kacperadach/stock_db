@@ -32,14 +32,19 @@ class Options():
 
     def _make_request(self):
         req = requests.get(self.url)
-        return json.loads(req.text)['optionChain']['result'][0]
+        data = json.loads(req.text)['optionChain']['result']
+        if len(data) != 0:
+            return data[0]
+        return data
+
 
     def _change_url(self, date):
         self.url = OPTIONS_DATE_URL.format(self.symbol, date)
 
     def _append_options(self, options):
-        date = options[0]['expirationDate']
-        self.options[date] = {'calls': options[0]['calls'], 'puts': options[0]['puts']}
+        if options:
+            date = options[0]['expirationDate']
+            self.options[date] = {'calls': options[0]['calls'], 'puts': options[0]['puts']}
 
     def _is_valid_response(self):
         return bool(self.response)
