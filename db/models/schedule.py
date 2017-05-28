@@ -18,3 +18,11 @@ class TickerTask(Base):
     trading_date = Column(Date, primary_key=True)
     created = Column(DateTime, default=datetime.now)
     completed = Column(Boolean, default=False)
+
+class InsiderTask(Base):
+    __tablename__ = 'insidertask'
+
+    symbol = Column(String(30), primary_key=True)
+    trading_date = Column(Date, primary_key=True)
+    created = Column(DateTime, default=datetime.now)
+    completed = Column(Boolean, default=False)

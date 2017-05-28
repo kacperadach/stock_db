@@ -1,8 +1,10 @@
 import json
-
 import requests
 
 BASE_URL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{}?formatted=true&crumb=cdjFLauo4.a&lang=en-US&region=US&modules=institutionOwnership%2CfundOwnership%2CmajorDirectHolders%2CmajorHoldersBreakdown%2CinsiderTransactions%2CinsiderHolders%2CnetSharePurchaseActivity&corsDomain=finance.yahoo.com"
+
+class InsiderError(Exception):
+	pass
 
 class InsiderTransactions():
 
@@ -13,15 +15,20 @@ class InsiderTransactions():
 
 	def _make_request(self):
 		self.response = json.loads(requests.get(self.url).text)
-		self._parse_response()
+		if self._validate_response():
+			self._parse_response()
+		else:
+			raise InsiderError('Insider information not found for {}'.format(self.symbol))
+
+	def _validate_response(self):
+		if 'quoteSummary' in self.response.keys():
+			if isinstance(self.response['quoteSummary'], dict) and 'result' in self.response['quoteSummary'].keys():
+				if isinstance(self.response['quoteSummary']['result'], list) and len(self.response['quoteSummary']['result']) >= 1:
+					return True
+		return False
 
 	def _parse_response(self):
-		data = {}	
-		print self.response['quoteSummary']['result'][0]['insiderHolders']['holders'][0]
-		data['insiderHolders'] = map(lambda x: {'name': x['name'], 'relation': x['relation'], 'transaction': x['transactionDescription'], 'lastestTransDate': x['latestTransDate']['fmt'], 'positionIndirect': x['positionIndirect']['raw'], 'positionIndirectDate': x['positionIndirectDate']['fmt']}, self.response['quoteSummary']['result'][0]['insiderHolders']['holders'])
-		mhb = self.response['quoteSummary']['result'][0]['majorHoldersBreakdown']
-		data['majorHoldersBreakdown'] = {'insidersPercentHeld': mhb['insidersPercentHeld']['raw'], 'institutionsPercentHeld': mhb['institutionsPercentHeld']['raw'], 'institutionsFloatPercentHeld': mhb['institutionsFloatPercentHeld']['raw'], 'institutionsCount': mhb['institutionsCount']['raw']}
-		self.data = data
+		self.data = self.response['quoteSummary']['result'][0]
 
 	def get_data(self):
 		return self.data

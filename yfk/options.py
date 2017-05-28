@@ -33,10 +33,9 @@ class Options():
     def _make_request(self):
         req = requests.get(self.url)
         data = json.loads(req.text)['optionChain']['result']
-        if len(data) != 0:
+        if data and len(data) != 0:
             return data[0]
         return data
-
 
     def _change_url(self, date):
         self.url = OPTIONS_DATE_URL.format(self.symbol, date)

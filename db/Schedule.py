@@ -17,6 +17,7 @@ class ScheduleDB():
 
 	def __init__(self):
 		self.options_task = None
+		self.insider_task = None
 		self.error = None
 
 		self.user = environ['SCHEDULE_DB_USER']
@@ -42,9 +43,9 @@ class ScheduleDB():
 		except Exception as e:
 			self.error = True
 			session.rollback()
-			error_msg = e.statement
-			for param in e.params:
-				error_msg = error_msg.replace('%s', str(param), 1)
+			# error_msg = e.statement
+			# for param in e.params:
+			# 	error_msg = error_msg.replace('%s', str(param), 1)
 			#Logger.log('Schedule Database Rollback: {}'.format(error_msg), 'warning')
 		finally:
 			session.close()
@@ -89,3 +90,22 @@ class ScheduleDB():
 			tasks = session.query(OptionTask.symbol).filter_by(trading_date=trading_date, completed=False)
 			for task in tasks:
 				yield task.symbol
+
+	def create_insider_task(self, symbol, trading_date):
+		self.insider_task = InsiderTask(symbol=symbol, trading_date=trading_date)
+		self.add_to_schedule(self.insider_task)
+		return self.error
+
+	def get_incomplete_insider_tasks(self, trading_date):
+		with self.session_scope() as session:
+			tasks = session.query(InsiderTask.symbol).filter_by(trading_date=trading_date, completed=False)
+			for task in tasks:
+				yield task.symbol
+
+	def complete_insider_task(self, symbol, trading_date):
+		with self.session_scope() as session:
+			task = session.query(InsiderTask).filter_by(symbol=symbol, trading_date=trading_date).first()
+			if not task:
+				raise ScheduleDBError('InsiderTask does not exist: {} {}'.format(symbol, trading_date))
+			task.completed = True
+			session.add(task)
