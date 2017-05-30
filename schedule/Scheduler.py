@@ -27,8 +27,8 @@ class Scheduler(FThread):
 			Logger.log('{}: {} options tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
 			Logger.log('{}: {} options tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))
 			transactions = schedule_insider(trading_date)
-			Logger.log('{}: {} options tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
-			Logger.log('{}: {} options tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))
+			Logger.log('{}: {} insider tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
+			Logger.log('{}: {} insider tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))
 
 	def _sleep(self):
 		# Sleep until next day
