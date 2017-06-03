@@ -18,8 +18,8 @@ class FThread(Thread):
 				self._sleep()
 				Logger.log(self.thread_name + ': Sleeping for ' + str(datetime.timedelta(seconds=self.sleep_time)))
 				time.sleep(self.sleep_time)
-		except KeyboardInterrupt:
-			Logger.log('Keyboard Interrupt, closing thread')
+		except Exception as e:
+			Logger.log('{}: unexpected error occured: {}'.format(self.thread_name, e))
 
 	def _run(self):
 		pass

@@ -89,7 +89,6 @@ class ScheduleDB():
 		with self.session_scope() as session:
 			tasks = session.query(OptionTask.symbol).filter_by(trading_date=trading_date, completed=False)
 			for task in tasks:
-				print task.symbol
 				yield task.symbol
 
 	def create_insider_task(self, symbol, trading_date):
