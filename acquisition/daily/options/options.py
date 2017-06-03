@@ -1,5 +1,6 @@
 from yfk.options import Options, OptionsError
 from db import ScheduleDB, FinanceDB
+from logger import Logger
 
 def get_options_data(symbol):
     try:
@@ -14,7 +15,7 @@ def get_all_options_data(trading_date):
     finance_db = FinanceDB('stock_options')
     not_found = []
     found = []
-    for symbol in schedule_db.get_incomplete_options_tasks(trading_date):
+    for symbol in Logger.progress(schedule_db.get_incomplete_options_tasks(trading_date), 'options'):
         data = get_options_data(symbol)
         if 'options' in data.keys() and isinstance(data['options'], dict):
             options = {}

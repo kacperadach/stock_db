@@ -88,8 +88,8 @@ class ScheduleDB():
 	def get_incomplete_options_tasks(self, trading_date):
 		with self.session_scope() as session:
 			tasks = session.query(OptionTask.symbol).filter_by(trading_date=trading_date, completed=False)
-			for task in tasks:
-				yield task.symbol
+			return map(lambda x: x.symbol, tasks.all())
+
 
 	def create_insider_task(self, symbol, trading_date):
 		self.insider_task = InsiderTask(symbol=symbol, trading_date=trading_date)
@@ -99,9 +99,7 @@ class ScheduleDB():
 	def get_incomplete_insider_tasks(self, trading_date):
 		with self.session_scope() as session:
 			tasks = session.query(InsiderTask.symbol).filter_by(trading_date=trading_date, completed=False)
-			for task in tasks:
-				print task.symbol
-				yield task.symbol
+			return map(lambda x: x.symbol, tasks.all())
 
 	def complete_insider_task(self, symbol, trading_date):
 		with self.session_scope() as session:

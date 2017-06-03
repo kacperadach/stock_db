@@ -18,14 +18,12 @@ class Scheduler(FThread):
 			Logger.log('{}: Not running scheduler on weekend: {}'.format(self.thread_name, trading_date))
 		else:
 			Logger.log('{}: using {} as trading day'.format(self.thread_name, trading_date))
-			# if not tickers_task_exists(trading_date):
-			# 	schedule_tickers(trading_date)
-			# 	Logger.log('{}')
-			# else:
-			# 	Logger.log('{}: tickers task already exists for date {}'.format(self.thread_name, trading_date), 'warning')
+
+			Logger.log('{}: running task {}'.format(self.thread_name, schedule_options.func_name))
 			transactions = schedule_options(trading_date)
 			Logger.log('{}: {} options tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
 			Logger.log('{}: {} options tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))
+			Logger.log('{}: running task {}'.format(self.thread_name, schedule_insider.func_name))
 			transactions = schedule_insider(trading_date)
 			Logger.log('{}: {} insider tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))
 			Logger.log('{}: {} insider tasks errors'.format(self.thread_name, len(filter(lambda x: x['error'] is True, transactions))))

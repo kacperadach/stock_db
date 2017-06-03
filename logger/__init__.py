@@ -1,4 +1,5 @@
-from os import environ, path, mkdir
+import sys
+from os import path, mkdir
 from datetime import datetime
 import logging
 from sys import stdout
@@ -27,5 +28,15 @@ class AppLogger():
 	def log(self, msg, level='info'):
 		func = getattr(self.logger, level)
 		func(msg)
+
+	def progress(self, iter, task, update_percent=10):
+		length = len(iter)
+		last_benchmark = 0
+		for num, i in enumerate(iter):
+			if num/float(length) * 100 >= last_benchmark:
+				Logger.log("{}: {}/{} {}%".format(task, num, length, "%.2f" % (num/float(length)*100)))
+				last_benchmark += update_percent
+			yield i
+
 
 Logger = AppLogger()
