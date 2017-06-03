@@ -17,20 +17,20 @@ class Acquirer(FThread):
     def _run(self):
         self.history.clear()
         self.trading_date = datetime.now()
-        if self.trading_date.weekday() > 4:
-            Logger.log('{}: Not running Acquirer on weekend: {}'.format(self.thread_name, self.trading_date))
-        else:
-            if self.trading_date.hour < 16:
-                Logger.log('{}: Trading day has not finished yet, {}'.format(self.thread_name, self.trading_date.time()))
-            else:
-                self.trading_date = self.trading_date.date()
-                Logger.log('{}: using {} as trading day'.format(self.thread_name, self.trading_date))
+        # if self.trading_date.weekday() > 4:
+        #     Logger.log('{}: Not running Acquirer on weekend: {}'.format(self.thread_name, self.trading_date))
+        # else:
+        #     if self.trading_date.hour < 16:
+        #         Logger.log('{}: Trading day has not finished yet, {}'.format(self.thread_name, self.trading_date.time()))
+        #     else:
+        self.trading_date = self.trading_date.date()
+        Logger.log('{}: using {} as trading day'.format(self.thread_name, self.trading_date))
 
-                found, not_found = self.complete_task(get_all_options_data)
-                self.assert_complete(get_all_options_data, found, not_found)
+        found, not_found = self.complete_task(get_all_options_data)
+        self.assert_complete(get_all_options_data, found, not_found)
 
-                found, not_found = self.complete_task(get_all_insider_data)
-                self.assert_complete(get_all_insider_data, found, not_found)
+        found, not_found = self.complete_task(get_all_insider_data)
+        self.assert_complete(get_all_insider_data, found, not_found)
 
     def complete_task(self, task_fn):
         Logger.log('{}: beginning {} task'.format(self.thread_name, task_fn.func_name))

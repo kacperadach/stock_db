@@ -1,5 +1,6 @@
 import time
 import datetime
+import traceback
 from threading import Thread
 from logger import Logger
 
@@ -20,6 +21,7 @@ class FThread(Thread):
 				time.sleep(self.sleep_time)
 		except Exception as e:
 			Logger.log('{}: unexpected error occured: {}'.format(self.thread_name, e))
+			Logger.log(traceback.format_exc())
 
 	def _run(self):
 		pass

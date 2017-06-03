@@ -22,6 +22,7 @@ def get_all_options_data(trading_date):
             for key in data['options'].keys():  # convert int keys into str
                 options[str(key)] = data['options'][key]
             data['options'] = options
+            data['trading_date'] = str(trading_date)
             finance_db.insert_one(data)
             schedule_db.complete_options_task(symbol, trading_date)
             found.append(symbol)

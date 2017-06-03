@@ -35,7 +35,10 @@ class Options():
 
     def _make_request(self):
         req = requests.get(self.url)
-        data = json.loads(req.text)['optionChain']['result']
+        try:
+            data = json.loads(req.text)['optionChain']['result']
+        except ValueError:
+            data = []
         if data and len(data) != 0:
             return data[0]
         return data
