@@ -18,7 +18,6 @@ class Scheduler(FThread):
 			Logger.log('{}: Not running scheduler on weekend: {}'.format(self.thread_name, trading_date))
 		else:
 			Logger.log('{}: using {} as trading day'.format(self.thread_name, trading_date))
-
 			Logger.log('{}: running task {}'.format(self.thread_name, schedule_options.func_name))
 			transactions = schedule_options(trading_date)
 			Logger.log('{}: {} options tasks scheduled'.format(self.thread_name, len(filter(lambda x: x['error'] is False, transactions))))

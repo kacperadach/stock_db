@@ -1,10 +1,4 @@
-import traceback
+from yfk.insider_transactions import InsiderTransactions
 
-try:
-    raise ValueError
-except:
-    tb = traceback.format_exc()
-else:
-    tb = "No error"
-finally:
-    print tb
+i = InsiderTransactions('sgyp')
+print 1

@@ -5,7 +5,6 @@ from app.thread import FThread
 from acquisition.daily.options import get_all_options_data
 from acquisition.daily.insider import get_all_insider_data
 
-
 class Acquirer(FThread):
 
     def __init__(self):
@@ -51,14 +50,17 @@ class Acquirer(FThread):
             self.history[task_fn.func_name] = True
 
     def _sleep(self):
-
         now = datetime.now()
-        if all(self.history.values()) or (now.hour == 23 and now.minute >= 45):
-            # Sleep until next day
-            tomorrow = now + timedelta(days=1)
-            tomorrow = datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day, hour=16, minute=0, second=0)
-            x = (tomorrow - now).total_seconds()
-            self.sleep_time = x
+        if all(self.history.values()):
+            if now.hour < 16:
+                tomorrow = datetime(year=now.year, month=now.month, day=now.day, hour=16, minute=0, second=0)
+                x = (tomorrow - now).total_seconds()
+                self.sleep_time = x
+            else:
+                tomorrow = now + timedelta(days=1)
+                tomorrow = datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day, hour=16, minute=0, second=0)
+                x = (tomorrow - now).total_seconds()
+                self.sleep_time = x
         else:
             # Sleep 15 minutes try again
             Logger.log('{}: not all tasks were completed, trying again in 15 minutes'.format(self.thread_name))
