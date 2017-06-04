@@ -4,6 +4,8 @@ from urllib2 import Request, urlopen, URLError
 from re import findall
 from csv import reader
 
+from commodities import Commodities_Symbols
+
 SPECIFIC_PATH = 'all_tickers.txt'
 DIRNAME, _ = path.split(path.abspath(__file__))
 BASE_PATH = path.dirname(path.abspath(__file__))
@@ -64,6 +66,9 @@ class StockTickers():
 	def get_all(self):
 		return self.all_tickers
 
+	def get_commodities(self):
+		return Commodities_Symbols
+
 	def _write_tickers_to_file(self, exchange, file_data_string, file_path=None):
 		if not file_path:
 			file_path = path.join(path.join(path.dirname(path.abspath(__file__)), TICKERS_FOLDER), (exchange + '.txt'))
@@ -94,7 +99,6 @@ def get_all_tickers_from_file():
 	for f in _get_file_path_list():
 		tickers = _get_tickers_from_file(f)
 		all_tickers += tickers
-	#logger.info("Found {} tickers using static file".format(len(all_tickers)))
 	return _filter_all_tickers(all_tickers)
 
 def _get_tickers_from_file(p):
@@ -109,7 +113,6 @@ def _get_tickers_from_file(p):
 def get_all_tickers_from_ftp(base=BASE_PATH, specific=SPECIFIC_PATH):
 	_write_all_tickers_from_ftp(base, specific)
 	all_tickers = _pull_all_tickers_from_file(base, specific)
-	#logger.info("Found {} tickers using ftp".format(len(all_tickers)))
 	return _filter_all_tickers(all_tickers)
 
 def _pull_all_tickers_from_file(base, specific):
@@ -133,12 +136,3 @@ def _write_all_tickers_from_ftp(base, specific):
 	except:
 		a = 1
 		# logger.error("Error retrieving tickers from NASDAQ ftp")
-
-
-
-
-
-
-
-
-

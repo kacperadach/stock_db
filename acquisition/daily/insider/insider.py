@@ -15,8 +15,8 @@ def get_all_insider_data(trading_date):
     found, not_found = [], []
     for symbol in Logger.progress(schedule_db.get_incomplete_insider_tasks(trading_date), 'insider'):
         data = get_insider_data(symbol)
-        data['trading_date'] = str(trading_date)
         if data:
+            data['trading_date'] = str(trading_date)
             finance_db.insert_one(data)
             schedule_db.complete_options_task(symbol, trading_date)
             found.append(symbol)

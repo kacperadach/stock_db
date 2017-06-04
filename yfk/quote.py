@@ -44,11 +44,16 @@ class Quote(object):
 		url += "&interval={}".format(self.interval)
 		url += END_URL
 		self.url = url
-		print url
 
 	def _make_request(self):
 		req = requests.get(self.url)
-		self.response = QuoteResponse(json.loads(req.text))
+		body = {}
+		if hasattr(req, 'text'):
+			try:
+				body = json.loads(req.text)
+			except:
+				pass
+		self.response = QuoteResponse(body)
 
 	def get_data(self):
 		return self.response.get_data()
@@ -57,48 +62,46 @@ class Quote(object):
 class QuoteResponse():
 
 	def __init__(self, response):
+		if not isinstance(response, dict):
+			raise QuoteError('Invalid type supplied to QuoteResponse: {}'.format(response.__name__))
 		self.response = response
 		self.data = None
 		self.parse_data()
 
 	def is_valid_quote(self):
-		response = self.response['chart']['result']
-		return bool(response)
+		return bool(self.data)
 
 	def parse_data(self):
 		data = {}
-		data['symbol'] = self.response['chart']['result'][0]['meta']['symbol']
-		data['currency'] = self.response['chart']['result'][0]['meta']['currency']
-		data['exchangeName'] = self.response['chart']['result'][0]['meta']['exchangeName']
-		data['instrumentType'] = self.response['chart']['result'][0]['meta']['instrumentType']
-		data['gmtoffset'] = self.response['chart']['result'][0]['meta']['gmtoffset']
-		data['timezone'] = self.response['chart']['result'][0]['meta']['timezone']
-		data['firstTradeDate'] = self.response['chart']['result'][0]['meta']['firstTradeDate']
+		if self.response:
+			try:
+				timestamps = self.response['chart']['result'][0]['timestamp']
+				indicators = self.response['chart']['result'][0]['indicators']['quote'][0]
+				meta = self.response['chart']['result'][0]['meta']
+			except IndexError, KeyError:
+				pass
+			else:
+				data['meta'] = meta
+				close = [] if 'close' not in indicators.keys() else indicators['close']
+				op = [] if 'open' not in indicators.keys() else indicators['open']
+				low = [] if 'low' not in indicators.keys() else indicators['low']
+				high = [] if 'high' not in indicators.keys() else indicators['high']
+				volume = [] if 'volume' not in indicators.keys() else indicators['volume']
 
-		timestamp = self.response['chart']['result'][0]['timestamp']
-		indicators = self.response['chart']['result'][0]['indicators']['quote'][0]
-
-		close = indicators['close']
-		op = indicators['open']
-		low = indicators['low']
-		high = indicators['high']
-		volume = indicators['volume']
-
-		dataArr = []
-		for ts, cl, o, lo, hi, vol in itertools.izip(timestamp, close, op, low, high, volume):
-			dataArr.append((datetime.fromtimestamp(ts), {
-			'open': o,
-			'high': hi,
-			'close': cl,
-			'low': lo,
-			'volume': vol
-			}))
-		data['data'] = dataArr
+				if all((close, op, low, high, volume, timestamps)):
+					dataArr = []
+					for ts, cl, o, lo, hi, vol in itertools.izip(timestamps, close, op, low, high, volume):
+						dataArr.append((datetime.fromtimestamp(ts), {
+						'open': o,
+						'high': hi,
+						'close': cl,
+						'low': lo,
+						'volume': vol
+						}))
+					data['data'] = dataArr
 		self.data = data
 
 	def get_data(self):
-		if not self.data:
-			self.parse_data()
 		return self.data
 
 

@@ -18,6 +18,7 @@ class ScheduleDB():
 	def __init__(self):
 		self.options_task = None
 		self.insider_task = None
+		self.commodity_task = None
 		self.error = None
 
 		self.user = environ['SCHEDULE_DB_USER']
@@ -90,7 +91,6 @@ class ScheduleDB():
 			tasks = session.query(OptionTask.symbol).filter_by(trading_date=trading_date, completed=False)
 			return map(lambda x: x.symbol, tasks.all())
 
-
 	def create_insider_task(self, symbol, trading_date):
 		self.insider_task = InsiderTask(symbol=symbol, trading_date=trading_date)
 		self.add_to_schedule(self.insider_task)
@@ -106,5 +106,23 @@ class ScheduleDB():
 			task = session.query(InsiderTask).filter_by(symbol=symbol, trading_date=trading_date).first()
 			if not task:
 				raise ScheduleDBError('InsiderTask does not exist: {} {}'.format(symbol, trading_date))
+			task.completed = True
+			session.add(task)
+
+	def create_commodities_task(self, symbol, trading_date):
+		self.commodity_task = CommodityTask(symbol=symbol, trading_date=trading_date)
+		self.add_to_schedule(self.commodity_task)
+		return self.error
+
+	def get_incomplete_commodities_tasks(self, trading_date):
+		with self.session_scope() as session:
+			tasks = session.query(CommodityTask.symbol).filter_by(trading_date=trading_date, completed=False)
+			return map(lambda x: x.symbol, tasks.all())
+
+	def complete_commodities_task(self, symbol, trading_date):
+		with self.session_scope() as session:
+			task = session.query(CommodityTask).filter_by(symbol=symbol, trading_date=trading_date).first()
+			if not task:
+				raise ScheduleDBError('CommodityTask does not exist: {} {}'.format(symbol, trading_date))
 			task.completed = True
 			session.add(task)
