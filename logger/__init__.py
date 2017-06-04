@@ -20,7 +20,7 @@ class AppLogger():
 		self.log_path = path.join(BASE_PATH, 'logs', self.env)
 		self._create_log_folders()
 		file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
-		logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, file_name), level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+		logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, file_name), level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 		ch = logging.StreamHandler(stdout)
 		self.logger = logging.getLogger(self.env)
 		self.logger.addHandler(ch)

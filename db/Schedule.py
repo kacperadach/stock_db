@@ -31,7 +31,10 @@ class ScheduleDB():
 		if not database_exists(engine.url):
 			create_database(engine.url)
 
-		Base.metadata.create_all(engine, checkfirst=True)
+		try:
+			Base.metadata.create_all(engine, checkfirst=True)
+		except:
+			pass
 		self.Session = sessionmaker(bind=engine)
 
 	@contextmanager
