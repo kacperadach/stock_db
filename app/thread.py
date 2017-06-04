@@ -11,16 +11,19 @@ class FThread(Thread):
 		self.thread_name = None
 		self.sleep_time = None
 
+	def _log(self, msg, level='info'):
+		Logger.log(msg, level=level, threadname=self.thread_name)
+
 	def run(self):
 		try:
 			while 1:
-				Logger.log(self.thread_name + ': Running ' + self.thread_name)
+				self._log('Running ' + self.thread_name)
 				self._run()
 				self._sleep()
-				Logger.log(self.thread_name + ': Sleeping for ' + str(datetime.timedelta(seconds=self.sleep_time)))
+				self._log('Sleeping for ' + str(datetime.timedelta(seconds=self.sleep_time)))
 				time.sleep(self.sleep_time)
 		except Exception as e:
-			Logger.log('{}: unexpected error occured: {}'.format(self.thread_name, e))
+			self._log('unexpected error occured: {}'.format(e))
 			Logger.log(traceback.format_exc())
 
 	def _run(self):

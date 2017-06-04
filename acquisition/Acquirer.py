@@ -18,13 +18,13 @@ class Acquirer(FThread):
         self.history.clear()
         self.trading_date = datetime.now()
         if self.trading_date.weekday() > 4:
-            Logger.log('{}: Not running Acquirer on weekend: {}'.format(self.thread_name, self.trading_date))
+            self._log('Not running Acquirer on weekend: {}'.format(self.trading_date))
         else:
             if self.trading_date.hour < 16:
-                Logger.log('{}: Trading day has not finished yet, {}'.format(self.thread_name, self.trading_date.time()))
+                self._log('Trading day has not finished yet, {}'.format(self.trading_date.time()))
             else:
                 self.trading_date = self.trading_date.date()
-                Logger.log('{}: using {} as trading day'.format(self.thread_name, self.trading_date))
+                self._log('using {} as trading day'.format(self.trading_date))
 
                 found, not_found = self.complete_task(get_all_options_data)
                 self.assert_complete(get_all_options_data, found, not_found)
@@ -36,20 +36,20 @@ class Acquirer(FThread):
         self.assert_complete(get_all_commodities_data, found, not_found)
 
     def complete_task(self, task_fn):
-        Logger.log('{}: beginning {} task'.format(self.thread_name, task_fn.func_name))
+        self._log('beginning {} task'.format(task_fn.func_name))
         self.history[task_fn.func_name] = False
         start = datetime.now()
         found, not_found = task_fn(self.trading_date)
         end = datetime.now()
-        Logger.log('{}: {} task took {}'.format(self.thread_name, task_fn.func_name, end - start))
-        Logger.log('{}: acquired data for {} securities.'.format(self.thread_name, len(found)))
+        self._log('{} task took {}'.format(task_fn.func_name, end - start))
+        self._log('acquired data for {} securities.'.format(self.thread_name, len(found)))
         return found, not_found
 
     def assert_complete(self, task_fn, found, not_found):
         if len(found) + len(not_found) == 0:
-            Logger.log('{}: no securities scheduled while completing task {}'.format(self.thread_name, task_fn.func_name), 'warning')
+            self._log('no securities scheduled while completing task {}'.format(task_fn.func_name), level='warning')
         elif len(not_found) > 50:
-            Logger.log('{}: could not find data for {} securities while completing task {}'.format(self.thread_name, len(not_found), task_fn.func_name), 'warning')
+            self._log('could not find data for {} securities while completing task {}'.format(len(not_found), task_fn.func_name), level='warning')
         else:
             self.history[task_fn.func_name] = True
 
@@ -67,5 +67,5 @@ class Acquirer(FThread):
                 self.sleep_time = x
         else:
             # Sleep 15 minutes try again
-            Logger.log('{}: not all tasks were completed, trying again in 15 minutes'.format(self.thread_name))
+            self._log('not all tasks were completed, trying again in 15 minutes')
             self.sleep_time = 900

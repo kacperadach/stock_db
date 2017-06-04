@@ -6,6 +6,8 @@ from sys import stdout
 
 BASE_PATH = path.dirname(path.abspath(__file__))
 
+THREAD_LEN = 9
+
 class AppLogger():
 
 	def __init__(self):
@@ -25,8 +27,11 @@ class AppLogger():
 		self.logger = logging.getLogger(self.env)
 		self.logger.addHandler(ch)
 
-	def log(self, msg, level='info'):
+	def log(self, msg, level='info', threadname=None):
 		func = getattr(self.logger, level)
+		if threadname:
+			msg_format = "%" + str(THREAD_LEN) + "s: "
+			msg = (msg_format % threadname) + msg
 		func(msg)
 
 	def progress(self, iter, task, update_percent=10):
