@@ -16,7 +16,7 @@ class MainService():
 		self.initialize_env_vars()
 		Logger.log('+---------------------------------------------+')
 		Logger.log('|                                             |')
-		Logger.log('|    Service Started at {}      |'.format(datetime.now().strftime('%H:%m %Y-%m-%d')))
+		Logger.log('|    Service Started at {}      |'.format(datetime.now().strftime('%H:%M %Y-%m-%d')))
 		Logger.log('|          Environment: {}                  |'.format(self.env.upper() if self.env == 'prod' else 'DEV '))
 		Logger.log('|                                             |')
 		Logger.log('+---------------------------------------------+')
