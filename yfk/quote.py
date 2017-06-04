@@ -78,7 +78,7 @@ class QuoteResponse():
 				timestamps = self.response['chart']['result'][0]['timestamp']
 				indicators = self.response['chart']['result'][0]['indicators']['quote'][0]
 				meta = self.response['chart']['result'][0]['meta']
-			except IndexError, KeyError:
+			except (IndexError, KeyError, TypeError):
 				pass
 			else:
 				data['meta'] = meta

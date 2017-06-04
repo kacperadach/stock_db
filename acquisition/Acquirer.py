@@ -4,6 +4,7 @@ from logger import Logger
 from app.thread import FThread
 from acquisition.daily.options import get_all_options_data
 from acquisition.daily.insider import get_all_insider_data
+from acquisition.daily.commodities import get_all_commodities_data
 
 class Acquirer(FThread):
 
@@ -30,6 +31,9 @@ class Acquirer(FThread):
 
                 found, not_found = self.complete_task(get_all_insider_data)
                 self.assert_complete(get_all_insider_data, found, not_found)
+
+        found, not_found = self.complete_task(get_all_commodities_data)
+        self.assert_complete(get_all_commodities_data, found, not_found)
 
     def complete_task(self, task_fn):
         Logger.log('{}: beginning {} task'.format(self.thread_name, task_fn.func_name))
