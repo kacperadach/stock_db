@@ -21,7 +21,7 @@ def get_all_commodities_data(trading_date):
     yesterday = trading_date - timedelta(days=1)
     yesterday = datetime(year=yesterday.year, month=yesterday.month, day=yesterday.day)
     for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'commodities'):
-        data = get_commodities_data(symbol)
+        data = get_commodities_data(symbol, trading_date)
         if data:
             data['trading_date'] = str(trading_date)
             finance_db.insert_one(data)
