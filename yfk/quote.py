@@ -46,13 +46,17 @@ class Quote(object):
 		self.url = url
 
 	def _make_request(self):
-		req = requests.get(self.url)
 		body = {}
-		if hasattr(req, 'text'):
-			try:
-				body = json.loads(req.text)
-			except:
-				pass
+		try:
+			req = requests.get(self.url)
+		except:
+			pass
+		else:
+			if hasattr(req, 'text'):
+				try:
+					body = json.loads(req.text)
+				except:
+					pass
 		self.response = QuoteResponse(body)
 
 	def get_data(self):
