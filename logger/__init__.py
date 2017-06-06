@@ -39,7 +39,9 @@ class AppLogger():
 		last_benchmark = 0
 		for num, i in enumerate(iter):
 			if num/float(length) * 100 >= last_benchmark:
-				Logger.log("{}: {}/{} {}%".format(task, num, length, "%.2f" % (num/float(length)*100)))
+				msg_format = "%" + str(THREAD_LEN) + "s: "
+				msg = (msg_format % task) + "{}/{} {}%".format(num, length, "%.2f" % (num/float(length)*100))
+				Logger.log(msg)
 				last_benchmark += update_percent
 			yield i
 

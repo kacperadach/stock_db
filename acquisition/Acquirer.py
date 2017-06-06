@@ -42,14 +42,14 @@ class Acquirer(FThread):
         found, not_found = task_fn(self.trading_date)
         end = datetime.now()
         self._log('{} task took {}'.format(task_fn.func_name, end - start))
-        self._log('acquired data for {} securities.'.format(self.thread_name, len(found)))
+        self._log('acquired data for {} securities.'.format(len(found)))
         return found, not_found
 
     def assert_complete(self, task_fn, found, not_found):
         if len(found) + len(not_found) == 0:
             self._log('no securities scheduled while completing task {}'.format(task_fn.func_name), level='warning')
         elif len(not_found) > 50:
-            self._log('could not find data for {} securities while completing task {}'.format(len(not_found), task_fn.func_name), level='warning')
+            self._log('could not find data for {} ( {}% ) securities while completing task {}'.format(len(not_found), round((float(len(not_found))/(len(found)+len(not_found)))*100, 2), task_fn.func_name), level='warning')
         else:
             self.history[task_fn.func_name] = True
 

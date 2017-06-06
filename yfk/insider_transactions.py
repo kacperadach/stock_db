@@ -14,11 +14,15 @@ class InsiderTransactions():
 		self._make_request()
 
 	def _make_request(self):
-		self.response = json.loads(requests.get(self.url).text)
-		if self._validate_response():
-			self._parse_response()
+		try:
+			self.response = json.loads(requests.get(self.url).text)
+		except:
+			pass
 		else:
-			raise InsiderError('Insider information not found for {}'.format(self.symbol))
+			if self._validate_response():
+				self._parse_response()
+			else:
+				raise InsiderError('Insider information not found for {}'.format(self.symbol))
 
 	def _validate_response(self):
 		if 'quoteSummary' in self.response.keys():
