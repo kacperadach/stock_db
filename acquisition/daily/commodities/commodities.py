@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from yfk.quote import Quote, QuoteError
 from db import ScheduleDB, FinanceDB
@@ -23,7 +23,7 @@ def get_all_commodities_data(trading_date):
     for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'commodities'):
         data = get_commodities_data(symbol, trading_date)
         if data:
-            data['trading_date'] = str(trading_date.date())
+            data['trading_date'] = str(trading_date if isinstance(trading_date, date) else trading_date.date())
             finance_db.insert_one(data)
             schedule_db.complete_commodities_task(symbol, trading_date)
             found.append(symbol)

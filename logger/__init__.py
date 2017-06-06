@@ -6,7 +6,7 @@ from sys import stdout
 
 BASE_PATH = path.dirname(path.abspath(__file__))
 
-THREAD_LEN = 9
+THREAD_LEN = 11
 
 class AppLogger():
 
