@@ -30,7 +30,10 @@ class Options():
         if self.expiration_dates and self.auto_query:
             for expirationDate in self.expiration_dates:
                 self._change_url(expirationDate)
-                self._append_options(self._make_request()['options'])
+                try:
+                    self._append_options(self._make_request()['options'])
+                except:
+                    pass
             self.response['options'] = self.options
 
     def _make_request(self):
