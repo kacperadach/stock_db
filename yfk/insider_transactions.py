@@ -10,6 +10,7 @@ class InsiderTransactions():
 
 	def __init__(self, symbol):
 		self.symbol = symbol
+		self.data = {}
 		self.url = BASE_URL.format(symbol)
 		self._make_request()
 
