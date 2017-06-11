@@ -2,15 +2,17 @@ from os import environ
 
 from pymongo import MongoClient
 
+from app.constants import DEV_ENV_VARS
+
 class FinanceDBError(Exception):
 	pass
 
 class FinanceDB():
 
 	def __init__(self, collection=None):
-		self.host =  environ['FINANCE_DB_HOST']
-		self.port = int(environ['FINANCE_DB_PORT'])
-		self.db_name = environ['FINANCE_DB_NAME']
+		self.host =  environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
+		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
+		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
 		self.collection = collection
 		self.client = MongoClient(self.host, self.port)
 		self.db = self.client[self.db_name]
@@ -25,6 +27,8 @@ class FinanceDB():
 	def insert_one(self, document):
 		self._check_collection()
 		collection = self.db.get_collection(self.collection)
+		if 'trading_date' not in document.keys() or  not bool(document['trading_date']):
+			raise FinanceDBError('No trading_date in document')
 		collection.insert_one(document)
 
 	def insert_many(self, documents):

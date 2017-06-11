@@ -6,7 +6,7 @@ from sqlalchemy_utils import database_exists, create_database
 
 from db.models.schedule import *
 from db.models import Base
-from logger import Logger
+from app.constants import DEV_ENV_VARS
 
 MYSQL_URI = 'mysql://{}:{}@{}/{}'
 
@@ -21,10 +21,10 @@ class ScheduleDB():
 		self.commodity_task = None
 		self.error = None
 
-		self.user = environ['SCHEDULE_DB_USER']
-		self.pwd = environ['SCHEDULE_DB_PWD']
-		self.host = environ['SCHEDULE_DB_HOST']
-		self.db = environ['SCHEDULE_DB_NAME']
+		self.user = environ.get('SCHEDULE_DB_USER', DEV_ENV_VARS['SCHEDULE_DB_USER'])
+		self.pwd = environ.get('SCHEDULE_DB_PWD', DEV_ENV_VARS['SCHEDULE_DB_PWD'])
+		self.host = environ.get('SCHEDULE_DB_HOST', DEV_ENV_VARS['SCHEDULE_DB_HOST'])
+		self.db = environ.get('SCHEDULE_DB_NAME', DEV_ENV_VARS['SCHEDULE_DB_NAME'])
 		self.mysql_uri = MYSQL_URI.format(self.user, self.pwd, self.host, self.db)
 
 		engine = create_engine(self.mysql_uri)

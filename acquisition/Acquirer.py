@@ -1,10 +1,13 @@
 from datetime import date, datetime, timedelta
 
+from db.models.schedule import OptionTask, CommodityTask, InsiderTask
+from db.Schedule import ScheduleDB
 from logger import Logger
 from app.thread import FThread
 from acquisition.daily.options import get_all_options_data
 from acquisition.daily.insider import get_all_insider_data
 from acquisition.daily.commodities import get_all_commodities_data
+
 
 class Acquirer(FThread):
 
@@ -32,6 +35,7 @@ class Acquirer(FThread):
                 found, not_found = self.complete_task(get_all_insider_data)
                 self.assert_complete(get_all_insider_data, found, not_found)
 
+        self.trading_date = self.trading_date.date()
         found, not_found = self.complete_task(get_all_commodities_data)
         self.assert_complete(get_all_commodities_data, found, not_found)
 
@@ -42,16 +46,34 @@ class Acquirer(FThread):
         found, not_found = task_fn(self.trading_date)
         end = datetime.now()
         self._log('{} task took {}'.format(task_fn.func_name, end - start))
-        self._log('acquired data for {} securities.'.format(len(found)))
         return found, not_found
 
     def assert_complete(self, task_fn, found, not_found):
-        if len(found) + len(not_found) == 0:
-            self._log('no securities scheduled while completing task {}'.format(task_fn.func_name), level='warning')
-        elif len(not_found) > 50:
-            self._log('could not find data for {} ( {}% ) securities while completing task {}'.format(len(not_found), round((float(len(not_found))/(len(found)+len(not_found)))*100, 2), task_fn.func_name), level='warning')
+        s = ScheduleDB()
+        table = None
+        if task_fn == get_all_options_data:
+            table = OptionTask
+        elif task_fn == get_all_insider_data:
+            table = InsiderTask
+        elif task_fn == get_all_commodities_data:
+            table = CommodityTask
+
+        if table:
+            if table == CommodityTask:
+                trading_date = self.trading_date - timedelta(days=1)
+            else:
+                trading_date = self.trading_date
+            complete = s.query(table, {'trading_date': trading_date, 'completed': True}).all()
+            incomplete = s.query(table, {'trading_date': trading_date, 'completed': False}).all()
+            self._log('{} / {}  found/not_found'.format(len(found), len(not_found)))
+            self._log('{} / {}  complete/incomplete'.format(len(complete), len(incomplete)))
+            if (len(found) == 0 and len(not_found) < len(complete)) or len(incomplete) == 0:
+                self._log('Completed {}'.format(task_fn.func_name))
+                self.history[task_fn.func_name] = True
+            else:
+                self._log('{} was not fully completed'.format(task_fn.func_name))
         else:
-            self.history[task_fn.func_name] = True
+            self._log('Task not found in assert_complete', level='error')
 
     def _sleep(self):
         now = datetime.now()

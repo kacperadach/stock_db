@@ -23,9 +23,10 @@ def get_all_commodities_data(trading_date):
     for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'commodities'):
         data = get_commodities_data(symbol, trading_date)
         if data:
-            data['trading_date'] = str(trading_date if isinstance(trading_date, date) else trading_date.date())
+            # trading date for commodities is the day before
+            data['trading_date'] = str(yesterday if not hasattr(yesterday, 'date') else yesterday.date())
             finance_db.insert_one(data)
-            schedule_db.complete_commodities_task(symbol, trading_date)
+            schedule_db.complete_commodities_task(symbol, yesterday)
             found.append(symbol)
         else:
             not_found.append(symbol)

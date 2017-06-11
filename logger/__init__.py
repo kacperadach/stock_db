@@ -11,6 +11,7 @@ THREAD_LEN = 11
 class AppLogger():
 
 	def __init__(self):
+		self.logger = None
 		pass
 
 	def _create_log_folders(self):
@@ -28,11 +29,14 @@ class AppLogger():
 		self.logger.addHandler(ch)
 
 	def log(self, msg, level='info', threadname=None):
-		func = getattr(self.logger, level)
 		if threadname:
 			msg_format = "%" + str(THREAD_LEN) + "s: "
 			msg = (msg_format % threadname) + msg
-		func(msg)
+		if self.logger:
+			func = getattr(self.logger, level)
+			func(msg)
+		else:
+			print msg
 
 	def progress(self, iter, task, update_percent=10):
 		length = len(iter)
@@ -41,7 +45,7 @@ class AppLogger():
 			if num/float(length) * 100 >= last_benchmark:
 				msg_format = "%" + str(THREAD_LEN) + "s: "
 				msg = (msg_format % task) + "{}/{} {}%".format(num, length, "%.2f" % (num/float(length)*100))
-				Logger.log(msg)
+				self.log(msg)
 				last_benchmark += update_percent
 			yield i
 
