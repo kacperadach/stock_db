@@ -17,6 +17,7 @@ def get_all_insider_data(trading_date):
         data = get_insider_data(symbol)
         if data:
             data['trading_date'] = str(trading_date)
+            data['symbol'] = symbol
             finance_db.insert_one(data)
             schedule_db.complete_insider_task(symbol, trading_date)
             found.append(symbol)

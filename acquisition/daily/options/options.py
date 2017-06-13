@@ -5,6 +5,8 @@ from logger import Logger
 def get_options_data(symbol):
     try:
         o = Options(symbol, auto_query=True)
+        f = open("url.txt", "a+")
+        f.write(o.url + "\n")
         return o.get_data()
     except OptionsError:
         return {}

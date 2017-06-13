@@ -35,7 +35,7 @@ class Acquirer(FThread):
                 found, not_found = self.complete_task(get_all_insider_data)
                 self.assert_complete(get_all_insider_data, found, not_found)
 
-        self.trading_date = self.trading_date.date()
+        self.trading_date = self.trading_date if not hasattr(self.trading_date, 'date') else self.trading_date.date()
         found, not_found = self.complete_task(get_all_commodities_data)
         self.assert_complete(get_all_commodities_data, found, not_found)
 
