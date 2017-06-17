@@ -67,7 +67,7 @@ class Acquirer(FThread):
             incomplete = s.query(table, {'trading_date': trading_date, 'completed': False}).all()
             self._log('{} / {}  found/not_found'.format(len(found), len(not_found)))
             self._log('{} / {}  complete/incomplete'.format(len(complete), len(incomplete)))
-            if (len(found) == 0 and len(not_found) < len(complete)) or len(incomplete) == 0:
+            if len(found) == 0 and len(not_found) < len(complete):
                 self._log('Completed {}'.format(task_fn.func_name))
                 self.history[task_fn.func_name] = True
             else:
