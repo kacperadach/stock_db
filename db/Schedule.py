@@ -90,6 +90,8 @@ class ScheduleDB():
 			session.add(task)
 
 	def get_incomplete_options_tasks(self, trading_date):
+		if hasattr(trading_date, 'date'):
+			trading_date = trading_date.date()
 		with self.session_scope() as session:
 			tasks = session.query(OptionTask.symbol).filter_by(trading_date=trading_date, completed=False)
 			return map(lambda x: x.symbol, tasks.all())

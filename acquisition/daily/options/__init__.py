@@ -1,1 +1,1 @@
-from options import get_all_options_data
+from options import *

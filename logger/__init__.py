@@ -6,7 +6,7 @@ from sys import stdout
 
 BASE_PATH = path.dirname(path.abspath(__file__))
 
-THREAD_LEN = 11
+THREAD_LEN = 20
 
 class AppLogger():
 
@@ -31,7 +31,7 @@ class AppLogger():
 	def log(self, msg, level='info', threadname=None):
 		if threadname:
 			msg_format = "%" + str(THREAD_LEN) + "s: "
-			msg = (msg_format % threadname) + msg
+			msg = (msg_format % threadname) + str(msg)
 		if self.logger:
 			func = getattr(self.logger, level)
 			func(msg)

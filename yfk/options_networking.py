@@ -1,7 +1,6 @@
 from networking import Networking
 
 OPTIONS_URL = "https://query1.finance.yahoo.com/v7/finance/options/{}?lang=en-US&region=US&corsDomain=finance.yahoo.com"
-
 OPTIONS_DATE_URL = "https://query2.finance.yahoo.com/v7/finance/options/{}?lang=en-US&region=US&date={}&corsDomain=finance.yahoo.com"
 
 class OptionsError(Exception):
@@ -17,7 +16,7 @@ class Options():
         self.response = self._make_requests()
 
     def _make_requests(self):
-        n = Networking(max_threads=150)
+        n = Networking(max_threads=50, threadname='OptionsAcquisition')
         data = n.execute(self.urls)
         data = dict(map(lambda (k,v): (k, v['optionChain']['result'][0] if 'optionChain' in v.keys() and 'result' in v['optionChain'].keys() and len(v['optionChain']['result']) > 0 else {}), data.iteritems()))
 
@@ -53,13 +52,13 @@ class Options():
         return self.data
 
 
-from acquisition.symbol.tickers import StockTickers
-
-tickers = StockTickers().get_all()
-from datetime import datetime
-
-start = datetime.now()
-o = Options(tickers)
-data = o.get_data()
-print(datetime.now() - start)
-a = 1
+# from acquisition.symbol.tickers import StockTickers
+#
+# tickers = StockTickers().get_all()
+# from datetime import datetime
+#
+# start = datetime.now()
+# o = Options(tickers)
+# data = o.get_data()
+# print(datetime.now() - start)
+# a = 1
