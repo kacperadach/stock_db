@@ -4,7 +4,6 @@ from app.thread import FThread
 from insider import schedule_insider
 from options import schedule_options
 from commodities import schedule_commodities
-from logger import Logger
 
 LOG_CHAR_COUNT = 9
 

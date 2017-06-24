@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, date
 import itertools
 import calendar
 
@@ -12,13 +12,12 @@ BASE_URL = "https://query2.finance.yahoo.com/v7/finance/chart/{}?"
 QUERY_URL = "period1={}&period2={}&interval={}"
 END_URL = "&indicators=quote&includeTimestamps=true&includePrePost=true&events=div%7Csplit%7Cearn&corsDomain=finance.yahoo.com"
 
-
 class QuoteError(Exception):
 	pass
 
 class Quote(object):
 
-	def __init__(self, symbol, period1=None, period2=None, interval='1d'):
+	def __init__(self, symbol, period1=None, period2=None, interval='1m', auto_query=False):
 		self.symbol = symbol
 		if interval.lower() not in VALID_INTERVALS:
 			raise QuoteError('Invalid range parameter: {}'.format(interval))
@@ -33,9 +32,10 @@ class Quote(object):
 		if period1 > period2:
 			raise QuoteError('Invalid periods, period 2 must be greater than period 1')
 		self._make_url()
-		self._make_request()
-		if not self.response.is_valid_quote():
-			raise QuoteError('Invalid symbol: {}'.format(symbol))
+		if auto_query:
+			self._make_request()
+			if not self.response.is_valid_quote():
+				raise QuoteError('Invalid symbol: {}'.format(symbol))
 
 	def _make_url(self):
 		url = BASE_URL.format(self.symbol)
