@@ -64,7 +64,7 @@ class CommoditiesAcquisition():
                 found.append(symbol)
             else:
                 not_found.append(symbol)
-        self._log('{}/{} found/not_found'.format(self.found, self.not_found))
+        self._log('{}/{} found/not_found'.format(len(self.found), len(self.not_found)))
         self.complete = schedule_db.query(CommodityTask, {'trading_date': yesterday.date(), 'completed': True}).all()
         self.incomplete = schedule_db.query(CommodityTask, {'trading_date': yesterday.date(), 'completed': False}).all()
         self._log('{}/{} complete/incomplete'.format(len(self.complete), len(self.incomplete)))

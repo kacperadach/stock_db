@@ -71,6 +71,8 @@ class ScheduleDB():
 		return self.error
 
 	def complete_options_task(self, symbol, trading_date):
+		if hasattr(trading_date, 'date'):
+			trading_date = trading_date.date()
 		with self.session_scope() as session:
 			task = session.query(OptionTask).filter_by(symbol=symbol, trading_date=trading_date).first()
 			if not task:
@@ -102,11 +104,15 @@ class ScheduleDB():
 		return self.error
 
 	def get_incomplete_insider_tasks(self, trading_date):
+		if hasattr(trading_date, 'date'):
+			trading_date = trading_date.date()
 		with self.session_scope() as session:
 			tasks = session.query(InsiderTask.symbol).filter_by(trading_date=trading_date, completed=False)
 			return map(lambda x: x.symbol, tasks.all())
 
 	def complete_insider_task(self, symbol, trading_date):
+		if hasattr(trading_date, 'date'):
+			trading_date = trading_date.date()
 		with self.session_scope() as session:
 			task = session.query(InsiderTask).filter_by(symbol=symbol, trading_date=trading_date).first()
 			if not task:
@@ -120,11 +126,15 @@ class ScheduleDB():
 		return self.error
 
 	def get_incomplete_commodities_tasks(self, trading_date):
+		if hasattr(trading_date, 'date'):
+			trading_date = trading_date.date()
 		with self.session_scope() as session:
 			tasks = session.query(CommodityTask.symbol).filter_by(trading_date=trading_date, completed=False)
 			return map(lambda x: x.symbol, tasks.all())
 
 	def complete_commodities_task(self, symbol, trading_date):
+		if hasattr(trading_date, 'date'):
+			trading_date = trading_date.date()
 		with self.session_scope() as session:
 			task = session.query(CommodityTask).filter_by(symbol=symbol, trading_date=trading_date).first()
 			if not task:

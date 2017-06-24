@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from yfk.insider_transactions import InsiderTransactions, InsiderError
+from yfk.insider_networking import InsiderTransactions
 from db import ScheduleDB, FinanceDB
 from db.models.schedule import InsiderTask
 from logger import Logger
@@ -28,21 +28,18 @@ class InsiderAcquisition():
         else:
             schedule_db = ScheduleDB()
             finance_db = FinanceDB('stock_insider')
-            found, not_found = [], []
-            for symbol in Logger.progress(schedule_db.get_incomplete_insider_tasks(self.trading_date), 'insider'):
-                try:
-                    it = InsiderTransactions(symbol)
-                    data = it.get_data()
-                except InsiderError:
-                    data = {}
+            self.symbols = schedule_db.get_incomplete_insider_tasks(self.trading_date)
+            ia = InsiderTransactions(self.symbols)
+            insider_data = ia.get_data()
+            for symbol, data in insider_data.iteritems():
                 if data:
-                    data['trading_date'] = str(self.trading_date)
+                    data['trading_date'] = str(self.trading_date.date())
                     data['symbol'] = symbol
                     finance_db.insert_one(data)
                     schedule_db.complete_insider_task(symbol, self.trading_date)
-                    found.append(symbol)
+                    self.found.append(symbol)
                 else:
-                    not_found.append(symbol)
+                    self. not_found.append(symbol)
             self._log('{}/{} found/not_found'.format(len(self.found), len(self.not_found)))
             complete = schedule_db.query(InsiderTask, {'trading_date': self.trading_date.date(), 'completed': True}).all()
             incomplete = schedule_db.query(InsiderTask, {'trading_date': self.trading_date.date(), 'completed': False}).all()

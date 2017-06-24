@@ -15,7 +15,7 @@ proxies = {
 
 class Networking():
 
-    def __init__(self, max_threads=10, controller_port=9051, log_progress=True, update_percent=10, threadname=''):
+    def __init__(self, max_threads=50, controller_port=9051, log_progress=True, update_percent=10, threadname=''):
         self.threads = []
         self.max_retry = 5
         self.max_threads = max_threads
