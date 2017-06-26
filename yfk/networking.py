@@ -27,8 +27,6 @@ class Networking():
 
     def _connect_to_controller(self):
         self.controller = Controller.from_port(port=self.controller_port)
-        for k,v in environ.iteritems():
-            Logger.log(k + ': ' + v)
         self.controller.authenticate(environ['TOR_PW'])
 
     def _disconnect_from_controller(self):
