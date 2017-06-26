@@ -18,7 +18,12 @@ class HistoricalStockAcquisition():
         self.counter = 0
         self.date = None
 
+    # def _log_process(self):
+    #     if self.counter
+
+
     def next(self):
+        self._log_process()
         if self.date is None:
             self.date = datetime.now().date()
         now = datetime.now().date()
@@ -27,6 +32,7 @@ class HistoricalStockAcquisition():
             self.current_symbol = self.symbols[self.counter]
         else:
             self.counter = 0
+            self.last_benchmark = 0
             raise StopIteration
         stock_record = self.schedule_db.query(HistoricalStockData, {'symbol': self.current_symbol}).first()
 

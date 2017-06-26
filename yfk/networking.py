@@ -27,6 +27,8 @@ class Networking():
 
     def _connect_to_controller(self):
         self.controller = Controller.from_port(port=self.controller_port)
+        for k,v in environ.iteritems():
+            print k + ': ' + v
         self.controller.authenticate(environ['TOR_PW'])
 
     def _disconnect_from_controller(self):
@@ -52,7 +54,10 @@ class Networking():
                 retry += 1
                 if self.controller.is_newnym_available():
                     self.controller.signal(Signal.NEWNYM)
-                response = requests.get(url.strip(), proxies=proxies)
+                try:
+                    response = requests.get(url.strip(), proxies=proxies)
+                except requests.ConnectionError:
+                    response = requests.get(url.strip(), proxies=proxies)
             try:
                 data = json.loads(response.text)
             except:
