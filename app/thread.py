@@ -4,6 +4,7 @@ import traceback
 from threading import Thread, Event
 
 from logger import Logger
+from discord.webhook import DiscordWebhook
 
 class FThread(Thread):
 
@@ -29,6 +30,8 @@ class FThread(Thread):
 		except Exception as e:
 			self._log('unexpected error occured: {}'.format(e))
 			Logger.log(traceback.format_exc())
+			if Logger.env == 'prod':
+				DiscordWebhook().alert_error(self.thread_name, traceback.format_exc())
 
 	def _run(self):
 		pass

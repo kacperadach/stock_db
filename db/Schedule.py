@@ -27,7 +27,7 @@ class ScheduleDB():
 		self.db = environ.get('SCHEDULE_DB_NAME', DEV_ENV_VARS['SCHEDULE_DB_NAME'])
 		self.mysql_uri = MYSQL_URI.format(self.user, self.pwd, self.host, self.db)
 
-		engine = create_engine(self.mysql_uri)
+		engine = create_engine(self.mysql_uri, pool_size=20, max_overflow=100)
 		if not database_exists(engine.url):
 			create_database(engine.url)
 

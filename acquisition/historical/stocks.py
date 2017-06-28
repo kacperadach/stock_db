@@ -7,9 +7,9 @@ from db.models.schedule import HistoricalStockData
 from yfk.quote_networking import QuoteNetworking
 from logger import Logger
 
-DAYS_PER_CALL = 100
+DAYS_PER_CALL = 50
 LOG_PERCENT = 5
-REQUESTS_PER_ITERATION = 100
+REQUESTS_PER_ITERATION = 150
 
 class HistoricalStockAcquisition():
 
@@ -35,50 +35,71 @@ class HistoricalStockAcquisition():
         self._log_process()
         if self.date is None:
             self.date = datetime.now().date()
-        now = datetime.now().date()
-        yesterday = datetime(year=now.year, month=now.month, day=now.day) - timedelta(days=1)
-        if self.counter < len(self.symbols):
-            self.current_symbol = self.symbols[self.counter]
-        else:
+
+        if self.counter >= len(self.symbols):
             self.counter = 0
             self.last_benchmark = 0
             raise StopIteration
-        stock_record = self.schedule_db.query(HistoricalStockData, {'symbol': self.current_symbol}).first()
 
-        #symbol_dates = []
-        #stock_recods = []
-        #while sum(map(lambda x: x['requests'], symbol_dates)) < 50:
-        if stock_record is None:
-            start = yesterday - timedelta(days=DAYS_PER_CALL)
-            end = yesterday
-        else:
-            end_date = datetime(year=stock_record.end_date.year, month=stock_record.end_date.month, day=stock_record.end_date.day)
-            start = end_date + timedelta(days=1)
-            end = yesterday
-        data = QuoteNetworking(symbol=self.current_symbol, start=start, end=end, log_process=False).get_data()
-        minute_data = filter(lambda (k, v): 'data' in v.keys() and len(v['data']) >= 390, data.iteritems())
-        minute_data = dict(sorted(minute_data, key=lambda x: x[0]))
+        now = datetime.now().date()
+        yesterday = datetime(year=now.year, month=now.month, day=now.day) - timedelta(days=1)
+
+        symbol_dates = []
+        requests = 0
+        while requests < REQUESTS_PER_ITERATION and self.counter < len(self.symbols):
+            self.current_symbol = self.symbols[self.counter]
+            stock_record = self.schedule_db.query(HistoricalStockData, {'symbol': self.current_symbol}).first()
+            if stock_record is None:
+                stock_record = HistoricalStockData(symbol=self.current_symbol)
+                start = yesterday - timedelta(days=DAYS_PER_CALL)
+                end = yesterday
+            else:
+                end_date = datetime(year=stock_record.end_date.year, month=stock_record.end_date.month, day=stock_record.end_date.day)
+                start = end_date + timedelta(days=1)
+                end = yesterday
+
+            if end > start:
+                symbol_dates.append({
+                    'symbol': self.current_symbol,
+                    'start': start,
+                    'end': end,
+                    'stock_record': stock_record
+                })
+                requests += (end-start).days + 1
+            self.counter += 1
+
+        data = QuoteNetworking(symbols=symbol_dates, log_process=False).get_data()
+        minute_data = dict(filter(lambda (k, v): 'data' in v.keys() and len(v['data']) > 100, data.iteritems()))
         documents = []
 
-        start,end = None, None
         for key, data in minute_data.iteritems():
-            if start is None or key.date() < start:
-                start = key.date()
-            if end is None or key.date() > end:
-                end = key.date()
-            data['trading_date'] = str(key.date())
-            data['symbol'] = self.current_symbol
+            symbol, dt = key.split('-', 1)
+            dt = datetime.strptime(dt, '%Y-%m-%d').date()
+            for sym_date in symbol_dates:
+                if sym_date['symbol'] == symbol:
+                    if 'data_start' not in sym_date.keys() or sym_date['data_start'] > dt:
+                        sym_date['data_start'] = dt
+                    if 'data_end' not in sym_date.keys() or sym_date['data_end'] < dt:
+                        sym_date['data_end'] = dt
+                    break
+            data['trading_date'] = str(dt)
+            data['symbol'] = symbol
             documents.append(data)
 
-        if stock_record is None:
-            stock_record = HistoricalStockData(symbol=self.current_symbol)
-            stock_record.start_date = start
-            stock_record.minute_start_date = start
-            stock_record.has_minute_granularity = True if start and end else False
+        records = []
+        for sym_date in symbol_dates:
+            if 'data_end' not in sym_date.keys() and 'data_start' not in sym_date.keys():
+                continue
+            else:
+                stock_record = sym_date['stock_record']
+                if stock_record.start_date is None:
+                    stock_record.has_minute_granularity = True
+                    stock_record.start_date = sym_date['data_start']
+                    stock_record.minute_start_date = sym_date['data_start']
 
-        if end and documents:
-            stock_record.end_date = end
+                stock_record.end_date = sym_date['data_end']
+                records.append(stock_record)
+
+        if records and documents:
             self.finance_db.insert_many(documents)
-            self.schedule_db.add_to_schedule(stock_record)
-
-        self.counter += 1
+            self.schedule_db.add_to_schedule(records)

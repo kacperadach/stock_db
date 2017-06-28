@@ -5,6 +5,7 @@ import time
 
 from logger import Logger
 from acquisition.historical.stocks import HistoricalStockAcquisition
+from discord.webhook import DiscordWebhook
 
 class HistoricalAcquisition(threading.Thread):
 
@@ -31,6 +32,8 @@ class HistoricalAcquisition(threading.Thread):
         except Exception as e:
             self._log('unexpected error occured: {}'.format(e))
             Logger.log(traceback.format_exc())
+            if Logger.env == 'prod':
+                DiscordWebhook().alert_error(self.thread_name, traceback.format_exc())
 
     def _sleep(self):
         if self.finished:
