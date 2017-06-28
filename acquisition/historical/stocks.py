@@ -5,8 +5,11 @@ from db.Schedule import ScheduleDB
 from db.Finance import FinanceDB
 from db.models.schedule import HistoricalStockData
 from yfk.quote_networking import QuoteNetworking
+from logger import Logger
 
 DAYS_PER_CALL = 100
+LOG_PERCENT = 5
+REQUESTS_PER_ITERATION = 100
 
 class HistoricalStockAcquisition():
 
@@ -17,10 +20,16 @@ class HistoricalStockAcquisition():
         self.symbols = StockTickers().get_all()
         self.counter = 0
         self.date = None
+        self.last_benchmark = 0
 
-    # def _log_process(self):
-    #     if self.counter
+    def _log(self, msg, level='info'):
+        Logger.log(msg, level=level, threadname=self.task_name)
 
+    def _log_process(self):
+        progress = (float(self.counter) / len(self.symbols)) * 100
+        if  progress > self.last_benchmark:
+            self._log(str(round(float(progress), 2)) + '%')
+            self.last_benchmark += LOG_PERCENT
 
     def next(self):
         self._log_process()
@@ -36,6 +45,9 @@ class HistoricalStockAcquisition():
             raise StopIteration
         stock_record = self.schedule_db.query(HistoricalStockData, {'symbol': self.current_symbol}).first()
 
+        #symbol_dates = []
+        #stock_recods = []
+        #while sum(map(lambda x: x['requests'], symbol_dates)) < 50:
         if stock_record is None:
             start = yesterday - timedelta(days=DAYS_PER_CALL)
             end = yesterday

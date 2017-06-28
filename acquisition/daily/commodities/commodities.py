@@ -10,29 +10,10 @@ def get_commodities_data(symbol, trading_date):
     period1 = datetime(year=yesterday.year, month=yesterday.month, day=yesterday.day, hour=0, minute=0)
     period2 = datetime(year=trading_date.year, month=trading_date.month, day=trading_date.day, hour=0, minute=0)
     try:
-        it = Quote(symbol, period1=period1, period2=period2, interval='1m')
+        it = Quote(symbol, period1=period1, period2=period2, interval='1m', auto_query=True)
         return it.get_data()
     except QuoteError:
         return {}
-
-# def get_all_commodities_data(trading_date):
-#     schedule_db = ScheduleDB()
-#     finance_db = FinanceDB('commodities')
-#     found, not_found = [], []
-#     yesterday = trading_date - timedelta(days=1)
-#     yesterday = datetime(year=yesterday.year, month=yesterday.month, day=yesterday.day)
-#     for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'commodities'):
-#         data = get_commodities_data(symbol, trading_date)
-#         if data:
-#             # trading date for commodities is the day before
-#             data['trading_date'] = str(yesterday if not hasattr(yesterday, 'date') else yesterday.date())
-#             finance_db.insert_one(data)
-#             schedule_db.complete_commodities_task(symbol, yesterday)
-#             found.append(symbol)
-#         else:
-#             not_found.append(symbol)
-#     return found, not_found
-
 
 class CommoditiesAcquisition():
 
@@ -53,7 +34,7 @@ class CommoditiesAcquisition():
         finance_db = FinanceDB('commodities')
         yesterday = self.trading_date - timedelta(days=1)
         yesterday = datetime(year=yesterday.year, month=yesterday.month, day=yesterday.day)
-        for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'commodities'):
+        for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'Commodities'):
             data = get_commodities_data(symbol, self.trading_date)
             if data:
                 # trading date for commodities is the day before

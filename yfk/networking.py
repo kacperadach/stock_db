@@ -1,10 +1,13 @@
 import threading
 from os import environ
 import json
+import logging
 
 import requests
 from stem import Signal
 from stem.control import Controller
+
+logging.getLogger('stem').setLevel(logging.WARNING)
 
 from logger import Logger
 
@@ -42,6 +45,7 @@ class Networking():
 
     def worker(self, urls):
         for symbol, url in urls:
+            response = None
             self._log_process()
             retry = 0
             try:
@@ -54,8 +58,9 @@ class Networking():
                     self.controller.signal(Signal.NEWNYM)
                 try:
                     response = requests.get(url.strip(), proxies=proxies)
-                except requests.ConnectionError:
-                    response = requests.get(url.strip(), proxies=proxies)
+                except requests.ConnectionError as e:
+                    print e
+                    pass
             try:
                 data = json.loads(response.text)
             except:

@@ -70,11 +70,3 @@ class OptionsAcquisition():
                 return (tomorrow - now).total_seconds()
         else:
             return 900
-
-# o = OptionsAcquisition(datetime.today())
-# o.start()
-# a = 1
-
-
-
-

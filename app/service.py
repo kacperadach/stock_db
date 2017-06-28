@@ -1,6 +1,5 @@
 from os import environ
 from datetime import datetime
-import time
 
 from constants import DEV_ENV_VARS, PROD_ENV_VARS
 from schedule import Scheduler
@@ -27,10 +26,10 @@ class MainService():
 	def main_service(self):
 		self.Scheduler = Scheduler()
 		self.Acquirer = Acquirer()
-		#self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
+		self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
 		self.Scheduler.start()
 		self.Acquirer.start()
-		#self.HistoricalAcquisition.start()
+		self.HistoricalAcquisition.start()
 
 	def initialize_env_vars(self):
 		environment_vars = PROD_ENV_VARS if self.official else DEV_ENV_VARS
