@@ -30,6 +30,7 @@ class CommoditiesAcquisition():
         Logger.log(msg, level=level, threadname=self.task_name)
 
     def start(self):
+        self._reset_counters()
         schedule_db = ScheduleDB()
         finance_db = FinanceDB('commodities')
         yesterday = self.trading_date - timedelta(days=1)
