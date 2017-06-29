@@ -42,4 +42,5 @@ class FinanceDB():
 
 	def find(self, query):
 		self._check_collection()
-		return self.collection.find(query)
+		collection = self.db.get_collection(self.collection)
+		return collection.find(query)

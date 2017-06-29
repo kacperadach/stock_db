@@ -10,8 +10,8 @@ def get_commodities_data(symbol, trading_date):
     period1 = datetime(year=yesterday.year, month=yesterday.month, day=yesterday.day, hour=0, minute=0)
     period2 = datetime(year=trading_date.year, month=trading_date.month, day=trading_date.day, hour=0, minute=0)
     try:
-        it = Quote(symbol, period1=period1, period2=period2, interval='1m', auto_query=True)
-        return it.get_data()
+        q = Quote(symbol, period1=period1, period2=period2, interval='1m', auto_query=True)
+        return q.get_data()
     except QuoteError:
         return {}
 

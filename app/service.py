@@ -6,6 +6,7 @@ from schedule import Scheduler
 from acquisition.Acquirer import Acquirer
 from acquisition.historical import HistoricalAcquisition
 from logger import Logger
+from discord.webhook import DiscordWebhook
 
 class MainService():
 
@@ -22,6 +23,8 @@ class MainService():
 		Logger.log('|                                             |')
 		Logger.log('+---------------------------------------------+')
 		self.main_service()
+		if self.env == 'prod':
+			DiscordWebhook().alert_start()
 
 	def main_service(self):
 		self.Scheduler = Scheduler()

@@ -26,10 +26,11 @@ class HistoricalStockAcquisition():
         Logger.log(msg, level=level, threadname=self.task_name)
 
     def _log_process(self):
-        progress = (float(self.counter) / len(self.symbols)) * 100
-        if  progress > self.last_benchmark:
-            self._log(str(round(float(progress), 2)) + '%')
-            self.last_benchmark += LOG_PERCENT
+        if len(self.symbols) > 0:
+            progress = (float(self.counter) / len(self.symbols)) * 100
+            if  progress > self.last_benchmark:
+                self._log(str(round(float(progress), 2)) + '%')
+                self.last_benchmark += LOG_PERCENT
 
     def next(self):
         self._log_process()

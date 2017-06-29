@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests
 
 from logger import Logger
@@ -8,6 +10,10 @@ class DiscordWebhook():
 
     def __init__(self):
         pass
+
+    def alert_start(self):
+        msg = 'Production Service Started'
+        self.send_message(msg)
 
     def alert_error(self, thread_name, error):
         msg = 'Prod Service Error in {}: \n'.format(thread_name) + "```\n" + error + "\n```"
