@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
 from yfk.quote import Quote, QuoteError
 from db import ScheduleDB, FinanceDB

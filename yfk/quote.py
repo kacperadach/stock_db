@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, date
+from datetime import datetime, timedelta
 import itertools
 import calendar
 
@@ -18,6 +18,8 @@ class QuoteError(Exception):
 class Quote(object):
 
 	def __init__(self, symbol, period1=None, period2=None, interval='1m', auto_query=False):
+		period1 = period1 + timedelta(hours=4)
+		period2 = period2 + timedelta(hours=4)
 		self.symbol = symbol
 		if interval.lower() not in VALID_INTERVALS:
 			raise QuoteError('Invalid range parameter: {}'.format(interval))

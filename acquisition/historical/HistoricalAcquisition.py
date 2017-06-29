@@ -6,6 +6,7 @@ import time
 from logger import Logger
 from acquisition.historical.stocks import HistoricalStockAcquisition
 from acquisition.historical.commodities import HistoricalCommoditiesAcquisition
+from acquisition.historical.currencies import HistoricalCurrenciesAcquisition
 from discord.webhook import DiscordWebhook
 
 class HistoricalAcquisition(threading.Thread):
@@ -14,10 +15,9 @@ class HistoricalAcquisition(threading.Thread):
         super(HistoricalAcquisition, self).__init__()
         self.thread_name = 'HistoricalAcquisition'
         self.AcquirerThread = AcquirerThread
-       # self.HistoricalStockAcquisition =
         self.date = datetime.now().date()
         self.today = datetime.now().date()
-        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition())
+        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition())
         self.task_counter = 0
 
     def _log(self, msg, level='info'):

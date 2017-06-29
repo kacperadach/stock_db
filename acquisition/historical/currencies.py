@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from acquisition.symbol.commodities import Commodities_Symbols
+from acquisition.symbol.currencies import Currency_Pairs
 from db.Finance import FinanceDB
 from yfk.quote import Quote, QuoteResponse
 from yfk.networking import Networking
@@ -9,12 +9,12 @@ from logger import Logger
 DAYS_PER_CALL = 50
 LOG_PERCENT = 5
 
-class HistoricalCommoditiesAcquisition():
+class HistoricalCurrenciesAcquisition():
 
     def __init__(self):
-        self.task_name = 'Historical Commodities Acquisition'
-        self.finance_db = FinanceDB('commodities')
-        self.symbols = Commodities_Symbols
+        self.task_name = 'Historical Currencies Acquisition'
+        self.finance_db = FinanceDB('currencies')
+        self.symbols = Currency_Pairs
         self.counter = 0
         self.current_symbol = self.symbols[self.counter]
         self.current_date = None
@@ -41,7 +41,6 @@ class HistoricalCommoditiesAcquisition():
         now = datetime.now().date()
         yesterday = datetime(year=now.year, month=now.month, day=now.day) - timedelta(days=1)
 
-        # self.finance_db.find({"trading_date": {"$gt": yesterday}}).sort("trading_date") query for greater than date
         self.current_symbol = self.symbols[self.counter]
 
         symbol_dates = []
