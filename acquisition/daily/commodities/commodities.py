@@ -36,15 +36,19 @@ class CommoditiesAcquisition():
         yesterday = self.trading_date - timedelta(days=1)
         yesterday = datetime(year=yesterday.year, month=yesterday.month, day=yesterday.day)
         for symbol in Logger.progress(schedule_db.get_incomplete_commodities_tasks(yesterday), 'Commodities'):
-            data = get_commodities_data(symbol, self.trading_date)
-            if data:
-                # trading date for commodities is the day before
-                data['trading_date'] = str(yesterday.date())
-                finance_db.insert_one(data)
-                schedule_db.complete_commodities_task(symbol, yesterday)
+            exists = next(finance_db.find({"meta.symbol": symbol, "trading_date": str(yesterday.date())}), None)
+            if exists:
                 self.found.append(symbol)
             else:
-                self.not_found.append(symbol)
+                data = get_commodities_data(symbol, self.trading_date)
+                if data:
+                    # trading date for commodities is the day before
+                    data['trading_date'] = str(yesterday.date())
+                    finance_db.insert_one(data)
+                    schedule_db.complete_commodities_task(symbol, yesterday)
+                    self.found.append(symbol)
+                else:
+                    self.not_found.append(symbol)
         self._log('{}/{} found/not_found'.format(len(self.found), len(self.not_found)))
         self.complete = schedule_db.query(CommodityTask, {'trading_date': yesterday.date(), 'completed': True}).all()
         self.incomplete = schedule_db.query(CommodityTask, {'trading_date': yesterday.date(), 'completed': False}).all()

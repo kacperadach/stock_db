@@ -5,6 +5,7 @@ import time
 
 from logger import Logger
 from acquisition.historical.stocks import HistoricalStockAcquisition
+from acquisition.historical.commodities import HistoricalCommoditiesAcquisition
 from discord.webhook import DiscordWebhook
 
 class HistoricalAcquisition(threading.Thread):
@@ -13,9 +14,11 @@ class HistoricalAcquisition(threading.Thread):
         super(HistoricalAcquisition, self).__init__()
         self.thread_name = 'HistoricalAcquisition'
         self.AcquirerThread = AcquirerThread
-        self.HistoricalStockAcquisition = HistoricalStockAcquisition()
+       # self.HistoricalStockAcquisition =
         self.date = datetime.now().date()
         self.today = datetime.now().date()
+        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition())
+        self.task_counter = 0
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.thread_name)
@@ -43,12 +46,23 @@ class HistoricalAcquisition(threading.Thread):
             self._log('Sleeping for ' + str(timedelta(seconds=self.sleep_time)))
             time.sleep(self.sleep_time)
 
+    def _call_next(self):
+        current_task = self.tasks[self.task_counter]
+        try:
+            current_task.next()
+        except StopIteration:
+            if self.task_counter == len(self.tasks) - 1:
+                return True
+            else:
+                self.task_counter += 1
+                return False
+        return False
+
     def acquire(self):
         self.finished = False
         while self.AcquirerThread.event.is_set():
-            try:
-                self.HistoricalStockAcquisition.next()
-            except StopIteration:
+            finished = self._call_next()
+            if finished:
                 self.today = datetime.now().date()
                 if self.date == self.today:
                     self.finished = True

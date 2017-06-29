@@ -67,7 +67,7 @@ class HistoricalCommoditiesAcquisition():
         data = n.execute(dict(symbol_dates))
         data = dict(map(lambda (k, v): (k, QuoteResponse(v).get_data()), data.iteritems()))
 
-        if not any(map(lambda x: bool(x[1]), data.items()[0:10])) or len(symbol_dates) < 5:
+        if not any(map(lambda x: bool(x[1]), data.items()[0:10])) or len(symbol_dates) < 10:
             self.current_date = None
             self.counter += 1
 
@@ -80,7 +80,7 @@ class HistoricalCommoditiesAcquisition():
         if documents:
             self.finance_db.insert_many(documents)
 
-
-a = HistoricalCommoditiesAcquisition()
-while 1:
-    a.next()
+#
+# a = HistoricalCommoditiesAcquisition()
+# while 1:
+#     a.next()
