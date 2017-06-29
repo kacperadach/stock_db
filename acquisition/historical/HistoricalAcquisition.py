@@ -63,6 +63,7 @@ class HistoricalAcquisition(threading.Thread):
         while self.AcquirerThread.event.is_set():
             finished = self._call_next()
             if finished:
+                self.task_counter = 0
                 self.today = datetime.now().date()
                 if self.date == self.today:
                     self.finished = True
