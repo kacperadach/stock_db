@@ -27,8 +27,6 @@ class FinanceDB():
 	def insert_one(self, document):
 		self._check_collection()
 		collection = self.db.get_collection(self.collection)
-		if 'trading_date' not in document.keys() or  not bool(document['trading_date']):
-			raise FinanceDBError('No trading_date in document')
 		collection.insert_one(document)
 
 	def insert_many(self, documents):

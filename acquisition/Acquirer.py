@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from app.thread import FThread
 from acquisition.daily.options import OptionsAcquisition
 from acquisition.daily.insider import InsiderAcquisition
+from acquisition.daily.biopharmcatalyst import BioPharmCatalyst
 
 class Acquirer(FThread):
 
@@ -10,7 +11,7 @@ class Acquirer(FThread):
         super(Acquirer, self).__init__()
         self.thread_name = 'Acquirer'
         self.trading_day = None
-        self.tasks = [OptionsAcquisition(), InsiderAcquisition()]
+        self.tasks = [OptionsAcquisition(), InsiderAcquisition(), BioPharmCatalyst()]
 
     def _run(self):
         self.trading_date = datetime.now()
