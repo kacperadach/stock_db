@@ -53,7 +53,7 @@ class HistoricalCommoditiesAcquisition():
             skip = False
             data_generator = self.finance_db.find({"meta.symbol": self.current_symbol, "trading_date": { "$lte": self.current_date.strftime("%Y-%m-%d")}})
             for data in data_generator:
-                trading_date = datetime.strptime(data['trading_date'], '%Y-%m-%d')
+                trading_date = datetime.strptime(data['trading_date'].split(' ')[0], '%Y-%m-%d')
                 if trading_date == self.current_date:
                     skip = True
                     break
