@@ -40,7 +40,7 @@ class BioPharmCatalyst():
     def start(self):
         self.lc = self.last_checked()
         if self.lc is None or (datetime.now() - self.lc).total_seconds() > 14400:
-            self.driver = webdriver.PhantomJS()
+            self.driver = webdriver.PhantomJS("C:/Users/Kacper/AppData/Roaming/npm/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs")
             self.get_fda_calendar()
             self._log('FDA Calendar Parsed Successfully: {} new events'.format(self.found))
             self.get_historical_catalyst_calendar()

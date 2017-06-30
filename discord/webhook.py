@@ -15,7 +15,7 @@ HISTORICAL_CATALYST_WEBSITE = 'https://www.biopharmcatalyst.com/calendars/histor
 class DiscordWebhook():
 
     def __init__(self):
-        pass
+        self.name = 'DiscordWebhook'
 
     def alert_start(self):
         msg = 'Production Service Started'
