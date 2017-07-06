@@ -46,6 +46,7 @@ class BioPharmCatalyst():
             self.get_historical_catalyst_calendar()
             self._log('Historical Catalyst Calendar Parsed Successfully: {} new events'.format(self.found))
             self.update_last_checked()
+            self.driver.quit()
         else:
             self._log('BioPharmCatalyst Calendars checked less than 4 hours ago, not checking')
 
@@ -129,3 +130,7 @@ class BioPharmCatalyst():
                 if Logger.env == 'prod':
                     self.discord.alert_BioPharmCatalyst_catalyst(event)
                 self.finance_db.insert_one(event)
+
+if __name__ == "__main__":
+    a = BioPharmCatalyst()
+    a.start()

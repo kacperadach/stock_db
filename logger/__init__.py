@@ -12,6 +12,7 @@ class AppLogger():
 
 	def __init__(self):
 		self.logger = None
+		self.env = 'dev'
 		pass
 
 	def _create_log_folders(self):
