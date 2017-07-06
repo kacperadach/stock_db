@@ -1,4 +1,5 @@
 from os import environ
+from contextlib import contextmanager
 
 from pymongo import MongoClient
 
@@ -14,8 +15,18 @@ class FinanceDB():
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
 		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
 		self.collection = collection
-		self.client = MongoClient(self.host, self.port)
-		self.db = self.client[self.db_name]
+
+	@contextmanager
+	def mongo_client(self):
+		try:
+			self._check_collection()
+			self.client = MongoClient(self.host, self.port)
+			self.db = self.client[self.db_name]
+			yield self.db
+		except Exception as e:
+			print e
+		finally:
+			self.client.close()
 
 	def set_collection(self, collection_name):
 		self.collection = collection_name
@@ -25,20 +36,16 @@ class FinanceDB():
 			raise FinanceDBError('Collection not set, use FinanceDB.set_collection')
 
 	def insert_one(self, document):
-		self._check_collection()
-		collection = self.db.get_collection(self.collection)
-		collection.insert_one(document)
+		with self.mongo_client() as db:
+			collection = db.get_collection(self.collection)
+			collection.insert_one(document)
 
 	def insert_many(self, documents):
-		self._check_collection()
-		collection = self.db.get_collection(self.collection)
-		collection.insert_many(documents)
-
-	def find_one(self, query):
-		self._check_collection()
-		return self.collection.find_one(query)
+		with self.mongo_client() as db:
+			collection = db.get_collection(self.collection)
+			collection.insert_many(documents)
 
 	def find(self, query):
-		self._check_collection()
-		collection = self.db.get_collection(self.collection)
-		return collection.find(query)
+		with self.mongo_client() as db:
+			collection = db.get_collection(self.collection)
+			return collection.find(query)
