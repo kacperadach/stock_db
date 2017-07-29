@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime
 
 from app.thread import FThread
 from acquisition.daily.options import OptionsAcquisition
@@ -25,3 +25,6 @@ class Acquirer(FThread):
 
     def _sleep(self):
         self.sleep_time = min(map(lambda x: x.sleep_time(), self.tasks))
+
+if __name__ == "__main__":
+    Acquirer().start()
