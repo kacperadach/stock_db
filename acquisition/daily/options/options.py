@@ -37,7 +37,7 @@ class OptionsAcquisition():
                     for key in data['options'].keys():  # convert int keys into str
                         options[str(key)] = data['options'][key]
                     data['options'] = options
-                    data['trading_date'] = str(self.trading_date)
+                    data['trading_date'] = str(self.trading_date.date())
                     finance_db.insert_one(data)
                     schedule_db.complete_options_task(symbol, self.trading_date)
                     self.found.append(symbol)

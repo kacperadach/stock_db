@@ -3,21 +3,23 @@ from datetime import datetime, timedelta
 import traceback
 import time
 
+
 from logger import Logger
 from acquisition.historical.stocks import HistoricalStockAcquisition
 from acquisition.historical.commodities import HistoricalCommoditiesAcquisition
 from acquisition.historical.currencies import HistoricalCurrenciesAcquisition
+from acquisition.historical.financials.financials import Financials
 from discord.webhook import DiscordWebhook
 
 class HistoricalAcquisition(threading.Thread):
 
-    def __init__(self, AcquirerThread):
+    def __init__(self, AcquirerThread=None):
         super(HistoricalAcquisition, self).__init__()
         self.thread_name = 'HistoricalAcquisition'
         self.AcquirerThread = AcquirerThread
         self.date = datetime.now().date()
         self.today = datetime.now().date()
-        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition())
+        self.tasks = (Financials(), HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition())
         self.task_counter = 0
 
     def _log(self, msg, level='info'):
@@ -26,12 +28,16 @@ class HistoricalAcquisition(threading.Thread):
     def run(self):
         try:
             while 1:
-                self.AcquirerThread.event.wait()
-                self._log('Beginning Acquisition')
-                while self.AcquirerThread.event.is_set():
+                if self.AcquirerThread is None:
                     self.acquire()
                     self._sleep()
-                self._log('Waiting for Acquirer to finish execution')
+                else:
+                    self.AcquirerThread.event.wait()
+                    self._log('Beginning Acquisition')
+                    while self.AcquirerThread.event.is_set():
+                        self.acquire()
+                        self._sleep()
+                    self._log('Waiting for Acquirer to finish execution')
         except Exception as e:
             self._log('unexpected error occured: {}'.format(e))
             Logger.log(traceback.format_exc())
@@ -60,7 +66,7 @@ class HistoricalAcquisition(threading.Thread):
 
     def acquire(self):
         self.finished = False
-        while self.AcquirerThread.event.is_set():
+        while 1 if not self.AcquirerThread else self.AcquirerThread.event.is_set():
             finished = self._call_next()
             if finished:
                 self.task_counter = 0
@@ -71,3 +77,6 @@ class HistoricalAcquisition(threading.Thread):
                 else:
                     self.date = datetime.now().date()
                     break
+
+if __name__ == "__main__":
+    HistoricalAcquisition().start()

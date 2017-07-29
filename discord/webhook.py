@@ -33,6 +33,7 @@ class DiscordWebhook():
         else:
             Logger.log('Discord Message Sent')
 
+
     def alert_BioPharmCatalyst_fda(self, event):
         body = {
             "embeds": [{

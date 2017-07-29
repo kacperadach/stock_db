@@ -1,4 +1,4 @@
-from selenium import webdriver
+from utils import webdriver
 from bs4 import BeautifulSoup
 
 from discord.webhook import DiscordWebhook
@@ -32,7 +32,7 @@ class ETF():
     def get_all_etfs(self):
         max_etfs = None
         i = 0
-        self.driver = webdriver.PhantomJS("C:/Users/Kacper/AppData/Roaming/npm/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs")
+        self.driver = webdriver.PhantomJS("C:/Users/Kacper/AppData/Roaming/npm/node_modules/utils-prebuilt/lib/phantom/bin/utils")
 
         self.driver.get(ETF_URL.format(i))
         page_source = self.driver.page_source

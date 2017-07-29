@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 import os
 
-from selenium import webdriver
 from bs4 import BeautifulSoup
 
 from db import FinanceDB
 from logger import Logger
 from discord.webhook import DiscordWebhook
+from utils.webdriver import Selenium
 
 FDA_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
 HIST_CATALYST_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/historical-catalyst-calendar'
@@ -40,7 +40,7 @@ class BioPharmCatalyst():
     def start(self):
         self.lc = self.last_checked()
         if self.lc is None or (datetime.now() - self.lc).total_seconds() > 14400:
-            self.driver = webdriver.PhantomJS("C:/Users/Kacper/AppData/Roaming/npm/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs")
+            self.driver = Selenium().get_driver()
             self.get_fda_calendar()
             self._log('FDA Calendar Parsed Successfully: {} new events'.format(self.found))
             self.get_historical_catalyst_calendar()
