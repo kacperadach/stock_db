@@ -11,7 +11,7 @@ logging.getLogger('stem').setLevel(logging.WARNING)
 
 from logger import Logger
 
-proxies = {
+TOR_PROXIES = {
     'http': 'socks5://localhost:9050',
     'https': 'socks5://localhost:9050'
 }
@@ -29,12 +29,18 @@ class Networking():
         self.threadname = threadname
 
     def _connect_to_controller(self):
-        self.controller = Controller.from_port(port=self.controller_port)
-        self.controller.authenticate(environ['TOR_PW'])
+        try:
+            self.controller = Controller.from_port(port=self.controller_port)
+            self.controller.authenticate(environ['TOR_PW'])
+        except Exception, e:
+            self._log("Error trying to connect to tor: {}".format(e))
 
     def _disconnect_from_controller(self):
         if self.controller and hasattr(self.controller, 'close'):
             self.controller.close()
+
+    def _log(self, msg, level='info'):
+        Logger.log(msg, level=level, threadname='Networking')
 
     def _log_process(self):
         if self.log_process:
@@ -43,24 +49,26 @@ class Networking():
                 self.last_benchmark += self.update_percent
                 Logger.log(str(round((float(self.progress) / self.num_urls) * 100, 2)) + '%', threadname=self.threadname)
 
+    def _request(self, url):
+        if self.controller is None:
+            proxies = {}
+        else:
+            proxies = TOR_PROXIES
+        return requests.get(url.strip(), proxies=proxies)
+
     def worker(self, urls):
         for symbol, url in urls:
             response = None
-            self._log_process()
             retry = 0
-            try:
-                response = requests.get(url.strip(), proxies=proxies)
-            except:
-                continue
-            while response.status_code != 200 and retry <= self.max_retry:
-                retry += 1
-                if self.controller.is_newnym_available():
-                    self.controller.signal(Signal.NEWNYM)
+            self._log_process()
+            while response is None or (response.status_code != 200 and retry <= self.max_retry):
                 try:
-                    response = requests.get(url.strip(), proxies=proxies)
-                except requests.ConnectionError as e:
-                    print e
+                    response = self._request(url)
+                except requests.ConnectionError:
                     pass
+                if retry > 0 and self.controller is not None and self.controller.is_newnym_available():
+                    self.controller.signal(Signal.NEWNYM)
+                retry += 1
             try:
                 data = json.loads(response.text)
             except:
