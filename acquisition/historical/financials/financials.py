@@ -95,8 +95,8 @@ class Financials():
                 try:
                     self.finance_db.insert_one(document)
                 except Exception, e:
-                    a = 1
-
+                    print e
+                    pass
 
     def quit_phantom_js(self):
         if self.driver and hasattr(self.driver, 'quit'):
