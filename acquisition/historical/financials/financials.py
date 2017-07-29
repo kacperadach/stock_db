@@ -113,7 +113,7 @@ class Financials():
             if not self.driver:
                 self.driver = Selenium().get_driver()
             self.get_financials(symbol)
-            if len(self.data.keys()) >= 10:
+            if len(self.data.keys()) >= 10 or self.counter + 1  >= len(self.symbols):
                 self.write_to_mongo()
                 self.data.clear()
             self.counter += 1
