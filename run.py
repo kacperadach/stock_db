@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 
 from app.service import MainService
