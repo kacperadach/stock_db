@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from db import FinanceDB
 from logger import Logger
 from discord.webhook import DiscordWebhook
-from acquisition.symbol.tickers import StockTickers
+from acquisition.symbol.financial_symbols import FinancialSymbols
 from utils.webdriver import Selenium
 
 INCOME_STATEMENT_URL = 'https://finance.yahoo.com/quote/{}/financials'
@@ -19,7 +19,7 @@ class Financials():
         self.task_name = 'Financials'
         self.finance_db = FinanceDB('financials')
         self.discord = DiscordWebhook()
-        self.symbols = StockTickers().get_all()
+        self.symbols = FinancialSymbols().get_all()
         self.counter = 0
         self.income_statement = None
         self.balance_sheet = None
@@ -106,7 +106,7 @@ class Financials():
         self._log_process()
         if self.counter >= len(self.symbols):
             self.counter = 0
-            self.symbols = StockTickers().get_all()
+            self.symbols = FinancialSymbols().get_all()
             raise StopIteration
         try:
             symbol = self.symbols[self.counter]

@@ -3,21 +3,21 @@ from datetime import datetime, timedelta
 from yfk.insider_networking import InsiderTransactions
 from db import FinanceDB
 from logger import Logger
-from acquisition.symbol.tickers import StockTickers
+from acquisition.symbol.financial_symbols import Financial_Symbols
 
 class InsiderAcquisition():
 
     def __init__(self, trading_date=None):
         self.task_name = 'InsiderAcquisition'
         self.trading_date = trading_date
-        self.symbols = StockTickers().get_all()
+        self.symbols = Financial_Symbols.get_all()
         self.finance_db = None
         self._reset_counters()
 
     def _reset_counters(self):
         self.found = []
         self.not_found = []
-        self.symbols = StockTickers().get_all()
+        self.symbols = Financial_Symbols.get_all()
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.task_name)

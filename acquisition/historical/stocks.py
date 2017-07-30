@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from acquisition.symbol.tickers import StockTickers
+from acquisition.symbol.financial_symbols import Financial_Symbols
 from db.Finance import FinanceDB
 from yfk.quote_networking import QuoteNetworking
 from logger import Logger
@@ -14,7 +14,7 @@ class HistoricalStockAcquisition():
     def __init__(self):
         self.task_name = 'HistoricalStockAcquisition'
         self.finance_db = FinanceDB('stock_historical')
-        self.symbols = StockTickers().get_all()
+        self.symbols = Financial_Symbols.get_all()
         self.counter = 0
         self.date = None
         self.last_benchmark = 0

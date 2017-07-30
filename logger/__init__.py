@@ -1,4 +1,3 @@
-import sys
 from os import path, mkdir
 from datetime import datetime
 import logging
