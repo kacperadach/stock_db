@@ -1,3 +1,5 @@
+import sys
+
 from app.service import MainService
 
 def run():
@@ -5,7 +7,8 @@ def run():
 		MainService()
 	except BaseException:
 		from discord.webhook import DiscordWebhook
-		DiscordWebhook().alert_stop()
+		if len(sys.argv) > 1:
+			DiscordWebhook().alert_stop()
 
 if __name__ == '__main__':
 	run()
