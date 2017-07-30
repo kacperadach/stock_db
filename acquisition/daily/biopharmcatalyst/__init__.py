@@ -130,13 +130,15 @@ class BioPharmCatalyst():
                     self.discord.send_message('Error in BioPharmCatalyst Historical Catalyst Calendar parsing: {}'.format(e))
 
         self.finance_db.set_collection('BioPharmCatalyst_historical')
+        documents = []
         for event in fda_events:
             if len(list(self.finance_db.find(event))) == 0:
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
                 if Logger.env == 'prod':
                     self.discord.alert_BioPharmCatalyst_catalyst(event)
-                self.finance_db.insert_one(event)
+                documents.append(event)
+        self.finance_db.insert_many(documents)
 
 if __name__ == "__main__":
     a = BioPharmCatalyst()
