@@ -2,7 +2,6 @@ from os import environ
 from datetime import datetime
 
 from constants import DEV_ENV_VARS, PROD_ENV_VARS
-from schedule import Scheduler
 from acquisition.Acquirer import Acquirer
 from acquisition.historical import HistoricalAcquisition
 from logger import Logger
@@ -27,10 +26,8 @@ class MainService():
 			DiscordWebhook().alert_start()
 
 	def main_service(self):
-		self.Scheduler = Scheduler()
 		self.Acquirer = Acquirer()
 		self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
-		self.Scheduler.start()
 		self.Acquirer.start()
 		self.HistoricalAcquisition.start()
 

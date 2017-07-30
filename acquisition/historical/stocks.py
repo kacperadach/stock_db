@@ -1,9 +1,7 @@
 from datetime import datetime, timedelta
 
 from acquisition.symbol.tickers import StockTickers
-from db.Schedule import ScheduleDB
 from db.Finance import FinanceDB
-from db.models.schedule import HistoricalStockData
 from yfk.quote_networking import QuoteNetworking
 from logger import Logger
 
@@ -15,7 +13,6 @@ class HistoricalStockAcquisition():
 
     def __init__(self):
         self.task_name = 'HistoricalStockAcquisition'
-        self.schedule_db = ScheduleDB()
         self.finance_db = FinanceDB('stock_historical')
         self.symbols = StockTickers().get_all()
         self.counter = 0
@@ -49,24 +46,28 @@ class HistoricalStockAcquisition():
         requests = 0
         while requests < REQUESTS_PER_ITERATION and self.counter < len(self.symbols):
             self.current_symbol = self.symbols[self.counter]
-            stock_record = self.schedule_db.query(HistoricalStockData, {'symbol': self.current_symbol}).first()
-            if stock_record is None:
-                stock_record = HistoricalStockData(symbol=self.current_symbol)
-                start = yesterday - timedelta(days=DAYS_PER_CALL)
-                end = yesterday
+            stock_documents = list(self.finance_db.find({"symbol": self.current_symbol}))
+            if len(stock_documents) == 0:
+                start_date = yesterday - timedelta(days=DAYS_PER_CALL)
+                end_date = yesterday
             else:
-                end_date = datetime(year=stock_record.end_date.year, month=stock_record.end_date.month, day=stock_record.end_date.day)
-                start = end_date + timedelta(days=1)
-                end = yesterday
+                start = datetime.strptime(min(map(lambda x: x['trading_date'], stock_documents)), "%Y-%m-%d")
+                end = datetime.strptime(max(map(lambda x: x['trading_date'], stock_documents)), "%Y-%m-%d")
+                if end < yesterday:
+                    start_date = end
+                    end_date = yesterday
+                elif (end - start).days < DAYS_PER_CALL:
+                    start_date = end - timedelta(days=DAYS_PER_CALL)
+                    end_date = start
+                else:
+                    continue
 
-            if end > start:
-                symbol_dates.append({
-                    'symbol': self.current_symbol,
-                    'start': start,
-                    'end': end,
-                    'stock_record': stock_record
-                })
-                requests += (end-start).days + 1
+            symbol_dates.append({
+                'symbol': self.current_symbol,
+                'start': start_date,
+                'end': end_date
+            })
+            requests += (end_date-start_date).days + 1
             self.counter += 1
 
         data = QuoteNetworking(symbols=symbol_dates, log_process=False).get_data()
@@ -85,22 +86,15 @@ class HistoricalStockAcquisition():
                     break
             data['trading_date'] = str(dt)
             data['symbol'] = symbol
+            data['start_time'] = min(map(lambda x: x[0],data['data']))
+            data['end_time'] = max(map(lambda x: x[0],data['data']))
             documents.append(data)
 
-        records = []
-        for sym_date in symbol_dates:
-            if 'data_end' not in sym_date.keys() and 'data_start' not in sym_date.keys():
-                continue
-            else:
-                stock_record = sym_date['stock_record']
-                if stock_record.start_date is None:
-                    stock_record.has_minute_granularity = True
-                    stock_record.start_date = sym_date['data_start']
-                    stock_record.minute_start_date = sym_date['data_start']
-
-                stock_record.end_date = sym_date['data_end']
-                records.append(stock_record)
-
-        if records and documents:
+        if documents:
             self.finance_db.insert_many(documents)
-            self.schedule_db.add_to_schedule(records)
+
+
+if __name__ == "__main__":
+    h = HistoricalStockAcquisition()
+    while 1:
+        h.next()

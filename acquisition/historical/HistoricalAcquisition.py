@@ -19,7 +19,7 @@ class HistoricalAcquisition(threading.Thread):
         self.AcquirerThread = AcquirerThread
         self.date = datetime.now().date()
         self.today = datetime.now().date()
-        self.tasks = (Financials(), HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition())
+        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition(), Financials())
         self.task_counter = 0
 
     def _log(self, msg, level='info'):

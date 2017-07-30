@@ -33,7 +33,7 @@ class Networking():
             self.controller = Controller.from_port(port=self.controller_port)
             self.controller.authenticate(environ['TOR_PW'])
         except Exception, e:
-            self._log("Error trying to connect to tor: {}".format(e))
+            print "Error trying to connect to tor: {}".format(e)
 
     def _disconnect_from_controller(self):
         if self.controller and hasattr(self.controller, 'close'):
