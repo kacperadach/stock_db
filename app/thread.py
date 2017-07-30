@@ -33,7 +33,6 @@ class FThread(Thread):
 			Logger.log(traceback.format_exc())
 			if Logger.env == 'prod':
 				DiscordWebhook().alert_error(self.thread_name, traceback.format_exc())
-			raise e
 
 	def _run(self):
 		pass

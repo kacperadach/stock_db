@@ -19,8 +19,6 @@ def run(ticker, target_day, data_parser, max_period=30):
     target_day_data = fb.find({"underlyingSymbol": ticker, "trading_date": target_day}).next()
     target_day_data = data_parser(target_day_data)
 
-
-
     for expiration_date, strikes in target_day_data.iteritems():
         for strike in strikes.iterkeys():
             data = []
@@ -34,7 +32,6 @@ def run(ticker, target_day, data_parser, max_period=30):
             std = data.std(0)
             tdd = target_day_data[expiration_date][strike]
             pass
-
 
 
 def options_data_parser(day_data):

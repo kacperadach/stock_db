@@ -11,7 +11,7 @@ class FinanceDBError(Exception):
 class FinanceDB():
 
 	def __init__(self, collection=None):
-		self.user = 'root'
+		self.user = 'admin'
 		self.password = 'Thickjoint420'
 		self.host =  environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
