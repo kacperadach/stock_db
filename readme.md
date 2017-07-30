@@ -1,0 +1,4 @@
+- Create a service file: stock_db.service
+- Put it in /lib/systemd/system/
+- Reload systemd using command: systemctl daemon-reload
+- Enable auto start using command: systemctl enable stock_db.service
