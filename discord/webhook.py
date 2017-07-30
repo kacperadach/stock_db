@@ -21,13 +21,17 @@ class DiscordWebhook():
         msg = 'Production Service Started'
         self.send_message(msg, MAIN_SERVICE)
 
+    def alert_stop(self):
+        msg = 'Production Service Stopped'
+        self.send_message(msg, MAIN_SERVICE)
+
     def alert_error(self, thread_name, error):
         msg = 'Prod Service Error in {}: \n'.format(thread_name) + "```\n" + error + "\n```"
         self.send_message(msg, PROD_ERROR)
 
     def send_message(self, msg, messenger):
         try:
-            requests.post(PROD_ERROR, {'content': msg})
+            requests.post(messenger, {'content': msg})
         except:
             Logger.log('Discord Message Error')
         else:

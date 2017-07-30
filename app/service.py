@@ -1,5 +1,6 @@
 from os import environ
 from datetime import datetime
+import sys
 
 from constants import DEV_ENV_VARS, PROD_ENV_VARS
 from acquisition.Acquirer import Acquirer
@@ -14,8 +15,8 @@ COMMAND_LINE_ARGUMENTS = {
 
 class MainService():
 
-	def __init__(self, argv):
-		self._parse_cl_arguments(argv)
+	def __init__(self):
+		self._parse_cl_arguments(sys.argv)
 		Logger.set_env(self.env)
 		Logger.log('Service: Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()
@@ -43,7 +44,7 @@ class MainService():
 
 	def _parse_cl_arguments(self, argv):
 		if len(argv) <= 1:
-			return
+			pass
 		else:
 			set_keys = []
 			for i in range(1, len(argv)):
@@ -51,9 +52,9 @@ class MainService():
 				if key.lower() in COMMAND_LINE_ARGUMENTS.iterkeys():
 					setattr(self, key, value)
 					set_keys.append(key)
-			for key, value in COMMAND_LINE_ARGUMENTS.iteritems():
-				if not hasattr(self, key):
-					if value.lower() == 'true' or value.lower() == 'false':
-						setattr(self, key, bool(value))
-					else:
-						setattr(self, key, value)
+		for key, value in COMMAND_LINE_ARGUMENTS.iteritems():
+			if not hasattr(self, key):
+				if isinstance(value, bool):
+					setattr(self, key, bool(value))
+				else:
+					setattr(self, key, value)
