@@ -11,6 +11,8 @@ class FinanceDBError(Exception):
 class FinanceDB():
 
 	def __init__(self, collection=None):
+		self.user = 'admin'
+		self.password = 'Thickblunt420'
 		self.host =  environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
 		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
@@ -20,7 +22,7 @@ class FinanceDB():
 	def mongo_client(self):
 		try:
 			self._check_collection()
-			self.client = MongoClient(self.host, self.port)
+			self.client = MongoClient('mongodb://' + self.user + ':' + self.password + '@' + self.host, self.port)
 			self.db = self.client[self.db_name]
 			yield self.db
 		except Exception as e:
