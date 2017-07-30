@@ -1,8 +1,4 @@
-from os import path
-
 from selenium import webdriver
-
-CWD = path.dirname(path.realpath(__file__))
 
 class Selenium():
 

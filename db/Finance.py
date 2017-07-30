@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from pymongo import MongoClient
 
 from app.constants import DEV_ENV_VARS
+from utils.credentials import Credentials
 
 class FinanceDBError(Exception):
 	pass
@@ -11,8 +12,9 @@ class FinanceDBError(Exception):
 class FinanceDB():
 
 	def __init__(self, collection=None):
-		self.user = 'admin'
-		self.password = 'Thickjoint420'
+		self.credentials = Credentials()
+		self.user = self.credentials.get_user()
+		self.password = self.credentials.get_password()
 		self.host =  environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
 		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
