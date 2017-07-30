@@ -2,14 +2,15 @@ import threading
 from os import environ
 import json
 import logging
+import sys
 
 import requests
 from stem import Signal
 from stem.control import Controller
 
-logging.getLogger('stem').setLevel(logging.WARNING)
-
 from logger import Logger
+
+logging.getLogger('stem').setLevel(logging.WARNING)
 
 TOR_PROXIES = {
     'http': 'socks5://localhost:9050',
@@ -23,10 +24,23 @@ class Networking():
         self.max_retry = 5
         self.max_threads = max_threads
         self.controller_port = controller_port
-        self.controller = self._connect_to_controller()
         self.log_process = log_progress
         self.update_percent = update_percent
         self.threadname = threadname
+        self.controller = None
+
+        self.use_tor = False
+        if len(sys.argv) > 1:
+            for i in range(1, len(sys.argv)):
+                key, value = sys.argv[i].split('=')
+                if key == 'use_tor':
+                    if value.lower() == 'true':
+                        setattr(self, key, True)
+                    else:
+                        setattr(self, key, False)
+
+        if self.use_tor:
+            self._connect_to_controller()
 
     def _connect_to_controller(self):
         try:
@@ -76,7 +90,7 @@ class Networking():
             self.responses[symbol] = data
 
     def execute(self, url_list):
-        if self.controller:
+        if self.controller and self.use_tor:
             self._connect_to_controller()
 
         thread_urls = [[] for _ in range(self.max_threads)]
@@ -96,6 +110,6 @@ class Networking():
         for t in self.threads:
             t.join()
 
-        if self.controller:
+        if self.controller and self.use_tor:
             self._disconnect_from_controller()
         return self.responses

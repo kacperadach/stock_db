@@ -6,8 +6,8 @@ import requests
 from logger import Logger
 
 PROD_ERROR = 'https://discordapp.com/api/webhooks/329754263024697354/yO-H4bhqhhzEsP0sUYH7UytGPOX0jmu73MHm8JM7vpKBs8CKiDCu5q5mKCXRnUhUSHNm'
-TEST = 'https://discordapp.com/api/webhooks/330190439821082636/YDQNzKU5YahDLETWUqjBDKjVJQaTUJpRp-c1nV61uZrqRMsUUkgvKR8CaxtKHzXN08du'
 BIO_PHARM_CATALYST = 'https://discordapp.com/api/webhooks/330197086622449666/JRicV2KReEZoBZ_7nXUCCrCguQVouuRMgEGgzz4aPUM4olmZec1h50fQCAlSVP4Coqgj'
+MAIN_SERVICE = 'https://discordapp.com/api/webhooks/341063657171451915/Onio3ZnH7cT8bc5eC6VIeMtW3umAnbvIXnROStYf8PSPL507iJLWnA85F_IaqaG4KS46'
 
 FDA_CATALYST_WEBSITE = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
 HISTORICAL_CATALYST_WEBSITE = 'https://www.biopharmcatalyst.com/calendars/historical-catalyst-calendar'
@@ -19,13 +19,13 @@ class DiscordWebhook():
 
     def alert_start(self):
         msg = 'Production Service Started'
-        self.send_message(msg)
+        self.send_message(msg, MAIN_SERVICE)
 
     def alert_error(self, thread_name, error):
         msg = 'Prod Service Error in {}: \n'.format(thread_name) + "```\n" + error + "\n```"
-        self.send_message(msg)
+        self.send_message(msg, PROD_ERROR)
 
-    def send_message(self, msg):
+    def send_message(self, msg, messenger):
         try:
             requests.post(PROD_ERROR, {'content': msg})
         except:
