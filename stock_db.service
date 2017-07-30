@@ -1,0 +1,10 @@
+[Unit]
+Description=Stock DB Service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/stock_db.sh
+
+[Install]
+WantedBy=multi-user.target
+
