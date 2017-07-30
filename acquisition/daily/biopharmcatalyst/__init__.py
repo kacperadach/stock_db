@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 import os
+import urllib2
 
 from bs4 import BeautifulSoup
 
 from db import FinanceDB
 from logger import Logger
 from discord.webhook import DiscordWebhook
-from utils.webdriver import Selenium
 
 FDA_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
 HIST_CATALYST_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/historical-catalyst-calendar'
@@ -20,6 +20,7 @@ class BioPharmCatalyst():
         self.task_name = 'BioPharmCatalyst'
         self.finance_db = FinanceDB()
         self.discord = DiscordWebhook()
+        self.fda_calendar = None
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.task_name)
@@ -40,13 +41,11 @@ class BioPharmCatalyst():
     def start(self):
         self.lc = self.last_checked()
         if self.lc is None or (datetime.now() - self.lc).total_seconds() > 14400:
-            self.driver = Selenium().get_driver()
             self.get_fda_calendar()
             self._log('FDA Calendar Parsed Successfully: {} new events'.format(self.found))
             self.get_historical_catalyst_calendar()
             self._log('Historical Catalyst Calendar Parsed Successfully: {} new events'.format(self.found))
             self.update_last_checked()
-            self.driver.quit()
         else:
             self._log('BioPharmCatalyst Calendars checked less than 4 hours ago, not checking')
 
@@ -55,8 +54,12 @@ class BioPharmCatalyst():
 
     def get_fda_calendar(self):
         self.found = 0
-        self.driver.get(FDA_CALENDAR)
-        self.fda_calendar = BeautifulSoup(self.driver.page_source, "html.parser")
+
+        req = urllib2.Request('https://www.biopharmcatalyst.com/calendars/fda-calendar', headers={'User-Agent': "Magic Browser"})
+        con = urllib2.urlopen(req)
+
+        page_source = con.read()
+        self.fda_calendar = BeautifulSoup(page_source, "html.parser")
 
         table = self.fda_calendar.findChildren('table')[0]
         rows = table.findChildren('tr')[1:]
@@ -93,8 +96,12 @@ class BioPharmCatalyst():
 
     def get_historical_catalyst_calendar(self):
         self.found = 0
-        self.driver.get(HIST_CATALYST_CALENDAR)
-        self.fda_calendar = BeautifulSoup(self.driver.page_source, "html.parser")
+
+        req = urllib2.Request('https://www.biopharmcatalyst.com/calendars/fda-calendar', headers={'User-Agent': "Magic Browser"})
+        con = urllib2.urlopen(req)
+
+        page_source = con.read()
+        self.fda_calendar = BeautifulSoup(page_source, "html.parser")
 
         table = self.fda_calendar.findChildren('table')[0]
         rows = table.findChildren('tr')[1:]
@@ -106,9 +113,9 @@ class BioPharmCatalyst():
                 if not len(table_data) > 3:
                     continue
                 symbol = table_data[0].strip()
-                _, drug, drug_description, _ = table_data[1].split('\n')
-                stage = table_data[2].replace('\n', '').strip()
-                date, event_description = filter(bool, table_data[3].split('\n'))
+                _, drug, drug_description, _ = table_data[2].split('\n')
+                stage = table_data[3].replace('\n', '').strip()
+                date, event_description = filter(bool, table_data[4].split('\n'))
                 fda_events.append({
                     'symbol': symbol,
                     'drug': drug,

@@ -9,4 +9,4 @@ class Selenium():
         return webdriver.PhantomJS()
 
 if __name__ == "__main__":
-    Selenium().get_driver()
+    driver = Selenium().get_driver()
