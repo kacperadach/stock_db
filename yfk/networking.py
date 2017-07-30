@@ -23,7 +23,7 @@ class Networking():
         self.max_retry = 5
         self.max_threads = max_threads
         self.controller_port = controller_port
-        self.controller = None
+        self.controller = self._connect_to_controller()
         self.log_process = log_progress
         self.update_percent = update_percent
         self.threadname = threadname
@@ -76,7 +76,8 @@ class Networking():
             self.responses[symbol] = data
 
     def execute(self, url_list):
-        self._connect_to_controller()
+        if self.controller:
+            self._connect_to_controller()
 
         thread_urls = [[] for _ in range(self.max_threads)]
         for i, url in enumerate(url_list.items()):
@@ -95,5 +96,6 @@ class Networking():
         for t in self.threads:
             t.join()
 
-        self._disconnect_from_controller()
+        if self.controller:
+            self._disconnect_from_controller()
         return self.responses
