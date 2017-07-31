@@ -5,6 +5,7 @@ import sys
 from constants import DEV_ENV_VARS, PROD_ENV_VARS
 from acquisition.Acquirer import Acquirer
 from acquisition.historical import HistoricalAcquisition
+from reporting.reporting import Reporting
 from logger import Logger
 from discord.webhook import DiscordWebhook
 
@@ -33,8 +34,10 @@ class MainService():
 	def main_service(self):
 		self.Acquirer = Acquirer()
 		self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
+		self.Reporting = Reporting()
 		self.Acquirer.start()
 		self.HistoricalAcquisition.start()
+		self.Reporting.start()
 
 	def initialize_env_vars(self):
 		environment_vars = PROD_ENV_VARS if self.env.lower() == 'prod' else DEV_ENV_VARS

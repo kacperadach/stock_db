@@ -8,6 +8,7 @@ from logger import Logger
 PROD_ERROR = 'https://discordapp.com/api/webhooks/329754263024697354/yO-H4bhqhhzEsP0sUYH7UytGPOX0jmu73MHm8JM7vpKBs8CKiDCu5q5mKCXRnUhUSHNm'
 BIO_PHARM_CATALYST = 'https://discordapp.com/api/webhooks/330197086622449666/JRicV2KReEZoBZ_7nXUCCrCguQVouuRMgEGgzz4aPUM4olmZec1h50fQCAlSVP4Coqgj'
 MAIN_SERVICE = 'https://discordapp.com/api/webhooks/341063657171451915/Onio3ZnH7cT8bc5eC6VIeMtW3umAnbvIXnROStYf8PSPL507iJLWnA85F_IaqaG4KS46'
+REPORTING = 'https://discordapp.com/api/webhooks/341399041030225930/jBs48DaRfRP72XjZahVGroglKBwkUDKydLn7DubzaidEsyU_1SSr5lQj6JafzU6EmWJC'
 
 FDA_CATALYST_WEBSITE = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
 HISTORICAL_CATALYST_WEBSITE = 'https://www.biopharmcatalyst.com/calendars/historical-catalyst-calendar'
@@ -28,6 +29,9 @@ class DiscordWebhook():
     def alert_error(self, thread_name, error):
         msg = 'Prod Service Error in {}: \n'.format(thread_name) + "```\n" + error + "\n```"
         self.send_message(msg, PROD_ERROR)
+
+    def send_report(self, report):
+        self.send_message(report, REPORTING)
 
     def send_message(self, msg, messenger):
         try:
