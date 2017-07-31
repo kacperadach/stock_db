@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from db import FinanceDB
 from logger import Logger
 from discord.webhook import DiscordWebhook
-from acquisition.symbol.financial_symbols import FinancialSymbols
+from acquisition.symbol.financial_symbols import Financial_Symbols
 from utils.webdriver import Selenium
 
 INCOME_STATEMENT_URL = 'https://finance.yahoo.com/quote/{}/financials'
@@ -19,7 +19,7 @@ class Financials():
         self.task_name = 'Financials'
         self.finance_db = FinanceDB('financials')
         self.discord = DiscordWebhook()
-        self.symbols = FinancialSymbols().get_all()
+        self.symbols = Financial_Symbols.get_all()
         self.counter = 0
         self.income_statement = None
         self.balance_sheet = None
@@ -106,7 +106,8 @@ class Financials():
         self._log_process()
         if self.counter >= len(self.symbols):
             self.counter = 0
-            self.symbols = FinancialSymbols().get_all()
+            self.symbols = Financial_Symbols.get_all()
+            self.quit_phantom_js()
             raise StopIteration
         try:
             symbol = self.symbols[self.counter]
@@ -116,12 +117,12 @@ class Financials():
             if len(self.data.keys()) >= 10 or self.counter + 1  >= len(self.symbols):
                 self.write_to_mongo()
                 self.data.clear()
-            self.counter += 1
         except Exception, e:
             print e
             pass
         finally:
-            self.quit_phantom_js()
+            self.counter += 1
+
 
 
 if __name__ == "__main__":
