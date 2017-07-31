@@ -2,3 +2,10 @@
 - Put it in /lib/systemd/system/
 - Reload systemd using command: systemctl daemon-reload
 - Enable auto start using command: systemctl enable stock_db.service
+
+To change stock_db.sh:
+
+systemctl stop stock_db
+vim /usr/bin/stock_db.sh
+systemctl daemon-reload
+systemctl start stock_db
