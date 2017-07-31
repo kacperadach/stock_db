@@ -9,3 +9,8 @@ systemctl stop stock_db
 vim /usr/bin/stock_db.sh
 systemctl daemon-reload
 systemctl start stock_db
+
+Change time on a linux server:
+
+timedatectl
+timedatectl set-timezone 'EST'
