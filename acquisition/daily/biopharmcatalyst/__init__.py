@@ -127,7 +127,7 @@ class BioPharmCatalyst():
             except Exception as e:
                 self._log('Error in Historical Catalyst Calendar parsing: {}'.format(e))
                 if Logger.env == 'prod':
-                    self.discord.send_message('Error in BioPharmCatalyst Historical Catalyst Calendar parsing: {}'.format(e))
+                    self.discord.alert_error(self.task_name, 'Error in BioPharmCatalyst Historical Catalyst Calendar parsing: {}'.format(e))
 
         self.finance_db.set_collection('BioPharmCatalyst_historical')
         documents = []
@@ -138,7 +138,8 @@ class BioPharmCatalyst():
                 if Logger.env == 'prod':
                     self.discord.alert_BioPharmCatalyst_catalyst(event)
                 documents.append(event)
-        self.finance_db.insert_many(documents)
+        if documents:
+            self.finance_db.insert_many(documents)
 
 if __name__ == "__main__":
     a = BioPharmCatalyst()
