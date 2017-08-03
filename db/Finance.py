@@ -25,8 +25,7 @@ class FinanceDB():
 		try:
 			self._check_collection()
 			self.client =  MongoClient('mongodb://' + self.user + ':' + self.password + '@' + self.host, self.port)
-			self.db = self.client[self.db_name]
-			yield self.db
+			yield self.client[self.db_name]
 		except Exception as e:
 			print e
 		finally:
@@ -49,7 +48,7 @@ class FinanceDB():
 			collection = db.get_collection(self.collection)
 			collection.insert_many(documents)
 
-	def find(self, query):
+	def find(self, query, fields=None):
 		with self.mongo_client() as db:
 			collection = db.get_collection(self.collection)
-			return collection.find(query)
+			return collection.find(query, fields)

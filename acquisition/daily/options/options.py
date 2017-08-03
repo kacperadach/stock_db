@@ -15,8 +15,8 @@ class OptionsAcquisition():
         self._reset_counters()
 
     def _reset_counters(self):
-        self.found = []
-        self.not_found = []
+        self.found = 0
+        self.not_found = 0
         self.symbols = Financial_Symbols.get_all()
 
     def _log(self, msg, level='info'):
@@ -45,30 +45,34 @@ class OptionsAcquisition():
         else:
             self.finance_db = FinanceDB('stock_options')
             incomplete = self.get_incomplete_options_tasks()
-            o = Options(incomplete)
-            options_data = o.get_data()
-            for symbol, data in options_data.iteritems():
-                if 'options' in data.keys() and isinstance(data['options'], dict):
-                    options = {}
-                    for key in data['options'].keys():  # convert int keys into str
-                        options[str(key)] = data['options'][key]
-                    data['symbol'] = data['underlyingSymbol']
-                    data.pop('underlyingSymbol', None)
-                    data['options'] = options
-                    data['trading_date'] = str(self.trading_date.date())
-                    self.finance_db.insert_one(data)
-                    self.found.append(symbol)
-                else:
-                    self.not_found.append(symbol)
+            options = Options(incomplete, batching=True)
 
-            self._log('{}/{} found/not_found'.format(len(self.found), len(self.not_found)))
-            incomplete = self.get_incomplete_options_tasks()
-            complete = self.get_complete_options_tasks()
-            self._log('{}/{} complete/incomplete'.format(len(complete), len(incomplete)))
+            for options_data in options.generate():
+                documents = []
+                for symbol, data in options_data.iteritems():
+                    if 'options' in data.keys() and isinstance(data['options'], dict):
+                        options = {}
+                        for key in data['options'].keys():  # convert int keys into str
+                            options[str(key)] = data['options'][key]
+                        data['symbol'] = data['underlyingSymbol']
+                        data.pop('underlyingSymbol', None)
+                        data['options'] = options
+                        data['trading_date'] = str(self.trading_date.date())
+                        documents.append(data)
+                        self.found += 1
+                    else:
+                        self.not_found += 1
+                if documents:
+                    self.finance_db.insert_many(documents)
+
+            self._log('{}/{} found/not_found'.format(self.found, self.not_found))
+            incomplete = len(incomplete)
+            complete = len(self.get_complete_options_tasks())
+            self._log('{}/{} complete/incomplete'.format(complete, incomplete))
 
     def sleep_time(self):
         now = datetime.now()
-        if len(self.found + self.not_found) == 0:
+        if self.found + self.not_found == 0:
             if now.weekday() > 4:
                 next_trading = now + timedelta(days=7-now.weekday())
                 tomorrow = datetime(year=next_trading.year, month=next_trading.month, day=next_trading.day, hour=16, minute=0, second=0)
@@ -78,7 +82,7 @@ class OptionsAcquisition():
                 return (later - now).total_seconds()
             else:
                 return 900
-        elif len(self.found) == 0 and len(self.not_found) > 0:
+        elif self.found == 0 and self.not_found > 0:
             if now.hour < 16:
                 later = datetime(year=now.year, month=now.month, day=now.day, hour=16, minute=0, second=0)
                 return (later - now).total_seconds()

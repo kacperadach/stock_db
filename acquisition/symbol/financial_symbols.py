@@ -92,16 +92,7 @@ class FinancialSymbols():
 	def get_commodities(self):
 		return Commodities_Symbols
 
-	def _write_tickers_to_file(self, exchange, file_data_string, file_path=None):
-		if not file_path:
-			file_path = path.join(path.join(path.dirname(path.abspath(__file__)), TICKERS_FOLDER), (exchange + '.txt'))
-		else:
-			file_path = path.join(file_path, exchange + '.txt')
-		with open(file_path, 'w') as f:
-			f.write(file_data_string)
-
 Financial_Symbols = FinancialSymbols()
-
 
 if __name__ == "__main__":
 	FinancialSymbols().get_all()

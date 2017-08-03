@@ -11,7 +11,7 @@ class Acquirer(FThread):
         super(Acquirer, self).__init__()
         self.thread_name = 'Acquirer'
         self.trading_day = None
-        self.tasks = [OptionsAcquisition(), InsiderAcquisition(), BioPharmCatalyst()]
+        self.tasks = (OptionsAcquisition(), InsiderAcquisition(), BioPharmCatalyst())
 
     def _run(self):
         self.trading_date = datetime.now()

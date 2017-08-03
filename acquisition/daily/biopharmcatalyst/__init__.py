@@ -21,36 +21,23 @@ class BioPharmCatalyst():
         self.finance_db = FinanceDB()
         self.discord = DiscordWebhook()
         self.fda_calendar = None
+        self.last_checked = None
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.task_name)
 
-    def last_checked(self):
-        if os.path.exists(LAST_CHECKED_PATH):
-            f = open(LAST_CHECKED_PATH, 'r')
-            lines = f.readlines()
-            if len(lines) > 0:
-                last_checked = lines[0]
-                return datetime.strptime(last_checked.strip(), '%Y-%m-%d %H-%M')
-        return None
-
-    def update_last_checked(self):
-        f = open(LAST_CHECKED_PATH, 'w')
-        f.write(datetime.now().strftime('%Y-%m-%d %H-%M'))
-
     def start(self):
-        self.lc = self.last_checked()
-        if self.lc is None or (datetime.now() - self.lc).total_seconds() > 14400:
+        if self.last_checked is None or (datetime.now() - self.last_checked).total_seconds() > 14400:
             self.get_fda_calendar()
             self._log('FDA Calendar Parsed Successfully: {} new events'.format(self.found))
             self.get_historical_catalyst_calendar()
             self._log('Historical Catalyst Calendar Parsed Successfully: {} new events'.format(self.found))
-            self.update_last_checked()
+            self.last_checked = datetime.now()
         else:
             self._log('BioPharmCatalyst Calendars checked less than 4 hours ago, not checking')
 
     def sleep_time(self):
-        return ((self.last_checked() + timedelta(hours=4)) - datetime.now()).total_seconds()
+        return ((self.last_checked + timedelta(hours=4)) - datetime.now()).total_seconds()
 
     def get_fda_calendar(self):
         self.found = 0

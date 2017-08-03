@@ -5,6 +5,7 @@ from db import FinanceDB
 from logger import Logger
 from acquisition.symbol.financial_symbols import Financial_Symbols
 
+
 class InsiderAcquisition():
 
     def __init__(self, trading_date=None):
@@ -15,18 +16,17 @@ class InsiderAcquisition():
         self._reset_counters()
 
     def _reset_counters(self):
-        self.found = []
-        self.not_found = []
+        self.found = 0
+        self.not_found = 0
         self.symbols = Financial_Symbols.get_all()
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.task_name)
 
     def get_incomplete_insider_tasks(self):
-        symbols = []
         if not self.finance_db or not self.trading_date:
-            return symbols
-        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}))))
+            return []
+        found = set(list(map(lambda x: x['symbol'], self.finance_db.find({"trading_date": str(self.trading_date.date())}, {"symbol": 1}))))
         return list(set(self.symbols) - found)
 
     def get_complete_insider_tasks(self):
@@ -45,23 +45,29 @@ class InsiderAcquisition():
         else:
             self.finance_db = FinanceDB('stock_insider')
             incomplete = self.get_incomplete_insider_tasks()
-            insider_data = InsiderTransactions(incomplete).get_data()
-            for symbol, data in insider_data.iteritems():
-                if data:
-                    data['trading_date'] = str(self.trading_date.date())
-                    data['symbol'] = symbol
-                    self.finance_db.insert_one(data)
-                    self.found.append(symbol)
-                else:
-                    self.not_found.append(symbol)
-            self._log('{}/{} found/not_found'.format(len(self.found), len(self.not_found)))
-            complete = self.get_complete_insider_tasks()
-            incomplete = self.get_incomplete_insider_tasks()
-            self._log('{}/{} complete/incomplete'.format(len(complete), len(incomplete)))
+            insider_transactions = InsiderTransactions(incomplete, batching=True)
+
+            for insider_data in insider_transactions.generate():
+                documents = []
+                for symbol, data in insider_data.iteritems():
+                    if data:
+                        data['trading_date'] = str(self.trading_date.date())
+                        data['symbol'] = symbol
+                        documents.append(data)
+                        self.found += 1
+                    else:
+                        self.not_found += 1
+                if documents:
+                    self.finance_db.insert_many(documents)
+
+            self._log('{}/{} found/not_found'.format(self.found, self.not_found))
+            incomplete = len(incomplete)
+            complete = len(self.get_complete_insider_tasks())
+            self._log('{}/{} complete/incomplete'.format(complete, incomplete))
 
     def sleep_time(self):
         now = datetime.now()
-        if len(self.found + self.not_found) == 0:
+        if self.found + self.not_found == 0:
             if now.weekday() > 4:
                 next_trading = now + timedelta(days=7-now.weekday())
                 tomorrow = datetime(year=next_trading.year, month=next_trading.month, day=next_trading.day, hour=16, minute=0, second=0)
@@ -71,7 +77,7 @@ class InsiderAcquisition():
                 return (later - now).total_seconds()
             else:
                 return 900
-        elif len(self.found) == 0 and len(self.not_found) > 0:
+        elif self.found == 0 and self.not_found > 0:
             if now.hour < 16:
                 later = datetime(year=now.year, month=now.month, day=now.day, hour=16, minute=0, second=0)
                 return (later - now).total_seconds()
