@@ -38,8 +38,6 @@ class DiscordWebhook():
             requests.post(messenger, {'content': msg})
         except:
             Logger.log('Discord Message Error')
-        else:
-            Logger.log('Discord Message Sent')
 
 
     def alert_BioPharmCatalyst_fda(self, event):
@@ -57,8 +55,6 @@ class DiscordWebhook():
             requests.post(BIO_PHARM_CATALYST, json.dumps(body), headers={"Content-Type": "application/json"})
         except:
             Logger.log('Discord Message Error')
-        else:
-            Logger.log('Discord Message Sent')
 
 
     def alert_BioPharmCatalyst_catalyst(self, event):
@@ -76,5 +72,3 @@ class DiscordWebhook():
             requests.post(BIO_PHARM_CATALYST, json.dumps(body), headers={"Content-Type": "application/json"})
         except:
             Logger.log('Discord Message Error')
-        else:
-            Logger.log('Discord Message Sent')

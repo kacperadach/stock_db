@@ -14,3 +14,5 @@ Change time on a linux server:
 
 timedatectl
 timedatectl set-timezone 'EST'
+
+sudo dpkg-reconfigure tzdata
