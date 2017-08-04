@@ -61,7 +61,7 @@ class InsiderAcquisition():
                     self.finance_db.insert_many(documents)
 
             self._log('{}/{} found/not_found'.format(self.found, self.not_found))
-            incomplete = len(self.get_incomplete_options_tasks())
+            incomplete = len(self.get_incomplete_insider_tasks())
             complete = len(self.get_complete_insider_tasks())
             self._log('{}/{} complete/incomplete'.format(complete, incomplete))
 
