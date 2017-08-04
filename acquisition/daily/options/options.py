@@ -66,7 +66,7 @@ class OptionsAcquisition():
                     self.finance_db.insert_many(documents)
 
             self._log('{}/{} found/not_found'.format(self.found, self.not_found))
-            incomplete = len(incomplete)
+            incomplete = len(self.get_incomplete_options_tasks())
             complete = len(self.get_complete_options_tasks())
             self._log('{}/{} complete/incomplete'.format(complete, incomplete))
 
