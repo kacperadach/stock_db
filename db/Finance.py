@@ -5,6 +5,7 @@ from pymongo import MongoClient
 
 from app.constants import DEV_ENV_VARS
 from utils.credentials import Credentials
+from ReportDecorator import report
 
 class FinanceDBError(Exception):
 	pass
@@ -38,11 +39,13 @@ class FinanceDB():
 		if not self.collection:
 			raise FinanceDBError('Collection not set, use FinanceDB.set_collection')
 
+	@report
 	def insert_one(self, document):
 		with self.mongo_client() as db:
 			collection = db.get_collection(self.collection)
 			collection.insert_one(document)
 
+	@report
 	def insert_many(self, documents):
 		with self.mongo_client() as db:
 			collection = db.get_collection(self.collection)
@@ -52,3 +55,9 @@ class FinanceDB():
 		with self.mongo_client() as db:
 			collection = db.get_collection(self.collection)
 			return collection.find(query, fields)
+
+
+	def save(self, document):
+		with self.mongo_client() as db:
+			collection = db.get_collection(self.collection)
+			collection.save(document)

@@ -33,7 +33,7 @@ class InsiderAcquisition():
         symbols = []
         if not self.finance_db or not self.trading_date:
             return symbols
-        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}))))
+        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}, {"symbol": 1}))))
         return list(found)
 
     def start(self):
@@ -61,9 +61,9 @@ class InsiderAcquisition():
                     self.finance_db.insert_many(documents)
 
             self._log('{}/{} found/not_found'.format(self.found, self.not_found))
-            incomplete = len(self.get_incomplete_insider_tasks())
-            complete = len(self.get_complete_insider_tasks())
-            self._log('{}/{} complete/incomplete'.format(complete, incomplete))
+            # incomplete = len(self.get_incomplete_insider_tasks())
+            # complete = len(self.get_complete_insider_tasks())
+            # self._log('{}/{} complete/incomplete'.format(complete, incomplete))
 
     def sleep_time(self):
         now = datetime.now()

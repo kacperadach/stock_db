@@ -42,7 +42,7 @@ class FinancialSymbols():
 		all_symbols = set(map(lambda x: x['symbol'], list(self.finance_db.find({}))))
 		new_symbols = all_symbols - symbols
 		for symbol in new_symbols:
-			documents.append({"symbol": symbol})
+			documents.append({"symbol": symbol, "created_on": str(datetime.now().date())})
 		if documents:
 			self.finance_db.insert_many(documents)
 

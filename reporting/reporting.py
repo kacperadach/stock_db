@@ -6,6 +6,8 @@ from discord.webhook import DiscordWebhook
 
 COLLECTIONS = ('BioPharmCatalyst_fda', 'BioPharmCatalyst_historical', 'commodities', 'currencies', 'financials', 'stock_historical', 'stock_insider', 'stock_options', 'symbols')
 
+from db.ReportDecorator import REPORTING_COLLECTION
+
 class Reporting(FThread):
 
     def __init__(self):
@@ -23,11 +25,18 @@ class Reporting(FThread):
 
     def generate_report(self):
         report = {}
+        self.finance_db.set_collection(REPORTING_COLLECTION)
+        report_documents = list(self.finance_db.find({"trading_date": str(self.last_run.date())}))
+        if len(report_documents) > 0:
+            report_document = report_documents[0]
+        else:
+            report_document = {}
+
         for collection in COLLECTIONS:
-            self.finance_db.set_collection(collection)
-            trading_date = len(list(self.finance_db.find({"trading_date": str(self.last_run.date())})))
-            created_on = len(list(self.finance_db.find({"created_on": str(self.last_run.date())})))
-            report[collection] = trading_date + created_on
+            num_documents = 0
+            if collection in report_document.keys():
+                num_documents = report_document[collection]
+            report[collection] = num_documents
         self.report = report
 
     def send_report(self):
@@ -37,6 +46,7 @@ class Reporting(FThread):
             report += "{} : {}\n".format(key, value)
         self.discord.send_report(report)
         self._log("Discord Report sent")
+        self._log(report)
 
     def _sleep(self):
         now = datetime.now()

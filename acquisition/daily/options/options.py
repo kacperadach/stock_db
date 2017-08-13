@@ -26,14 +26,14 @@ class OptionsAcquisition():
         symbols = []
         if not self.finance_db or not self.trading_date:
             return symbols
-        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}))))
+        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}, {"symbol": 1}))))
         return list(set(self.symbols) - found)
 
     def get_complete_options_tasks(self):
         symbols = []
         if not self.finance_db or not self.trading_date:
             return symbols
-        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}))))
+        found = set(map(lambda x: x['symbol'], list(self.finance_db.find({"trading_date": str(self.trading_date.date())}, {"symbol": 1}))))
         return list(found)
 
     def start(self):
