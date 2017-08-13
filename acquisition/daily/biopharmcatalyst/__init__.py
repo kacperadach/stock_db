@@ -70,7 +70,7 @@ class BioPharmCatalyst():
             except Exception as e:
                 self._log('Error in FDA calendar parsing: {}'.format(e))
                 if Logger.env == 'prod':
-                    self.discord.send_message('Error in BioPharmCatalyst FDA calendar parsing: {}'.format(e))
+                    self.discord.alert_error(self.task_name, e)
 
         self.finance_db.set_collection('BioPharmCatalyst_fda')
         for event in fda_events:
