@@ -1,24 +1,23 @@
-from utils import webdriver
-from bs4 import BeautifulSoup
+import requests
+import json
 
 from discord.webhook import DiscordWebhook
+from logger import Logger
 
-ETF_URL = 'https://finance.yahoo.com/etfs?offset={}&count=100'
+URL = "https://query1.finance.yahoo.com/v1/finance/screener"
+PAYLOAD = "{\"offset\":0,\"size\":100,\"sortType\":\"DESC\",\"sortField\":\"percentchange\",\"quoteType\":\"ETF\",\"query\":{\"operator\":\"and\",\"operands\":[{\"operator\":\"gt\",\"operands\":[\"eodvolume\",100000]}]},\"userId\":\"\",\"userIdType\":\"guid\"}\r\n"
+HEADERS = {
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+}
 
-body = {
+BODY = {
     "offset": 0,
-    "size": "100",
+    "size":100,
     "sortType":"DESC",
     "sortField":"percentchange",
     "quoteType":"ETF",
-    "query": {
-        "operator":"and",
-        "operands": [{
-            "operator":"or",
-            "operands": [{
-                "operator":"EQ",
-                "operands": ["region","us"]}]
-        }]},
+    "query":{"operator":"and","operands":[{"operator":"gt","operands":["eodvolume",100000]}]},
     "userId":"",
     "userIdType":"guid"
 }
@@ -27,36 +26,41 @@ body = {
 class ETF():
 
     def __init__(self):
-        pass
+        self.task_name = 'ETFs'
+        self.discord = DiscordWebhook()
+
+    def _log(self, msg, level='info'):
+        Logger.log(msg, level, self.task_name)
+
+    def _get_request_body(self, offset):
+        body = BODY
+        body['offset'] = offset
+        return body
 
     def get_all_etfs(self):
-        max_etfs = None
-        i = 0
-        self.driver = webdriver.PhantomJS("C:/Users/Kacper/AppData/Roaming/npm/node_modules/utils-prebuilt/lib/phantom/bin/utils")
+        found = 0
+        size = 100
+        etfs = []
+        while (found < size):
+            response = requests.request("POST", URL, data=str(self._get_request_body(found)), headers=HEADERS)
+            if response.status_code == 200:
+                data = json.loads(response.text)
+                if 'finance' in data.keys():
+                    try:
+                        etfs += list(set(map(lambda x: x['symbol'], data['finance']['result'][0]['quotes'])))
+                        size = data['finance']['result'][0]['total']
+                        found += data['finance']['result'][0]['count']
+                    except (TypeError, KeyError, IndexError) as e:
+                        self._log('Error in acquiring ETF symbols: {}'.format(e))
+                        if Logger.env.lower() == 'prod':
+                            self.discord.alert_error(self.task_name, str(e))
+                        break
+            else:
+                break
+        return etfs
 
-        self.driver.get(ETF_URL.format(i))
-        page_source = self.driver.page_source
-        etfs = BeautifulSoup(page_source, "html.parser")
-        if max_etfs is None:
-            for div in etfs.find_all('div'):
-                if 'class' in div.attrs.keys():
-                    if "Fw(b)" in div.attrs['class'] and "Fz(36px)" in div.attrs['class']:
-                        max_etfs = int(div.text)
+if __name__ == "__main__":
+    print ETF().get_all_etfs()
 
-        if max_etfs is None:
-            DiscordWebhook().send_message('Could not find max ETFs when scraping')
-        else:
-            self.etfs = []
-            while i < max_etfs:
-                self.driver.get(ETF_URL.format(i))
-                page_source = self.driver.page_source
-                etfs = BeautifulSoup(page_source, "html.parser")
-                screener_table = etfs.findChildren('table')[1]
-                for row in screener_table.findChildren('tr')[1:]:
-                    td = filter(bool, map(lambda x: x.text, row.findChildren('td')))
-                    self.etfs.append(td[0])
-                i += 100
 
-a = ETF()
-a.get_all_etfs()
-print a.etfs
+

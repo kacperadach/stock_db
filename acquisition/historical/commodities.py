@@ -62,7 +62,6 @@ class HistoricalCommoditiesAcquisition():
                 symbol_dates.append((self.current_date.date(), q))
             self.current_date = self.current_date - timedelta(days=1)
 
-        print 'Excuting {} urls for {} ending at {}'.format(len(symbol_dates), self.current_symbol, self.current_date.date())
         n = Networking(log_progress=False)
         data = n.execute(dict(symbol_dates))
         data = dict(map(lambda (k, v): (k, QuoteResponse(v).get_data()), data.iteritems()))

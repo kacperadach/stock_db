@@ -4,6 +4,7 @@ from acquisition.symbol.financial_symbols import Financial_Symbols
 from db.Finance import FinanceDB
 from yfk.quote_networking import QuoteNetworking
 from logger import Logger
+from discord.webhook import DiscordWebhook
 
 DAYS_PER_CALL = 50
 LOG_PERCENT = 5
@@ -14,6 +15,7 @@ class HistoricalStockAcquisition():
     def __init__(self):
         self.task_name = 'HistoricalStockAcquisition'
         self.finance_db = FinanceDB('stock_historical')
+        self.discord = DiscordWebhook()
         self.symbols = Financial_Symbols.get_all()
         self.counter = 0
         self.date = None
@@ -75,20 +77,28 @@ class HistoricalStockAcquisition():
         documents = []
 
         for key, data in minute_data.iteritems():
-            symbol, dt = key.split('-', 1)
-            dt = datetime.strptime(dt, '%Y-%m-%d').date()
-            for sym_date in symbol_dates:
-                if sym_date['symbol'] == symbol:
-                    if 'data_start' not in sym_date.keys() or sym_date['data_start'] > dt:
-                        sym_date['data_start'] = dt
-                    if 'data_end' not in sym_date.keys() or sym_date['data_end'] < dt:
-                        sym_date['data_end'] = dt
-                    break
-            data['trading_date'] = str(dt)
-            data['symbol'] = symbol
-            data['start_time'] = min(map(lambda x: x[0],data['data']))
-            data['end_time'] = max(map(lambda x: x[0],data['data']))
-            documents.append(data)
+            try:
+                dt = key.split('-', key.count('-') - 2)
+                dt = dt[len(dt)-1]
+                dt = datetime.strptime(dt, '%Y-%m-%d').date()
+
+                symbol = key.split('-', key.count('-') - 2)[0]
+                for sym_date in symbol_dates:
+                    if sym_date['symbol'] == symbol:
+                        if 'data_start' not in sym_date.keys() or sym_date['data_start'] > dt:
+                            sym_date['data_start'] = dt
+                        if 'data_end' not in sym_date.keys() or sym_date['data_end'] < dt:
+                            sym_date['data_end'] = dt
+                        break
+                data['trading_date'] = str(dt)
+                data['symbol'] = symbol
+                data['start_time'] = min(map(lambda x: x[0],data['data']))
+                data['end_time'] = max(map(lambda x: x[0],data['data']))
+                documents.append(data)
+            except Exception as e:
+                self._log("Unexpected Error occurred: {}".format(e))
+                if Logger.env.lower() == 'prod':
+                    self.discord.alert_error(self.task_name, str(e))
 
         if documents:
             self.finance_db.insert_many(documents)

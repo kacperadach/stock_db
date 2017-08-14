@@ -56,8 +56,10 @@ class HistoricalAcquisition(threading.Thread):
     def _call_next(self):
         current_task = self.tasks[self.task_counter]
         try:
+            raise StopIteration
             current_task.next()
-        except BaseException:
+        except StopIteration:
+            self._log('{} task completed'.format(current_task.task_name))
             if self.task_counter == len(self.tasks) - 1:
                 return True
             else:
