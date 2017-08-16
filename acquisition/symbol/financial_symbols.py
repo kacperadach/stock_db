@@ -24,7 +24,7 @@ class FinancialSymbols():
 		self.ETF = ETF()
 		self._get_symbols()
 
-	def _log(self, msg, level='INFO'):
+	def _log(self, msg, level='info'):
 		Logger.log(msg, level, self.task_name)
 
 	def _get_symbols(self):
