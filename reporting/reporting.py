@@ -40,7 +40,7 @@ class Reporting(FThread):
         self.report = report
 
     def send_report(self):
-        report = "Daily Stock_DB report for {}\n\n".format(self.last_run.date() - timedelta(days=1))
+        report = "Daily Stock_DB report for {}\n\n".format(self.last_run.date())
         report += "Collection | New Documents\n"
         for key, value in self.report.iteritems():
             report += "{} : {}\n".format(key, value)
