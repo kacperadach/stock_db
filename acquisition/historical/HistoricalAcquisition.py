@@ -22,6 +22,7 @@ class HistoricalAcquisition(threading.Thread):
         self.today = datetime.now().date()
         self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition(), Financials())
         self.task_counter = 0
+        self.finished = False
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.thread_name)
@@ -33,15 +34,15 @@ class HistoricalAcquisition(threading.Thread):
                     self.acquire()
                     self._sleep()
                 else:
+                    self._log('Waiting for Acquirer to finish execution')
                     self.AcquirerThread.event.wait()
                     self._log('Beginning Acquisition')
                     while self.AcquirerThread.event.is_set():
                         self.acquire()
                         self._sleep()
-                    self._log('Waiting for Acquirer to finish execution')
         except Exception as e:
             self._log('unexpected error occured: {}'.format(e))
-            Logger.log(traceback.format_exc())
+            self._log(traceback.format_exc(), level='error')
             if Logger.env == 'prod':
                 DiscordWebhook().alert_error(self.thread_name, traceback.format_exc())
 
@@ -52,6 +53,8 @@ class HistoricalAcquisition(threading.Thread):
             self.sleep_time = (tomorrow - datetime.now()).total_seconds()
             self._log('Sleeping for ' + str(timedelta(seconds=self.sleep_time)))
             time.sleep(self.sleep_time)
+        else:
+            self._log("Finished previous day's acquisition, not sleeping")
 
     def _call_next(self):
         current_task = self.tasks[self.task_counter]
