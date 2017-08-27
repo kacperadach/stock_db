@@ -74,7 +74,16 @@ class HistoricalCurrenciesAcquisition():
         for date, d in data.iteritems():
             if d:
                 d['trading_date'] = str(date)
+                if 'meta' in d.keys() and isinstance(d['meta'], dict) and 'symbol' in d['meta'].keys():
+                    d['symbol'] = d['meta']['symbol']
+                else:
+                    continue
                 documents.append(d)
 
         if documents:
             self.finance_db.insert_many(documents)
+
+if __name__ == "__main__":
+    currencies = HistoricalCurrenciesAcquisition()
+    while 1:
+        currencies.next()

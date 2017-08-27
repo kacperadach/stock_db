@@ -1,3 +1,5 @@
+import urllib2
+from urllib2 import HTTPError
 import threading
 from os import environ
 import json
@@ -19,14 +21,15 @@ TOR_PROXIES = {
 
 class Networking():
 
-    def __init__(self, max_threads=10, controller_port=9051, log_progress=True, update_percent=10, threadname=''):
+    def __init__(self, max_threads=10, controller_port=9051, log_progress=True, update_percent=10, threadname='', request_method='requests'):
         self.threads = []
-        self.max_retry = 5
+        self.max_retry = 2
         self.max_threads = max_threads
         self.controller_port = controller_port
         self.log_process = log_progress
         self.update_percent = update_percent
         self.threadname = threadname
+        self.request_method = request_method
         self.controller = None
 
         self.use_tor = False
@@ -68,7 +71,18 @@ class Networking():
             proxies = {}
         else:
             proxies = TOR_PROXIES
-        return requests.get(url.strip(), proxies=proxies)
+        if self.request_method.lower() == 'requests':
+            return requests.get(url.strip(), proxies=proxies)
+        elif self.request_method.lower() == 'urllib':
+            req = urllib2.Request(url.strip(), headers={'User-Agent': "Magic Browser"})
+            try:
+                con = urllib2.urlopen(req)
+                con.status_code = con.code
+            except HTTPError as e:
+                e.status_code = e.code
+                con = e
+            return con
+
 
     def worker(self, urls):
         for symbol, url in urls:
@@ -77,16 +91,23 @@ class Networking():
             self._log_process()
             while response is None or (response.status_code != 200 and retry <= self.max_retry):
                 try:
+                    print url
                     response = self._request(url)
                 except requests.ConnectionError:
                     pass
                 if retry > 0 and self.controller is not None and self.controller.is_newnym_available():
                     self.controller.signal(Signal.NEWNYM)
                 retry += 1
-            try:
-                data = json.loads(response.text)
-            except:
-                data = {}
+            if self.request_method == 'requests':
+                try:
+                    data = json.loads(response.text)
+                except:
+                    if hasattr(response, 'text') and response.text:
+                        data = response.text
+                    else:
+                        data = {}
+            elif self.request_method == 'urllib':
+                data = response.read()
             self.responses[symbol] = data
 
     def execute(self, url_list):
