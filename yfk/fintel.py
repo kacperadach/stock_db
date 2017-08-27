@@ -1,5 +1,6 @@
 from Queue import Queue, Empty
 from threading import Thread
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 
@@ -13,6 +14,8 @@ INSIDER_TRANSACTIONS = "https://fintel.io/n/us/{}?page={}"
 MAX_QUEUE_SIZE = 5000
 QUEUE_TIMEOUT = 30
 
+INSIDER_COLLECTION = 'fintel_insider'
+OWNERSHIP_COLLECTION = 'fintel_ownership'
 
 class FintelAcquisitionError(Exception):
     pass
@@ -35,9 +38,10 @@ class FintelAcquisition():
 
     def _insider_worker(self, data):
         response = data['data']
-        parsed_response = self._parse_insider(response)
+        parsed_response = self._parse_response(response)
         if len(parsed_response) > 0:
-            self.finance_db.set_collection('fintel_insider')
+            if self.finance_db.collection != INSIDER_COLLECTION:
+                self.finance_db.set_collection(INSIDER_COLLECTION)
             documents = []
             for document in parsed_response:
                 document['symbol'] = data['symbol']
@@ -45,14 +49,27 @@ class FintelAcquisition():
                     documents.append(document)
             if documents:
                 self.finance_db.insert_many(documents)
-            data['page'] += 1
-            data['url'] = data['url'].split('=')[0] + "={}".format(data['page'])
-            data['data'] = None
-            if not self.first_page_only:
+            if not self.first_page_only and len(parsed_response) >= 50:
+                data['page'] += 1
+                data['url'] = data['url'].split('=')[0] + "={}".format(data['page'])
+                data['data'] = None
+                print 'adding ' + data['url']
                 self.url_queue.put(data, timeout=QUEUE_TIMEOUT)
 
     def _ownership_worker(self, data):
-        pass
+        print 'working: {}'.format(data['symbol'])
+        response = data['data']
+        parsed_response = self._parse_response(response)
+        if len(parsed_response) > 0:
+            if self.finance_db.collection != OWNERSHIP_COLLECTION:
+                self.finance_db.set_collection(OWNERSHIP_COLLECTION)
+            documents = []
+            for document in parsed_response:
+                document['symbol'] = data['symbol']
+                if len(list(self.finance_db.find(document).limit(1))) == 0:
+                    documents.append(document)
+            if documents:
+                self.finance_db.insert_many(documents)
 
     def start_input_worker(self, symbols, base_url):
         def _input_worker():
@@ -109,19 +126,19 @@ class FintelAcquisition():
             t.join()
         input.join()
 
-    def _parse_insider(self, response):
+    def _parse_response(self, response):
         bs = BeautifulSoup(response, 'html.parser')
         tables = bs.findAll('table')
-        insider_table = None
+        transaction_table = None
         for table in tables:
             if 'id' in table.attrs.keys() and table.attrs['id'].lower() == 'transactions':
-                insider_table = table
+                transaction_table = table
                 break
 
-        if not insider_table:
+        if not transaction_table:
             return []
 
-        rows = insider_table.findChildren('tr')
+        rows = transaction_table.findChildren('tr')
         if len(rows) <= 1:
             return []
 
@@ -139,7 +156,7 @@ class FintelAcquisition():
                 parsed_data.append(data)
         return parsed_data
 
+
 if __name__ == "__main__":
     from acquisition.symbol.financial_symbols import Financial_Symbols
-    FintelAcquisition().execute_insider(Financial_Symbols.get_all()[0:100], first_page_only=False)
-    a = 1
+    FintelAcquisition().execute_ownership(Financial_Symbols.get_all())
