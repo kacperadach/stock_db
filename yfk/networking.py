@@ -91,7 +91,6 @@ class Networking():
             self._log_process()
             while response is None or (response.status_code != 200 and retry <= self.max_retry):
                 try:
-                    print url
                     response = self._request(url)
                 except requests.ConnectionError:
                     pass

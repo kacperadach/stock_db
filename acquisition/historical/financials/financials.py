@@ -118,8 +118,9 @@ class Financials():
                 self.write_to_mongo()
                 self.data.clear()
         except Exception, e:
-            print e
-            pass
+            self._log("Unexpected error occurred during execution: {}".format(str(e)))
+            if Logger.env.lower() == 'prod':
+                self.discord.alert_error(self.task_name, str(e))
         finally:
             self.counter += 1
 

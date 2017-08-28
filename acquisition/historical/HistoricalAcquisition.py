@@ -20,7 +20,7 @@ class HistoricalAcquisition(threading.Thread):
         self.AcquirerThread = AcquirerThread
         self.date = datetime.now().date()
         self.today = datetime.now().date()
-        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition(), Financials())
+        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition())
         self.task_counter = 0
         self.finished = False
 
@@ -84,4 +84,7 @@ class HistoricalAcquisition(threading.Thread):
                     break
 
 if __name__ == "__main__":
-    HistoricalAcquisition().start()
+    from acquisition.Acquirer import Acquirer
+    a = Acquirer()
+    a.start()
+    HistoricalAcquisition(a).start()

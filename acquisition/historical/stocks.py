@@ -96,7 +96,7 @@ class HistoricalStockAcquisition():
                 data['end_time'] = max(map(lambda x: x[0],data['data']))
                 documents.append(data)
             except Exception as e:
-                self._log("Unexpected Error occurred: {}".format(e))
+                self._log("Unexpected Error occurred: {}".format(str(e)))
                 if Logger.env.lower() == 'prod':
                     self.discord.alert_error(self.task_name, str(e))
 
