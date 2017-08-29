@@ -16,7 +16,8 @@ class HistoricalStockAcquisition():
         self.task_name = 'HistoricalStockAcquisition'
         self.finance_db = FinanceDB('stock_historical')
         self.discord = DiscordWebhook()
-        self.symbols = Financial_Symbols.get_all()
+        #self.symbols = Financial_Symbols.get_all()
+        self.symbols = ["AAPL"]
         self.counter = 0
         self.date = None
         self.last_benchmark = 0

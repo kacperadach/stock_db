@@ -8,11 +8,13 @@ from acquisition.historical import HistoricalAcquisition
 from reporting.reporting import Reporting
 from logger import Logger
 from discord.webhook import DiscordWebhook
+from db.Indexer import MongoIndexer
 
 COMMAND_LINE_ARGUMENTS = {
 	'env': 'dev',
 	'use_tor': False
 }
+
 
 class MainService():
 
@@ -32,6 +34,7 @@ class MainService():
 			DiscordWebhook().alert_start()
 
 	def main_service(self):
+		MongoIndexer().create_indices()
 		self.Acquirer = Acquirer()
 		self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
 		self.Reporting = Reporting()

@@ -56,8 +56,12 @@ class FinanceDB():
 			collection = db.get_collection(self.collection)
 			return collection.find(query, fields)
 
-
 	def save(self, document):
 		with self.mongo_client() as db:
 			collection = db.get_collection(self.collection)
 			collection.save(document)
+
+	def create_index(self, keys):
+		with self.mongo_client() as db:
+			collection = db.get_collection(self.collection)
+			collection.create_index(keys.items())

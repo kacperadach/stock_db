@@ -56,10 +56,10 @@ class DiscordWebhook():
             Logger.log('Discord Message Error')
 
 
-    def alert_BioPharmCatalyst_catalyst(self, event):
+    def alert_BioPharmCatalyst_catalyst(self, event, calendar_name):
         body = {
             "embeds": [{
-                "title": "New BioPharmCatalyst found in FDA calendar",
+                "title": "New BioPharmCatalyst found in {} calendar".format(calendar_name),
                 "description": u"**${}**\n\n*{}*\n{}\n\n{}\n\n__{}__\n{}".format(event['symbol'], event['drug'].strip(), event['drug_description'], event['stage'], event['date'], event['event_description']),
                 "url": HISTORICAL_CATALYST_WEBSITE,
                 "thumbnail": {
