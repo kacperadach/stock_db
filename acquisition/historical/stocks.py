@@ -104,7 +104,7 @@ class HistoricalStockAcquisition():
         if documents:
             self.finance_db.insert_many(documents)
 
-        print 'Time took: {}'.format(datetime.now()-start_time)
+        self._log('Time took: {}'.format(datetime.now()-start_time))
 
 
 if __name__ == "__main__":
