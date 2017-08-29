@@ -2,7 +2,7 @@ from Queue import Queue, Empty
 from threading import Thread
 from datetime import datetime
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 
 from request_queue import RequestQueue
 from logger import Logger
@@ -127,18 +127,8 @@ class FintelAcquisition():
         input.join()
 
     def _parse_response(self, response):
-        bs = BeautifulSoup(response, 'html.parser')
-        tables = bs.findAll('table')
-        transaction_table = None
-        for table in tables:
-            if 'id' in table.attrs.keys() and table.attrs['id'].lower() == 'transactions':
-                transaction_table = table
-                break
-
-        if not transaction_table:
-            return []
-
-        rows = transaction_table.findChildren('tr')
+        bs = BeautifulSoup(response, 'lxml', parse_only=SoupStrainer('table', {'id': 'transactions'}))
+        rows = bs.findAll('tr')
         if len(rows) <= 1:
             return []
 
@@ -159,4 +149,5 @@ class FintelAcquisition():
 
 if __name__ == "__main__":
     from acquisition.symbol.financial_symbols import Financial_Symbols
-    FintelAcquisition().execute_ownership(Financial_Symbols.get_all())
+    #FintelAcquisition().execute_ownership(Financial_Symbols.get_all())
+    FintelAcquisition().execute_insider(['AAPL'])

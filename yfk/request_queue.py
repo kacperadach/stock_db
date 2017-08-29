@@ -47,7 +47,7 @@ class RequestQueue():
 
             for thread in self.request_threads:
                 thread.join()
-            print 'Finished Execute Worker'
+            print 'Finished Request Queue Worker'
 
         t = Thread(target=execute_worker)
         t.setDaemon(True)

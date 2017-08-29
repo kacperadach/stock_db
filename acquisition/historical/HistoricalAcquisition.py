@@ -54,7 +54,7 @@ class HistoricalAcquisition(threading.Thread):
             self._log('Sleeping for ' + str(timedelta(seconds=self.sleep_time)))
             time.sleep(self.sleep_time)
         else:
-            self._log("Finished previous day's acquisition, not sleeping")
+            self._log("Not sleeping")
 
     def _call_next(self):
         current_task = self.tasks[self.task_counter]

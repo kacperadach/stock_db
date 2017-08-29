@@ -32,6 +32,7 @@ class HistoricalStockAcquisition():
                 self.last_benchmark += LOG_PERCENT
 
     def next(self):
+        start_time = datetime.now()
         self._log_process()
         if self.date is None:
             self.date = datetime.now().date()
@@ -48,7 +49,7 @@ class HistoricalStockAcquisition():
         requests = 0
         while requests < REQUESTS_PER_ITERATION and self.counter < len(self.symbols):
             self.current_symbol = self.symbols[self.counter]
-            stock_documents = list(self.finance_db.find({"symbol": self.current_symbol}))
+            stock_documents = list(self.finance_db.find({"symbol": self.current_symbol}, {"symbol": 1, "trading_date": 1}))
             if len(stock_documents) == 0:
                 start_date = yesterday - timedelta(days=DAYS_PER_CALL)
                 end_date = yesterday
@@ -102,6 +103,8 @@ class HistoricalStockAcquisition():
 
         if documents:
             self.finance_db.insert_many(documents)
+
+        print 'Time took: {}'.format(datetime.now()-start_time)
 
 
 if __name__ == "__main__":
