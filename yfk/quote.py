@@ -69,7 +69,7 @@ class QuoteResponse():
 
 	def __init__(self, response):
 		if not isinstance(response, dict):
-			raise QuoteError('Invalid type supplied to QuoteResponse: {}'.format(response.__name__))
+			raise QuoteError('Invalid type supplied to QuoteResponse: {}'.format(str(type(response))))
 		self.response = response
 		self.data = None
 		self.parse_data()

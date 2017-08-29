@@ -13,6 +13,8 @@ CASH_FLOW_URL = 'https://finance.yahoo.com/quote/{}/cash-flow'
 FINANCIAL_DOCUMENTS = ('income_statement', 'balance_sheet', 'cash_flow')
 LOG_PERCENT = 10
 
+BATCH_SIZE = 10
+
 class Financials():
 
     def __init__(self):
@@ -21,13 +23,9 @@ class Financials():
         self.discord = DiscordWebhook()
         self.symbols = Financial_Symbols.get_all()
         self.counter = 0
-        self.income_statement = None
-        self.balance_sheet = None
-        self.cash_flow = None
         self.driver = None
         self._reset_counters()
         self.data = {}
-        self.write_limit = 10
         self.last_benchmark = 0
 
     def _reset_counters(self):
@@ -45,17 +43,25 @@ class Financials():
                 self.last_benchmark += LOG_PERCENT
 
     def get_financials(self, ticker):
+        financials = {}
+        print ticker
         for url, var in ((INCOME_STATEMENT_URL, 'income_statement'), (BALANCE_SHEET_URL, 'balance_sheet'), (CASH_FLOW_URL, 'cash_flow')):
             try:
-                self.driver.get(url.format(ticker))
+                financials[var] = self.get_financial_document(url.format(ticker))
             except Exception, e:
                 continue
-            setattr(self, var, self.get_financial_document())
-        if all((self.income_statement, self.balance_sheet, self.cash_flow)):
-            self.data[ticker] = {'income_statement': self.income_statement, 'balance_sheet': self.balance_sheet, 'cash_flow': self.cash_flow}
+        if any(financials.itervalues()):
+            print 'found: {}'.format(ticker)
+            self.data[ticker] = financials
 
-    def get_financial_document(self):
-        quarterly_button = filter(lambda x: x.text == 'Quarterly', self.driver.find_elements_by_tag_name('span'))[0]
+    def get_financial_document(self, url):
+        self.driver.get(url)
+        quarterly_button = filter(lambda x: x.text == 'Quarterly', self.driver.find_elements_by_tag_name('span'))
+        if len(quarterly_button) == 0:
+            print 'quarterly button not found'
+            return {}
+
+        quarterly_button = quarterly_button[0]
         quarterly_button.click()
 
         document = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -78,25 +84,25 @@ class Financials():
         return data
 
     def write_to_mongo(self):
-        documents = []
+        found_documents = []
         for symbol, financials in self.data.iteritems():
             for collection in FINANCIAL_DOCUMENTS:
                 for date, data in financials[collection].iteritems():
                     data['period_ending'] = date
                     data['symbol'] = symbol
                     data['document'] = collection
-                    documents.append(data)
-        for document in documents:
+                    found_documents.append(data)
+        new_documents = []
+        for document in found_documents:
             query = {}
             query['symbol'] = document['symbol']
             query['period_ending'] = document['period_ending']
             query['document'] = document['document']
-            if len(list(self.finance_db.find(query))) == 0:
-                try:
-                    self.finance_db.insert_one(document)
-                except Exception, e:
-                    print e
-                    pass
+            if len(list(self.finance_db.find(query).limit(1))) == 0:
+                new_documents.append(document)
+
+        if new_documents:
+            self.finance_db.insert_many(new_documents)
 
     def quit_phantom_js(self):
         if self.driver and hasattr(self.driver, 'quit'):
@@ -114,7 +120,7 @@ class Financials():
             if not self.driver:
                 self.driver = Selenium().get_driver()
             self.get_financials(symbol)
-            if len(self.data.keys()) >= 10 or self.counter + 1  >= len(self.symbols):
+            if len(self.data.keys()) >= BATCH_SIZE or self.counter + 1 >= len(self.symbols):
                 self.write_to_mongo()
                 self.data.clear()
         except Exception, e:

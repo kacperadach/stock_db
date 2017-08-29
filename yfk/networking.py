@@ -101,10 +101,7 @@ class Networking():
                 try:
                     data = json.loads(response.text)
                 except:
-                    if hasattr(response, 'text') and response.text:
-                        data = response.text
-                    else:
-                        data = {}
+                    data = {}
             elif self.request_method == 'urllib':
                 data = response.read()
             self.responses[symbol] = data
