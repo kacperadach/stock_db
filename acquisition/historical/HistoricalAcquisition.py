@@ -1,9 +1,7 @@
-import sys
 import threading
 from datetime import datetime, timedelta
 import traceback
 import time
-
 
 from logger import Logger
 from acquisition.historical.stocks import HistoricalStockAcquisition
@@ -20,7 +18,7 @@ class HistoricalAcquisition(threading.Thread):
         self.AcquirerThread = AcquirerThread
         self.date = datetime.now().date()
         self.today = datetime.now().date()
-        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition())
+        self.tasks = (HistoricalStockAcquisition(), HistoricalCommoditiesAcquisition(), HistoricalCurrenciesAcquisition(), Financials())
         self.task_counter = 0
         self.finished = False
 
