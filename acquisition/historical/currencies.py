@@ -31,6 +31,8 @@ class HistoricalCurrenciesAcquisition():
                 self.last_benchmark += LOG_PERCENT
 
     def next(self):
+        if self.counter == 0:
+            self._log('Beginning {}'.format(self.task_name))
         self._log_process()
 
         if self.counter >= len(self.symbols):

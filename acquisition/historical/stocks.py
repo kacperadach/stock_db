@@ -32,6 +32,8 @@ class HistoricalStockAcquisition():
                 self.last_benchmark += LOG_PERCENT
 
     def next(self):
+        if self.counter == 0:
+            self._log('Beginning {}'.format(self.task_name))
         start_time = datetime.now()
         self._log_process()
         if self.date is None:

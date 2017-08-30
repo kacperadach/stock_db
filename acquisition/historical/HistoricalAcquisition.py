@@ -31,6 +31,7 @@ class HistoricalAcquisition(threading.Thread):
         try:
             while 1:
                 if self.AcquirerThread is None:
+                    self._log('Beginning Acquisition')
                     self.acquire()
                     self._sleep()
                 else:
@@ -85,6 +86,6 @@ class HistoricalAcquisition(threading.Thread):
 
 if __name__ == "__main__":
     from acquisition.Acquirer import Acquirer
-    a = Acquirer()
-    a.start()
-    HistoricalAcquisition(a).start()
+    # a = Acquirer()
+    # a.start()
+    HistoricalAcquisition().start()

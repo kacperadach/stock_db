@@ -46,7 +46,7 @@ class BioPharmCatalyst():
         con = urllib2.urlopen(req)
 
         page_source = con.read()
-        self.fda_calendar = BeautifulSoup(page_source, "html.parser")
+        self.fda_calendar = BeautifulSoup(page_source, "lxml")
 
         table = self.fda_calendar.findChildren('table')[0]
         rows = table.findChildren('tr')[1:]
