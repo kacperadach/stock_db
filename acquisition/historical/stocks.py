@@ -65,6 +65,7 @@ class HistoricalStockAcquisition():
                     start_date = end - timedelta(days=DAYS_PER_CALL)
                     end_date = start
                 else:
+                    self.counter += 1
                     continue
 
             symbol_dates.append({
