@@ -59,7 +59,7 @@ class DiscordWebhook():
     def alert_BioPharmCatalyst_catalyst(self, event):
         body = {
             "embeds": [{
-                "title": "New BioPharmCatalyst found in Historical Catalyst calendar".format(calendar_name),
+                "title": "New BioPharmCatalyst found in Historical Catalyst calendar",
                 "description": u"**${}**\n\n*{}*\n{}\n\n{}\n\n__{}__\n{}".format(event['symbol'], event['drug'].strip(), event['drug_description'], event['stage'], event['date'], event['event_description']),
                 "url": HISTORICAL_CATALYST_WEBSITE,
                 "thumbnail": {
