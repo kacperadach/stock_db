@@ -1,6 +1,7 @@
 from urllib2 import Request, urlopen, URLError
 from re import findall
 from datetime import datetime
+from random import shuffle
 
 from commodities import Commodities_Symbols
 from db import FinanceDB
@@ -88,6 +89,7 @@ class FinancialSymbols():
 	def get_all(self):
 		if self.last_check is None or (datetime.now() - self.last_check).total_seconds() > CHECK_API_TIME_INTERVAL:
 			self._get_symbols()
+		shuffle(self.all_symbols)
 		return self.all_symbols
 
 	def get_commodities(self):

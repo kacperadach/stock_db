@@ -78,7 +78,7 @@ class BioPharmCatalyst():
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
                 if Logger.env == 'prod':
-                    self.discord.alert_BioPharmCatalyst_fda(event, 'FDA')
+                    self.discord.alert_BioPharmCatalyst_fda(event)
                 self.finance_db.insert_one(event)
 
     def get_historical_catalyst_calendar(self):
@@ -123,7 +123,7 @@ class BioPharmCatalyst():
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
                 if Logger.env == 'prod':
-                    self.discord.alert_BioPharmCatalyst_catalyst(event, 'Historical Catalyst')
+                    self.discord.alert_BioPharmCatalyst_catalyst(event)
                 documents.append(event)
         if documents:
             self.finance_db.insert_many(documents)

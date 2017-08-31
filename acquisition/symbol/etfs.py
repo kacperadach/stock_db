@@ -3,6 +3,7 @@ import json
 
 from discord.webhook import DiscordWebhook
 from logger import Logger
+from yfk.response_wrapper import ResponseWrapper
 
 URL = "https://query1.finance.yahoo.com/v1/finance/screener"
 PAYLOAD = "{\"offset\":0,\"size\":100,\"sortType\":\"DESC\",\"sortField\":\"percentchange\",\"quoteType\":\"ETF\",\"query\":{\"operator\":\"and\",\"operands\":[{\"operator\":\"gt\",\"operands\":[\"eodvolume\",100000]}]},\"userId\":\"\",\"userIdType\":\"guid\"}\r\n"
@@ -42,10 +43,10 @@ class ETF():
         size = 100
         etfs = []
         while (found < size):
-            response = requests.request("POST", URL, data=str(self._get_request_body(found)), headers=HEADERS)
+            response = ResponseWrapper(requests.request("POST", URL, data=str(self._get_request_body(found)), headers=HEADERS))
             if response.status_code == 200:
-                data = json.loads(response.text)
-                if 'finance' in data.keys():
+                data = response.get_data(request_method='requests')
+                if isinstance(data, dict) and 'finance' in data.keys():
                     try:
                         etfs += list(set(map(lambda x: x['symbol'], data['finance']['result'][0]['quotes'])))
                         size = data['finance']['result'][0]['total']
