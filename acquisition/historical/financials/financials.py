@@ -106,7 +106,10 @@ class Financials():
 
     def quit_phantom_js(self):
         if self.driver and hasattr(self.driver, 'quit'):
-            self.driver.quit()
+            try:
+                self.driver.quit()
+            except OSError:
+                pass
 
     def next(self):
         self._log_process()
