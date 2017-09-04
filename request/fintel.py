@@ -1,17 +1,17 @@
-from Queue import Queue, Empty
-from threading import Thread
+from Queue import Queue, Empty, Full
 from datetime import datetime
+from threading import Thread
 
 from bs4 import BeautifulSoup, SoupStrainer
 
-from request_queue import RequestQueue
-from logger import Logger
 from db.Finance import FinanceDB
+from logger import Logger
+from request.request_queue import RequestQueue
 
 CURRENT_OWNERSHIP = "https://fintel.io/so/us/{}?page={}"
 INSIDER_TRANSACTIONS = "https://fintel.io/n/us/{}?page={}"
 
-MAX_QUEUE_SIZE = 5000
+MAX_QUEUE_SIZE = 10000
 QUEUE_TIMEOUT = 30
 
 INSIDER_COLLECTION = 'fintel_insider'
@@ -22,15 +22,14 @@ class FintelAcquisitionError(Exception):
 
 class FintelAcquisition():
 
-    def __init__(self, num_request_threads=10, num_parsing_threads=10):
+    def __init__(self, num_request_threads=10, num_parsing_threads=5):
         self.task_name = "FintelAcquisition"
         self.num_request_threads = num_request_threads
         self.num_parsing_threads = num_parsing_threads
         self.finance_db = FinanceDB()
-        self.request_queue = RequestQueue(request_method='urllib', num_request_threads=self.num_request_threads)
+        self.request_queue = RequestQueue(num_request_threads=self.num_request_threads)
         self.url_queue = Queue(maxsize=MAX_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=MAX_QUEUE_SIZE)
-
         self.documents = []
 
     def _log(self, msg, level='info'):
@@ -77,7 +76,7 @@ class FintelAcquisition():
                 for symbol in symbols:
                     self.url_queue.put({"symbol": symbol, "page": 1, "url": base_url.format(symbol, 1)}, timeout=QUEUE_TIMEOUT)
                 print 'Input worker finished'
-            except Empty:
+            except Full:
                 self._log('Queue timeout during input execution')
 
         t = Thread(target=_input_worker)
@@ -87,12 +86,14 @@ class FintelAcquisition():
 
     def start_output_worker(self, output_worker):
         def _output_worker():
-            try:
-                while 1:
-                    data = self.output_queue.get(timeout=QUEUE_TIMEOUT)
+            while 1:
+                try:
+                    data = self.output_queue.get()
                     output_worker(data)
-            except Empty:
-                self._log('Queue timeout during output execution')
+                except (Empty, Full):
+                    self._log('Queue timeout during output execution')
+                    continue
+
         threads = []
         for i in range(self.num_parsing_threads):
             t = Thread(target=_output_worker)
@@ -109,6 +110,7 @@ class FintelAcquisition():
         self._execute(symbols, 'ownership')
 
     def _execute(self, symbols, mode):
+        start = datetime.now()
         if mode.lower() == 'insider':
             base_url = INSIDER_TRANSACTIONS
             output_worker = self._insider_worker
@@ -125,6 +127,7 @@ class FintelAcquisition():
         for t in output_threads:
             t.join()
         input.join()
+        self._log("Finished Execution, time taken: {}".format(datetime.now()-start))
 
     def _parse_response(self, response):
         bs = BeautifulSoup(response, 'lxml', parse_only=SoupStrainer('table', {'id': 'transactions'}))
@@ -149,5 +152,5 @@ class FintelAcquisition():
 
 if __name__ == "__main__":
     from acquisition.symbol.financial_symbols import Financial_Symbols
-    #FintelAcquisition().execute_ownership(Financial_Symbols.get_all())
-    FintelAcquisition().execute_insider(['AAPL'])
+    FintelAcquisition().execute_ownership(Financial_Symbols.get_all())
+    #FintelAcquisition().execute_insider(['AAPL'])

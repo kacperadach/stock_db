@@ -4,3 +4,5 @@ __pycache__
 .idea
 *.log
 db_cred.txt
+temp.py
+credentials.txt

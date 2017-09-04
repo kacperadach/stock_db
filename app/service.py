@@ -9,17 +9,13 @@ from reporting.reporting import Reporting
 from logger import Logger
 from discord.webhook import DiscordWebhook
 from db.Indexer import MongoIndexer
-
-COMMAND_LINE_ARGUMENTS = {
-	'env': 'dev',
-	'use_tor': False
-}
-
+from config import App_Config
 
 class MainService():
 
 	def __init__(self):
-		self._parse_cl_arguments(sys.argv)
+		App_Config.set_config(sys.argv)
+		self.env = App_Config.env
 		Logger.set_env(self.env)
 		Logger.log('Service: Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()
@@ -47,20 +43,3 @@ class MainService():
 		environ['env'] = self.env
 		for key, val in environment_vars.items():
 			environ[key] = val
-
-	def _parse_cl_arguments(self, argv):
-		if len(argv) <= 1:
-			pass
-		else:
-			set_keys = []
-			for i in range(1, len(argv)):
-				key, value = argv[i].split('=')
-				if key.lower() in COMMAND_LINE_ARGUMENTS.iterkeys():
-					setattr(self, key, value)
-					set_keys.append(key)
-		for key, value in COMMAND_LINE_ARGUMENTS.iteritems():
-			if not hasattr(self, key):
-				if isinstance(value, bool):
-					setattr(self, key, bool(value))
-				else:
-					setattr(self, key, value)

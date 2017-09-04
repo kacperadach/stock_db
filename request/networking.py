@@ -50,11 +50,14 @@ class Networking():
             self.controller = Controller.from_port(port=self.controller_port)
             self.controller.authenticate(environ['TOR_PW'])
         except Exception, e:
-            print "Error trying to connect to tor: {}".format(e)
+            print "Unexpected error occurred while trying to connect to tor: {}".format(e)
 
     def _disconnect_from_controller(self):
-        if self.controller and hasattr(self.controller, 'close'):
-            self.controller.close()
+        try:
+            if self.controller and hasattr(self.controller, 'close'):
+                self.controller.close()
+        except Exception, e:
+            print "Unexpected error occurred while trying to disconnect from tor: {}".format(e)
 
     def _log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname='Networking')
@@ -82,7 +85,6 @@ class Networking():
                 e.status_code = e.code
                 con = e
             return con
-
 
     def worker(self, urls):
         for symbol, url in urls:
@@ -130,3 +132,4 @@ class Networking():
         if self.controller and self.use_tor:
             self._disconnect_from_controller()
         return self.responses
+

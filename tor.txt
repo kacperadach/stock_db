@@ -1,0 +1,7 @@
+ControlPort 9051
+HashedControlPassword 16:F5FFC4531E7B8B1A609C2C362439DA5113432D0A7A7645AEC53A7B2B36
+CookieAuthentication 1
+DataDirectory E:\Tor\Tor Browser\Browser\TorBrowser\Data\Tor
+GeoIPFile E:\Tor\Tor Browser\Browser\TorBrowser\Data\Tor\geoip
+GeoIPv6File E:\Tor\Tor Browser\Browser\TorBrowser\Data\Tor\geoip6
+

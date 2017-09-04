@@ -1,7 +1,7 @@
 from os import path
 
 CWD = path.dirname(path.realpath(__file__))
-CREDENTIALS_FILE = 'db_cred.txt'
+CREDENTIALS_FILE = 'credentials.txt'
 CREDENTIALS_PATH = path.join(path.dirname(CWD), CREDENTIALS_FILE)
 
 class Credentials():
@@ -24,6 +24,10 @@ class Credentials():
     def get_password(self):
         if 'password' in self.creds.keys():
             return self.creds['password']
+
+    def get_tor_password(self):
+        if 'tor_pw' in self.creds.keys():
+            return self.creds['tor_pw']
 
 if __name__ == "__main__":
     c = Credentials()

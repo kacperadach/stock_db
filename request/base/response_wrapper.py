@@ -13,19 +13,14 @@ class ResponseWrapper():
             return response.code
         return 404
 
-    def get_data(self, request_method):
+    def get_data(self):
         data = None
-        if request_method.lower() == 'requests':
+        if self.response is not None and hasattr(self.response, 'text'):
             try:
                 data = json.loads(self.response.text)
             except:
-                if hasattr(self.response, 'text') and self.response.text:
+                if self.response.text:
                     data = self.response.text
                 else:
                     data = ""
-        elif request_method.lower() == 'urllib':
-            if hasattr(self.response, 'read'):
-                data = self.response.read()
-            else:
-                data = ""
         return data

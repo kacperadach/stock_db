@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from yfk.insider_networking import InsiderTransactions
+from request.insider_networking import InsiderTransactions
 from db import FinanceDB
 from logger import Logger
 from acquisition.symbol.financial_symbols import Financial_Symbols

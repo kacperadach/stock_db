@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 from acquisition.symbol.commodities import Commodities_Symbols
 from db.Finance import FinanceDB
-from yfk.quote import Quote, QuoteResponse
-from yfk.networking import Networking
+from request.quote import Quote, QuoteResponse
+from request.networking import Networking
 from logger import Logger
 
 DAYS_PER_CALL = 50

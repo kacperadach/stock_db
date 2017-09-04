@@ -1,43 +1,34 @@
 from Queue import Queue, Empty
 from threading import Thread
-from urllib2 import urlopen, Request, HTTPError
-from httplib import BadStatusLine
 
-import requests
+from request.base.request_client import RequestClient
+from request.base.tor_client import TorClient
+from app.config import App_Config
+from logger.queue_logger import QueueLogger
 
-from response_wrapper import ResponseWrapper
-
-QUEUE_TIMEOUT = 30
-CONTROLLER_PORT = 9051
+class RequestQueueException(Exception):
+    pass
 
 class RequestQueue():
 
-    def __init__(self, num_request_threads=10, num_retries=2, request_method='requests'):
+    def __init__(self, num_request_threads=10, num_retries=2):
         self.num_request_threads = num_request_threads
         self.num_retries = num_retries
-        self.request_method = request_method
         self.url_queue = None
         self.output_queue = None
         self.request_threads = []
-
-    def _request(self, url):
-        response = None
-        if self.request_method.lower() == 'requests':
-            try:
-                response = requests.get(url.strip())
-            except requests.ConnectionError:
-                response = None
-        elif self.request_method.lower() == 'urllib':
-            try:
-                print url
-                req = Request(url.strip(), headers={'User-Agent': "Magic Browser"})
-                response = urlopen(req)
-            except (HTTPError, BadStatusLine) as e:
-                response = e
-        return ResponseWrapper(response)
+        self.use_tor = App_Config.use_tor
+        self.tor_client = TorClient()
+        self.request_client = RequestClient()
+        self.queue_logger = QueueLogger()
 
     def start(self, url_queue, output_queue):
         def execute_worker():
+            if self.use_tor:
+                self.tor_client.connect()
+
+            self.queue_logger.start_logging({"url_queue": url_queue, "output_queue": output_queue})
+
             self.request_threads = []
             for i in range(self.num_request_threads):
                 worker = Thread(target=self.request_worker, args=(url_queue, output_queue,))
@@ -47,6 +38,11 @@ class RequestQueue():
 
             for thread in self.request_threads:
                 thread.join()
+
+            self.queue_logger.stop_logging()
+
+            if self.use_tor:
+                self.tor_client.disconnect()
             print 'Finished Request Queue Worker'
 
         t = Thread(target=execute_worker)
@@ -54,26 +50,26 @@ class RequestQueue():
         t.start()
 
     def request_worker(self, url_queue, output_queue):
-        tickers_requested = 0
         try:
             while True:
-                url_obj = url_queue.get(timeout=QUEUE_TIMEOUT)
+                url_obj = url_queue.get()
                 url = url_obj['url']
-                tickers_requested += 1
                 retry = 0
                 response = None
                 while response is None or (response.status_code != 200 and retry < self.num_retries):
-                    response = self._request(url)
+                    if retry > 0 and self.use_tor:
+                        self.tor_client.new_nym()
+                    response = self.request_client.get(url)
                     retry += 1
-                url_obj['data'] = response.get_data(self.request_method)
-                output_queue.put(url_obj, timeout=QUEUE_TIMEOUT)
-        except Empty:
-            print 'Closing Request Thread, tickers requested: {}'.format(tickers_requested)
+                url_obj['data'] = response.get_data()
+                output_queue.put(url_obj)
+        except Exception as e:
+            raise RequestQueueException(str(e))
 
 if __name__ == "__main__":
     from acquisition.symbol.financial_symbols import Financial_Symbols
     CURRENT_OWNERSHIP = "https://fintel.io/so/us/{}"
-    rq = RequestQueue(request_method='urllib')
+    rq = RequestQueue()
     url_queue = Queue()
     output_queue = Queue()
 

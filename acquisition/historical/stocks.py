@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from acquisition.symbol.financial_symbols import Financial_Symbols
 from db.Finance import FinanceDB
-from yfk.quote_networking import QuoteNetworking
+from request.quote_networking import QuoteNetworking
 from logger import Logger
 from discord.webhook import DiscordWebhook
 
