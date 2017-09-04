@@ -35,12 +35,18 @@ class TorTest():
         self._run()
 
     def _run(self):
+        from datetime import datetime
+        print 'Connecting to Tor'
         self.tor_client.connect()
         value = None
         print 'Waiting for New NYM'
+        start = datetime.now()
         while value is not True:
             value = self.tor_client.new_nym()
+            if (datetime.now() - start).total_seconds() > 30:
+                break
         print 'Found New NYM'
+        print 'Disconnecting from Tor'
         self.tor_client.disconnect()
         return
 
