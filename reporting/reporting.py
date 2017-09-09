@@ -1,12 +1,10 @@
 from datetime import datetime, timedelta
 
 from app.thread import FThread
-from db.Finance import FinanceDB
 from discord.webhook import DiscordWebhook
+from report import Reporter
 
 COLLECTIONS = ('BioPharmCatalyst_fda', 'BioPharmCatalyst_historical', 'commodities', 'currencies', 'financials', 'stock_historical', 'stock_insider', 'stock_options', 'symbols')
-
-from db.ReportDecorator import REPORTING_COLLECTION
 
 class Reporting(FThread):
 
@@ -14,7 +12,6 @@ class Reporting(FThread):
         super(Reporting, self).__init__()
         self.thread_name = 'Reporting'
         self.discord = DiscordWebhook()
-        self.finance_db = FinanceDB()
         self.last_run = datetime.now()
 
     def _run(self):
@@ -24,20 +21,7 @@ class Reporting(FThread):
             self.last_run = datetime.now()
 
     def generate_report(self):
-        report = {}
-        self.finance_db.set_collection(REPORTING_COLLECTION)
-        report_documents = list(self.finance_db.find({"trading_date": str(self.last_run.date())}))
-        if len(report_documents) > 0:
-            report_document = report_documents[0]
-        else:
-            report_document = {}
-
-        for collection in COLLECTIONS:
-            num_documents = 0
-            if collection in report_document.keys():
-                num_documents = report_document[collection]
-            report[collection] = num_documents
-        self.report = report
+        self.report = Reporter.get_report(self.last_run.date())
 
     def send_report(self):
         report = "Daily Stock_DB report for {}\n\n".format(self.last_run.date())

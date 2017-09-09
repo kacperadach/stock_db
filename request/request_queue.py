@@ -1,10 +1,14 @@
 from Queue import Queue, Empty
 from threading import Thread
+import threading
+import time
 
 from request.base.request_client import RequestClient
 from request.base.tor_client import TorClient
 from app.config import App_Config
 from logger.queue_logger import QueueLogger
+
+QUEUE_TIMEOUT = 30
 
 class RequestQueueException(Exception):
     pass
@@ -21,8 +25,10 @@ class RequestQueue():
         self.tor_client = TorClient()
         self.request_client = RequestClient()
         self.queue_logger = QueueLogger()
+        self.running = threading.Event()
 
     def start(self, url_queue, output_queue):
+        self.running.set()
         def execute_worker():
             if self.use_tor:
                 self.tor_client.connect()
@@ -36,6 +42,11 @@ class RequestQueue():
                 self.request_threads.append(worker)
                 worker.start()
 
+            time.sleep(5)
+            while (url_queue.qsize() + output_queue.qsize() > 0):
+                time.sleep(5)
+
+            self.running.clear()
             for thread in self.request_threads:
                 thread.join()
 
@@ -51,18 +62,21 @@ class RequestQueue():
 
     def request_worker(self, url_queue, output_queue):
         try:
-            while True:
-                url_obj = url_queue.get()
-                url = url_obj['url']
-                retry = 0
-                response = None
-                while response is None or (response.status_code != 200 and retry < self.num_retries):
-                    if retry > 0 and self.use_tor:
-                        self.tor_client.new_nym()
-                    response = self.request_client.get(url)
-                    retry += 1
-                url_obj['data'] = response.get_data()
-                output_queue.put(url_obj)
+            while self.running.is_set():
+                try:
+                    url_obj = url_queue.get(timeout=QUEUE_TIMEOUT)
+                    url = url_obj['url']
+                    retry = 0
+                    response = None
+                    while response is None or (response.status_code != 200 and retry < self.num_retries):
+                        if retry > 0 and self.use_tor:
+                            self.tor_client.new_nym()
+                        response = self.request_client.get(url)
+                        retry += 1
+                    url_obj['data'] = response.get_data()
+                    output_queue.put(url_obj)
+                except Empty:
+                    pass
         except Exception as e:
             raise RequestQueueException(str(e))
 

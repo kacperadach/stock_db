@@ -4,14 +4,15 @@ from threading import Thread
 
 from bs4 import BeautifulSoup, SoupStrainer
 
-from db.Finance import FinanceDB
+from db.Finance import Finance_DB
 from logger import Logger
 from request.request_queue import RequestQueue
 
 CURRENT_OWNERSHIP = "https://fintel.io/so/us/{}?page={}"
 INSIDER_TRANSACTIONS = "https://fintel.io/n/us/{}?page={}"
 
-MAX_QUEUE_SIZE = 10000
+OUTPUT_QUEUE_SIZE = 5000
+URL_QUEUE_SIZE = 10000
 QUEUE_TIMEOUT = 30
 
 INSIDER_COLLECTION = 'fintel_insider'
@@ -26,10 +27,10 @@ class FintelAcquisition():
         self.task_name = "FintelAcquisition"
         self.num_request_threads = num_request_threads
         self.num_parsing_threads = num_parsing_threads
-        self.finance_db = FinanceDB()
+        self.finance_db = Finance_DB
         self.request_queue = RequestQueue(num_request_threads=self.num_request_threads)
-        self.url_queue = Queue(maxsize=MAX_QUEUE_SIZE)
-        self.output_queue = Queue(maxsize=MAX_QUEUE_SIZE)
+        self.url_queue = Queue(maxsize=URL_QUEUE_SIZE)
+        self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.documents = []
 
     def _log(self, msg, level='info'):
@@ -86,13 +87,12 @@ class FintelAcquisition():
 
     def start_output_worker(self, output_worker):
         def _output_worker():
-            while 1:
+            while self.url_queue.qsize() + self.output_queue.qsize() > 0:
                 try:
-                    data = self.output_queue.get()
+                    data = self.output_queue.get(timeout=QUEUE_TIMEOUT)
                     output_worker(data)
                 except (Empty, Full):
-                    self._log('Queue timeout during output execution')
-                    continue
+                    pass
 
         threads = []
         for i in range(self.num_parsing_threads):
@@ -121,8 +121,9 @@ class FintelAcquisition():
             raise FintelAcquisitionError('Invalid mode: {}'.format(mode))
 
         self.request_queue.start(self.url_queue, self.output_queue)
-        output_threads = self.start_output_worker(output_worker)
+
         input = self.start_input_worker(symbols, base_url)
+        output_threads = self.start_output_worker(output_worker)
 
         for t in output_threads:
             t.join()
@@ -152,5 +153,5 @@ class FintelAcquisition():
 
 if __name__ == "__main__":
     from acquisition.symbol.financial_symbols import Financial_Symbols
-    FintelAcquisition().execute_ownership(Financial_Symbols.get_all())
+    FintelAcquisition().execute_ownership(Financial_Symbols.get_all()[0:100])
     #FintelAcquisition().execute_insider(['AAPL'])

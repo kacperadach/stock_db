@@ -4,7 +4,7 @@ from datetime import datetime
 from random import shuffle
 
 from commodities import Commodities_Symbols
-from db import FinanceDB
+from db.Finance import Finance_DB
 from etfs import ETF
 from logger import Logger
 
@@ -12,8 +12,9 @@ IGNORED_STRINGS = ('SYMBOL', )
 FILTERED_SYMBOLS = ('^', '.', '$')
 EXCHANGES = ('nasdaq', 'nyse', 'amex')
 API_URL = 'http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange={}&render=download'
-
 CHECK_API_TIME_INTERVAL = 14400
+
+SYMBOLS_COLLECTION_NAME = 'symbols'
 
 class FinancialSymbols():
 
@@ -21,7 +22,8 @@ class FinancialSymbols():
 		self.task_name = 'FinancialSymbols'
 		self.all_symbols = []
 		self.last_check = None
-		self.finance_db = FinanceDB('symbols')
+		self.finance_db = Finance_DB
+		self.finance_db.set_collection(SYMBOLS_COLLECTION_NAME)
 		self.ETF = ETF()
 		self._get_symbols()
 
