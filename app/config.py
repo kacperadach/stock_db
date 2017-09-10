@@ -3,6 +3,7 @@ COMMAND_LINE_ARGUMENTS = {
 	'use_tor': False
 }
 
+
 class Config():
 
     def __init__(self):
@@ -17,6 +18,10 @@ class Config():
             for i in range(1, len(configuration)):
                 key, value = configuration[i].split('=')
                 if key.lower() in COMMAND_LINE_ARGUMENTS.iterkeys():
+                    if value.lower() == 'true':
+                        value = True
+                    elif value.lower() == 'false':
+                        value = False
                     setattr(self, key, value)
                     set_keys.append(key)
         for key, value in COMMAND_LINE_ARGUMENTS.iteritems():

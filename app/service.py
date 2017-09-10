@@ -10,14 +10,17 @@ from logger import Logger
 from discord.webhook import DiscordWebhook
 from db.Indexer import MongoIndexer
 from config import App_Config
+from request.base.tor_client import TorTest
 
 class MainService():
 
 	def __init__(self):
+		self.thread_name = 'MainService'
 		App_Config.set_config(sys.argv)
 		self.env = App_Config.env
+		self.use_tor = App_Config.use_tor
 		Logger.set_env(self.env)
-		Logger.log('Service: Running application in {} environment'.format(self.env))
+		self._log('Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()
 		Logger.log('+---------------------------------------------+')
 		Logger.log('|                                             |')
@@ -29,7 +32,13 @@ class MainService():
 		if self.env == 'prod':
 			DiscordWebhook().alert_start()
 
+	def _log(self, msg, level='info'):
+		Logger.log(msg, level=level, threadname=self.thread_name)
+
 	def main_service(self):
+		if self.use_tor:
+			self._log('Running Tor Test')
+			TorTest()
 		MongoIndexer().create_indices()
 		self.Acquirer = Acquirer()
 		self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
