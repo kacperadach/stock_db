@@ -4,7 +4,7 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-from db import FinanceDB
+from db.Finance import Finance_DB
 from logger import Logger
 from discord.webhook import DiscordWebhook
 
@@ -14,11 +14,14 @@ HIST_CATALYST_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/historical-
 CWD = os.path.dirname(os.path.realpath(__file__))
 LAST_CHECKED_PATH = os.path.join(CWD, 'last_checked.txt')
 
+FDA_COLLECTION = 'BioPharmCatalyst_fda'
+HISTORICAL_COLLECTION = 'BioPharmCatalyst_historical'
+
 class BioPharmCatalyst():
 
     def __init__(self):
         self.task_name = 'BioPharmCatalyst'
-        self.finance_db = FinanceDB()
+        self.finance_db = Finance_DB
         self.discord = DiscordWebhook()
         self.fda_calendar = None
         self.last_checked = None
@@ -72,14 +75,13 @@ class BioPharmCatalyst():
                 if Logger.env == 'prod':
                     self.discord.alert_error(self.task_name, 'Error in FDA calendar parsing: {}'.format(e))
 
-        self.finance_db.set_collection('BioPharmCatalyst_fda')
         for event in fda_events:
-            if len(list(self.finance_db.find(event))) == 0:
+            if len(list(self.finance_db.find(event, FDA_COLLECTION))) == 0:
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
                 if Logger.env == 'prod':
                     self.discord.alert_BioPharmCatalyst_fda(event)
-                self.finance_db.insert_one(event)
+                self.finance_db.insert_one(event, FDA_CALENDAR)
 
     def get_historical_catalyst_calendar(self):
         self.found = 0
@@ -116,17 +118,16 @@ class BioPharmCatalyst():
                 if Logger.env == 'prod':
                     self.discord.alert_error(self.task_name, 'Error in BioPharmCatalyst Historical Catalyst Calendar parsing: {}'.format(e))
 
-        self.finance_db.set_collection('BioPharmCatalyst_historical')
         documents = []
         for event in fda_events:
-            if len(list(self.finance_db.find(event))) == 0:
+            if len(list(self.finance_db.find(event, HISTORICAL_COLLECTION))) == 0:
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
                 if Logger.env == 'prod':
                     self.discord.alert_BioPharmCatalyst_catalyst(event)
                 documents.append(event)
         if documents:
-            self.finance_db.insert_many(documents)
+            self.finance_db.insert_many(documents, HISTORICAL_COLLECTION)
 
 if __name__ == "__main__":
     a = BioPharmCatalyst()

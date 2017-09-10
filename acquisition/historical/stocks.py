@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from acquisition.symbol.financial_symbols import Financial_Symbols
-from db.Finance import FinanceDB
+from db.Finance import Finance_DB
 from request.quote_networking import QuoteNetworking
 from logger import Logger
 from discord.webhook import DiscordWebhook
@@ -10,11 +10,13 @@ DAYS_PER_CALL = 50
 LOG_PERCENT = 5
 REQUESTS_PER_ITERATION = 150
 
+STOCK_COLLECTION = 'stock_historical'
+
 class HistoricalStockAcquisition():
 
     def __init__(self):
         self.task_name = 'HistoricalStockAcquisition'
-        self.finance_db = FinanceDB('stock_historical')
+        self.finance_db = Finance_DB
         self.discord = DiscordWebhook()
         self.symbols = Financial_Symbols.get_all()
         self.counter = 0
@@ -51,7 +53,7 @@ class HistoricalStockAcquisition():
         requests = 0
         while requests < REQUESTS_PER_ITERATION and self.counter < len(self.symbols):
             self.current_symbol = self.symbols[self.counter]
-            stock_documents = list(self.finance_db.find({"symbol": self.current_symbol}, {"symbol": 1, "trading_date": 1}))
+            stock_documents = list(self.finance_db.find({"symbol": self.current_symbol}, STOCK_COLLECTION, {"symbol": 1, "trading_date": 1}))
             if len(stock_documents) == 0:
                 start_date = yesterday - timedelta(days=DAYS_PER_CALL)
                 end_date = yesterday
@@ -105,9 +107,9 @@ class HistoricalStockAcquisition():
                     self.discord.alert_error(self.task_name, str(e))
 
         if documents:
-            self.finance_db.insert_many(documents)
+            self.finance_db.insert_many(documents, STOCK_COLLECTION)
 
-        self._log('Time took: {}'.format(datetime.now()-start_time))
+        self._log('Time taken: {}'.format(datetime.now()-start_time))
 
 
 if __name__ == "__main__":

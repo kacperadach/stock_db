@@ -27,7 +27,7 @@ class RequestQueue():
         self.queue_logger = QueueLogger()
         self.running = threading.Event()
 
-    def start(self, url_queue, output_queue):
+    def start(self, url_queue, output_queue, run_forever=False):
         self.running.set()
         def execute_worker():
             if self.use_tor:
@@ -42,11 +42,12 @@ class RequestQueue():
                 self.request_threads.append(worker)
                 worker.start()
 
-            time.sleep(5)
-            while (url_queue.qsize() + output_queue.qsize() > 0):
+            if not run_forever:
                 time.sleep(5)
+                while (url_queue.qsize() + output_queue.qsize() > 0):
+                    time.sleep(5)
+                self.running.clear()
 
-            self.running.clear()
             for thread in self.request_threads:
                 thread.join()
 

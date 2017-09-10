@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from acquisition.symbol.commodities import Commodities_Symbols
-from db.Finance import FinanceDB
+from db.Finance import Finance_DB
 from request.quote import Quote, QuoteResponse
 from request.networking import Networking
 from logger import Logger
@@ -9,11 +9,13 @@ from logger import Logger
 DAYS_PER_CALL = 50
 LOG_PERCENT = 5
 
+COMMODITIES_COLLECTION = 'commodities'
+
 class HistoricalCommoditiesAcquisition():
 
     def __init__(self):
         self.task_name = 'Historical Commodities Acquisition'
-        self.finance_db = FinanceDB('commodities')
+        self.finance_db = Finance_DB
         self.symbols = Commodities_Symbols
         self.counter = 0
         self.current_symbol = self.symbols[self.counter]
@@ -42,8 +44,6 @@ class HistoricalCommoditiesAcquisition():
 
         now = datetime.now().date()
         yesterday = datetime(year=now.year, month=now.month, day=now.day) - timedelta(days=1)
-
-        # self.finance_db.find({"trading_date": {"$gt": yesterday}}).sort("trading_date") query for greater than date
         self.current_symbol = self.symbols[self.counter]
 
         symbol_dates = []
@@ -53,7 +53,7 @@ class HistoricalCommoditiesAcquisition():
         start = self.current_date
         while self.current_date > start - timedelta(days=DAYS_PER_CALL):
             skip = False
-            data_generator = self.finance_db.find({"meta.symbol": self.current_symbol, "trading_date": { "$lte": self.current_date.strftime("%Y-%m-%d")}})
+            data_generator = self.finance_db.find({"meta.symbol": self.current_symbol, "trading_date": { "$lte": self.current_date.strftime("%Y-%m-%d")}}, COMMODITIES_COLLECTION)
             for data in data_generator:
                 trading_date = datetime.strptime(data['trading_date'].split(' ')[0], '%Y-%m-%d')
                 if trading_date == self.current_date:
@@ -79,4 +79,4 @@ class HistoricalCommoditiesAcquisition():
                 documents.append(d)
 
         if documents:
-            self.finance_db.insert_many(documents)
+            self.finance_db.insert_many(documents, COMMODITIES_COLLECTION)

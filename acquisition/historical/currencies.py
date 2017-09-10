@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from acquisition.symbol.currencies import Currency_Pairs
-from db.Finance import FinanceDB
+from db.Finance import Finance_DB
 from request.quote import Quote, QuoteResponse
 from request.networking import Networking
 from logger import Logger
@@ -9,11 +9,13 @@ from logger import Logger
 DAYS_PER_CALL = 50
 LOG_PERCENT = 5
 
+CURRENCIES_COLLECTION = 'currencies'
+
 class HistoricalCurrenciesAcquisition():
 
     def __init__(self):
         self.task_name = 'Historical Currencies Acquisition'
-        self.finance_db = FinanceDB('currencies')
+        self.finance_db = Finance_DB
         self.symbols = Currency_Pairs
         self.counter = 0
         self.current_symbol = self.symbols[self.counter]
@@ -52,7 +54,7 @@ class HistoricalCurrenciesAcquisition():
         start = self.current_date
         while self.current_date > start - timedelta(days=DAYS_PER_CALL):
             skip = False
-            data_generator = self.finance_db.find({"meta.symbol": self.current_symbol, "trading_date": { "$lte": self.current_date.strftime("%Y-%m-%d")}})
+            data_generator = self.finance_db.find({"meta.symbol": self.current_symbol, "trading_date": { "$lte": self.current_date.strftime("%Y-%m-%d")}}, CURRENCIES_COLLECTION)
             for data in data_generator:
                 trading_date = datetime.strptime(data['trading_date'], '%Y-%m-%d')
                 if trading_date == self.current_date:
@@ -83,7 +85,7 @@ class HistoricalCurrenciesAcquisition():
                 documents.append(d)
 
         if documents:
-            self.finance_db.insert_many(documents)
+            self.finance_db.insert_many(documents, CURRENCIES_COLLECTION)
 
 if __name__ == "__main__":
     currencies = HistoricalCurrenciesAcquisition()

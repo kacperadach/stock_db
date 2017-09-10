@@ -18,7 +18,7 @@ class FinanceDBError(Exception):
 
 class FinanceDB():
 
-	def __init__(self, collection=None):
+	def __init__(self):
 		self.name = "FinanceDB"
 		self.credentials = Credentials()
 		self.user = self.credentials.get_user()
@@ -26,10 +26,9 @@ class FinanceDB():
 		self.host =  environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
 		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
-		self.collection = collection
 		self.queue = Queue(maxsize=1)
 		self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
-		self.queue_worker = Thread(target=self.queue_worker)
+		self.queue_worker = Thread(target=self.worker)
 		self.queue_worker.setDaemon(True)
 		self.queue_running = False
 
@@ -42,7 +41,7 @@ class FinanceDB():
 		self.queue_running = True
 		self.queue_worker.start()
 
-	def queue_worker(self):
+	def worker(self):
 		self._log('Starting Queue Worker')
 		try:
 			with self.mongo_client() as db:
@@ -59,7 +58,6 @@ class FinanceDB():
 	@contextmanager
 	def mongo_client(self):
 		try:
-			self._check_collection()
 			self.client =  MongoClient('mongodb://' + self.user + ':' + self.password + '@' + self.host, self.port)
 			yield self.client[self.db_name]
 		except Exception as e:
@@ -67,58 +65,51 @@ class FinanceDB():
 		finally:
 			self.client.close()
 
-	def set_collection(self, collection_name):
-		self.collection = collection_name
-
-	def _check_collection(self):
-		if not self.collection:
-			raise FinanceDBError('Collection not set, use FinanceDB.set_collection')
+	@report
+	def insert_one(self, document, collection):
+		self._start_queue_worker()
+		self.queue.put({"collection": collection, "documents": document, "method": self._insert})
 
 	@report
-	def insert_one(self, document):
+	def insert_many(self, documents, collection):
 		self._start_queue_worker()
-		self.queue.put({"collection": self.collection, "documents": document, "method": self._insert})
+		self.queue.put({"collection": collection, "documents": documents, "method": self._insert})
 
-	@report
-	def insert_many(self, documents):
-		self._start_queue_worker()
-		self.queue.put({"collection": self.collection, "documents": documents, "method": self._insert})
-
-	def _insert_reporting(self, document):
+	def _insert_reporting(self, document, collection):
 		self.collection = 'reporting'
 		self._start_queue_worker()
-		self.queue.put({"collection": self.collection, "documents": document, "method": self._insert})
+		self.queue.put({"collection": collection, "documents": document, "method": self._insert})
 
 	def _insert(self, queue_item):
 		documents = queue_item['documents']
-		collection = self.db.get_collection(self.collection)
+		collection = self.db.get_collection(queue_item['collection'])
 		if isinstance(documents, dict):
 			documents = (documents,)
 		collection.insert_many(documents)
 
-	def find(self, query, fields=None):
+	def find(self, query, collection, fields=None):
 		self._start_queue_worker()
-		self.queue.put({"collection": self.collection, "query": query, "fields": fields, "method": self._find})
+		self.queue.put({"collection": collection, "query": query, "fields": fields, "method": self._find})
 		return self.output_queue.get()
 
 	def _find(self, queue_item):
 		collection = self.db.get_collection(queue_item["collection"])
 		return collection.find(queue_item["query"], queue_item["fields"])
 
-	def save(self, document):
+	def save(self, document, collection):
 		self._start_queue_worker()
-		self.queue.put({"collection": self.collection, "document": document,  "method": self._save})
+		self.queue.put({"collection": collection, "document": document,  "method": self._save})
 
 	def _save(self, queue_item):
-		collection = self.db.get_collection(self.collection)
+		collection = self.db.get_collection(queue_item['collection'])
 		collection.save(queue_item["document"])
 
-	def create_index(self, keys):
+	def create_index(self, keys, collection):
 		self._start_queue_worker()
-		self.queue.put({"collection": self.collection, "keys": keys, "method": self._create_index})
+		self.queue.put({"collection": collection, "keys": keys, "method": self._create_index})
 
 	def _create_index(self, queue_item):
-		collection = self.db.get_collection(self.collection)
+		collection = self.db.get_collection(queue_item['collection'])
 		collection.create_index(queue_item["keys"])
 
 Finance_DB = FinanceDB()

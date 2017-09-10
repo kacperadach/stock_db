@@ -14,7 +14,7 @@ EXCHANGES = ('nasdaq', 'nyse', 'amex')
 API_URL = 'http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange={}&render=download'
 CHECK_API_TIME_INTERVAL = 14400
 
-SYMBOLS_COLLECTION_NAME = 'symbols'
+SYMBOLS_COLLECTION = 'symbols'
 
 class FinancialSymbols():
 
@@ -23,7 +23,6 @@ class FinancialSymbols():
 		self.all_symbols = []
 		self.last_check = None
 		self.finance_db = Finance_DB
-		self.finance_db.set_collection(SYMBOLS_COLLECTION_NAME)
 		self.ETF = ETF()
 		self._get_symbols()
 
@@ -38,19 +37,19 @@ class FinancialSymbols():
 		self.last_check = datetime.now()
 
 	def _read_symbols_from_mongo(self):
-		return list(set(map(lambda x: x['symbol'], self.finance_db.find({}, {"symbol": 1}))))
+		return list(set(map(lambda x: x['symbol'], self.finance_db.find({}, SYMBOLS_COLLECTION, {"symbol": 1}))))
 
 	def _write_symbols_to_mongo(self, symbols, symbol_type):
 		documents = []
 		symbols = set(symbols)
-		all_symbols = set(map(lambda x: x['symbol'], list(self.finance_db.find({}, {"symbol": 1}))))
+		all_symbols = set(map(lambda x: x['symbol'], list(self.finance_db.find({}, SYMBOLS_COLLECTION, {"symbol": 1}))))
 		new_symbols = symbols - all_symbols
 		if new_symbols:
 			self._log('{} new {} found'.format(len(new_symbols), symbol_type))
 		for symbol in new_symbols:
 			documents.append({"symbol": symbol, "created_on": str(datetime.now().date())})
 		if documents:
-			self.finance_db.insert_many(documents)
+			self.finance_db.insert_many(documents, SYMBOLS_COLLECTION)
 
 	def _fetch_symbols(self):
 		all_symbols = []

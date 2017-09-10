@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from db import FinanceDB
+from db.Finance import Finance_DB
 from logger import Logger
 from discord.webhook import DiscordWebhook
 from acquisition.symbol.financial_symbols import Financial_Symbols
@@ -15,11 +15,13 @@ LOG_PERCENT = 10
 
 BATCH_SIZE = 10
 
+FINANCIALS_COLLECTION = 'financials'
+
 class Financials():
 
     def __init__(self):
         self.task_name = 'Financials'
-        self.finance_db = FinanceDB('financials')
+        self.finance_db = Finance_DB
         self.discord = DiscordWebhook()
         self.symbols = Financial_Symbols.get_all()
         self.counter = 0
@@ -98,11 +100,11 @@ class Financials():
             query['symbol'] = document['symbol']
             query['period_ending'] = document['period_ending']
             query['document'] = document['document']
-            if len(list(self.finance_db.find(query).limit(1))) == 0:
+            if len(list(self.finance_db.find(query, FINANCIALS_COLLECTION).limit(1))) == 0:
                 new_documents.append(document)
 
         if new_documents:
-            self.finance_db.insert_many(new_documents)
+            self.finance_db.insert_many(new_documents, FINANCIALS_COLLECTION)
 
     def quit_phantom_js(self):
         if self.driver and hasattr(self.driver, 'quit'):
