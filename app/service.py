@@ -17,6 +17,7 @@ class MainService():
 	def __init__(self):
 		self.thread_name = 'MainService'
 		App_Config.set_config(sys.argv)
+		self._log(sys.argv)
 		self.env = App_Config.env
 		self.use_tor = App_Config.use_tor
 		Logger.set_env(self.env)
