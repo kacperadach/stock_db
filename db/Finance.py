@@ -23,7 +23,7 @@ class FinanceDB():
 		self.credentials = Credentials()
 		self.user = self.credentials.get_user()
 		self.password = self.credentials.get_password()
-		self.host =  environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
+		self.host = environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
 		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
 		self.queue = Queue(maxsize=1)
@@ -31,6 +31,11 @@ class FinanceDB():
 		self.queue_worker = Thread(target=self.worker)
 		self.queue_worker.setDaemon(True)
 		self.queue_running = False
+
+	def get_db_params(self):
+		self.host = environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
+		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
+		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
 
 	def _log(self, msg, level='info'):
 		Logger.log(msg, level=level, threadname=self.name)

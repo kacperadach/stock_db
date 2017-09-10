@@ -9,6 +9,7 @@ from reporting.reporting import Reporting
 from logger import Logger
 from discord.webhook import DiscordWebhook
 from db.Indexer import MongoIndexer
+from db.Finance import Finance_DB
 from config import App_Config
 from request.base.tor_client import TorTest
 
@@ -17,12 +18,13 @@ class MainService():
 	def __init__(self):
 		self.thread_name = 'MainService'
 		App_Config.set_config(sys.argv)
-		self._log(sys.argv)
 		self.env = App_Config.env
 		self.use_tor = App_Config.use_tor
 		Logger.set_env(self.env)
+		self._log(sys.argv)
 		self._log('Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()
+		Finance_DB.get_db_params()
 		Logger.log('+---------------------------------------------+')
 		Logger.log('                                             ')
 		Logger.log('    Service Started at {}      '.format(datetime.now().strftime('%H:%M %Y-%m-%d')))

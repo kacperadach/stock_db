@@ -81,7 +81,7 @@ class BioPharmCatalyst():
                 self.found += 1
                 if Logger.env == 'prod':
                     self.discord.alert_BioPharmCatalyst_fda(event)
-                self.finance_db.insert_one(event, FDA_CALENDAR)
+                self.finance_db.insert_one(event, FDA_COLLECTION)
 
     def get_historical_catalyst_calendar(self):
         self.found = 0
