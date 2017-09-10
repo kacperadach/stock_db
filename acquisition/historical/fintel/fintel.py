@@ -40,15 +40,13 @@ class FintelAcquisition():
         response = data['data']
         parsed_response = self._parse_response(response)
         if len(parsed_response) > 0:
-            if self.finance_db.collection != INSIDER_COLLECTION:
-                self.finance_db.set_collection(INSIDER_COLLECTION)
             documents = []
             for document in parsed_response:
                 document['symbol'] = data['symbol']
-                if len(list(self.finance_db.find(document).limit(1))) == 0:
+                if len(list(self.finance_db.find(document, INSIDER_COLLECTION).limit(1))) == 0:
                     documents.append(document)
             if documents:
-                self.finance_db.insert_many(documents)
+                self.finance_db.insert_many(documents, INSIDER_COLLECTION)
             if not self.first_page_only and len(parsed_response) >= 50:
                 data['page'] += 1
                 data['url'] = data['url'].split('=')[0] + "={}".format(data['page'])
@@ -61,15 +59,13 @@ class FintelAcquisition():
         response = data['data']
         parsed_response = self._parse_response(response)
         if len(parsed_response) > 0:
-            if self.finance_db.collection != OWNERSHIP_COLLECTION:
-                self.finance_db.set_collection(OWNERSHIP_COLLECTION)
             documents = []
             for document in parsed_response:
                 document['symbol'] = data['symbol']
-                if len(list(self.finance_db.find(document).limit(1))) == 0:
+                if len(list(self.finance_db.find(document, OWNERSHIP_COLLECTION).limit(1))) == 0:
                     documents.append(document)
             if documents:
-                self.finance_db.insert_many(documents)
+                self.finance_db.insert_many(documents, OWNERSHIP_COLLECTION)
 
     def start_input_worker(self, symbols, base_url):
         def _input_worker():
