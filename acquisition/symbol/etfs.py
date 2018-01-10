@@ -2,7 +2,7 @@ import requests
 
 from discord.webhook import DiscordWebhook
 from logger import Logger
-from request.base.response_wrapper import ResponseWrapper
+from request.base.ResponseWrapper import ResponseWrapper
 
 URL = "https://query1.finance.yahoo.com/v1/finance/screener"
 PAYLOAD = "{\"offset\":0,\"size\":100,\"sortType\":\"DESC\",\"sortField\":\"percentchange\",\"quoteType\":\"ETF\",\"query\":{\"operator\":\"and\",\"operands\":[{\"operator\":\"gt\",\"operands\":[\"eodvolume\",100000]}]},\"userId\":\"\",\"userIdType\":\"guid\"}\r\n"

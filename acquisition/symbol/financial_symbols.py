@@ -37,19 +37,19 @@ class FinancialSymbols():
 		self.last_check = datetime.now()
 
 	def _read_symbols_from_mongo(self):
-		return list(set(map(lambda x: x['symbol'], self.finance_db.find({}, SYMBOLS_COLLECTION, {"symbol": 1}))))
+		return list(set(map(lambda x: x['symbol'], self.finance_db.find(SYMBOLS_COLLECTION, {}, {"symbol": 1}))))
 
 	def _write_symbols_to_mongo(self, symbols, symbol_type):
 		documents = []
 		symbols = set(symbols)
-		all_symbols = set(map(lambda x: x['symbol'], list(self.finance_db.find({}, SYMBOLS_COLLECTION, {"symbol": 1}))))
+		all_symbols = set(map(lambda x: x['symbol'], list(self.finance_db.find(SYMBOLS_COLLECTION, {}, {"symbol": 1}))))
 		new_symbols = symbols - all_symbols
 		if new_symbols:
 			self._log('{} new {} found'.format(len(new_symbols), symbol_type))
 		for symbol in new_symbols:
 			documents.append({"symbol": symbol, "created_on": str(datetime.now().date())})
 		if documents:
-			self.finance_db.insert_many(documents, SYMBOLS_COLLECTION)
+			self.finance_db.insert(SYMBOLS_COLLECTION, documents)
 
 	def _fetch_symbols(self):
 		all_symbols = []

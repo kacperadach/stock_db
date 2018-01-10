@@ -3,15 +3,14 @@ from datetime import datetime
 import sys
 
 from constants import DEV_ENV_VARS, PROD_ENV_VARS
-from acquisition.Acquirer import Acquirer
-from acquisition.historical import HistoricalAcquisition
-from reporting.reporting import Reporting
+
 from logger import Logger
 from discord.webhook import DiscordWebhook
-from db.Indexer import MongoIndexer
+from db.MongoIndexer import MongoIndexer
 from db.Finance import Finance_DB
 from config import App_Config
-from request.base.tor_client import TorTest
+from request.base.TorClient import Tor_Client
+from core.ScraperQueueManager import ScraperQueueManager
 
 class MainService():
 
@@ -42,14 +41,9 @@ class MainService():
 	def main_service(self):
 		if self.use_tor:
 			self._log('Running Tor Test')
-			TorTest()
+			Tor_Client.test()
 		MongoIndexer().create_indices()
-		self.Acquirer = Acquirer()
-		self.HistoricalAcquisition = HistoricalAcquisition(AcquirerThread=self.Acquirer)
-		self.Reporting = Reporting()
-		self.Acquirer.start()
-		self.HistoricalAcquisition.start()
-		self.Reporting.start()
+		ScraperQueueManager(use_tor=self.use_tor).start()
 
 	def initialize_env_vars(self):
 		environment_vars = PROD_ENV_VARS if self.env.lower() == 'prod' else DEV_ENV_VARS

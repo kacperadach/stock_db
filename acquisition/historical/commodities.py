@@ -80,3 +80,8 @@ class HistoricalCommoditiesAcquisition():
 
         if documents:
             self.finance_db.insert_many(documents, COMMODITIES_COLLECTION)
+
+if __name__ == "__main__":
+    hca = HistoricalCommoditiesAcquisition()
+    while 1:
+        hca.next()

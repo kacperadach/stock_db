@@ -12,7 +12,7 @@ class Credentials():
         lines = f.readlines()
         for line in lines:
             try:
-                key, value = line.split(':')
+                key, value = line.split(':', 1)
                 self.creds[key] = value.strip('\n')
             except:
                 print 'Credentials file has an error'
@@ -28,6 +28,14 @@ class Credentials():
     def get_tor_password(self):
         if 'tor_pw' in self.creds.keys():
             return self.creds['tor_pw']
+
+    def get_tor_password_hash(self):
+        if 'tor_pw_hash' in self.creds.keys():
+            return self.creds['tor_pw_hash']
+
+    def get_tor_path(self):
+        if 'tor_path' in self.creds.keys():
+            return self.creds['tor_path']
 
 if __name__ == "__main__":
     c = Credentials()
