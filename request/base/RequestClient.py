@@ -1,7 +1,9 @@
 import requests
 from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ReadTimeout
 from requests import ConnectionError
 from fake_useragent import UserAgent
+from threading import Lock
 
 from core.StockDbBase import StockDbBase
 from request.base.ResponseWrapper import ResponseWrapper
@@ -21,6 +23,7 @@ TOR_PROXIES = {
 CONTROLLER_PORT = 9051
 MAX_RETRIES = 2
 MIN_REQUEST_PER_NYM = 50
+TIMEOUT = 5
 
 class RequestClient(StockDbBase):
 
@@ -30,6 +33,7 @@ class RequestClient(StockDbBase):
         self.max_retries = MAX_RETRIES
         self.tor_client = Tor_Client
         self.requests_made = 0
+        self.lock = Lock()
         if use_tor:
             self.tor_client.connect()
 
@@ -45,13 +49,18 @@ class RequestClient(StockDbBase):
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.get(request_item.url.strip(), headers=self._get_headers(), proxies=self._get_proxies())
+                response = requests.get(request_item.url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), timeout=5)
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None
             except ChunkedEncodingError:
                 self.log('ChunkedEncodingError occurred')
                 response = None
+            except ReadTimeout:
+                self.log('{} timed out after {} seconds'.format(request_item.url, TIMEOUT))
+                response = None
+            self.requests_made += 1
+            retries += 1
 
             if response is not None and response.status_code == 200:
                 break
@@ -59,7 +68,6 @@ class RequestClient(StockDbBase):
                 new_nym = self.tor_client.new_nym()
                 if new_nym:
                     self.requests_made = 0
-            retries += 1
         return ResponseWrapper(response)
 
     def post(self, url, data):

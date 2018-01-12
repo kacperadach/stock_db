@@ -6,7 +6,7 @@ from random import shuffle
 from commodities import Commodities_Symbols
 from db.Finance import Finance_DB
 from etfs import ETF
-from logger import Logger
+from core.StockDbBase import StockDbBase
 
 IGNORED_STRINGS = ('SYMBOL', )
 FILTERED_SYMBOLS = ('^', '.', '$')
@@ -16,21 +16,18 @@ CHECK_API_TIME_INTERVAL = 14400
 
 SYMBOLS_COLLECTION = 'symbols'
 
-class FinancialSymbols():
+class FinancialSymbols(StockDbBase):
 
 	def __init__(self):
-		self.task_name = 'FinancialSymbols'
+		super(FinancialSymbols, self).__init__()
 		self.all_symbols = []
 		self.last_check = None
 		self.finance_db = Finance_DB
 		self.ETF = ETF()
 		self._get_symbols()
 
-	def _log(self, msg, level='info'):
-		Logger.log(msg, level, self.task_name)
-
 	def _get_symbols(self):
-		self._log('Fetching symbols')
+		self.log('Fetching symbols')
 		self._write_symbols_to_mongo(self._fetch_symbols(), 'Symbols')
 		self._write_symbols_to_mongo(self._fetch_etfs(), 'ETFs')
 		self.all_symbols = self._read_symbols_from_mongo()
@@ -45,7 +42,7 @@ class FinancialSymbols():
 		all_symbols = set(map(lambda x: x['symbol'], list(self.finance_db.find(SYMBOLS_COLLECTION, {}, {"symbol": 1}))))
 		new_symbols = symbols - all_symbols
 		if new_symbols:
-			self._log('{} new {} found'.format(len(new_symbols), symbol_type))
+			self.log('{} new {} found'.format(len(new_symbols), symbol_type))
 		for symbol in new_symbols:
 			documents.append({"symbol": symbol, "created_on": str(datetime.now().date())})
 		if documents:

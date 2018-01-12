@@ -22,7 +22,6 @@ BODY = {
     "userIdType":"guid"
 }
 
-
 class ETF():
 
     def __init__(self):

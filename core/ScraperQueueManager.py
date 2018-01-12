@@ -1,14 +1,16 @@
+from time import sleep
 from Queue import Queue
 from threading import Thread, Event
 
 from acquisition.scrapers.Stocks import StockScraper
-from core.RequestQueue import RequestQueue
+from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 
 URL_THREADS = 100
 OUTPUT_THREADS = 10
 MAX_QUEUE_SIZE = 5000
+QUEUE_LOG_FREQ_SEC = 10
 
 """
 This class is in charge of:
@@ -22,7 +24,7 @@ class ScraperQueueManager(StockDbBase):
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
         self.scrapers = (StockScraper(),)
-        self.request_queue = RequestQueue(MAX_QUEUE_SIZE)
+        self.request_queue = ScraperQueue(MAX_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=MAX_QUEUE_SIZE)
         self.request_client = RequestClient(use_tor=use_tor)
 
@@ -40,6 +42,7 @@ class ScraperQueueManager(StockDbBase):
             t.start()
         self.log("Created {} output threads".format(OUTPUT_THREADS))
 
+        self.launch_queue_logger()
         try:
             while not self.event.is_set():
                 for task in self.scrapers:
@@ -49,12 +52,24 @@ class ScraperQueueManager(StockDbBase):
         except Exception as e:
             self.log_exception(e)
 
+    def launch_queue_logger(self):
+        self.queue_logger = Thread(target=self.log_queue_sizes)
+        self.queue_logger.setDaemon(True)
+        self.queue_logger.start()
+
+    def log_queue_sizes(self):
+        while 1:
+            self.log('Request Queue Size: {}'.format(self.request_queue.get_size()))
+            self.log('Output Queue Size: {}'.format(self.output_queue.qsize()))
+            sleep(QUEUE_LOG_FREQ_SEC)
+
     def request_thread_worker(self):
         try:
             while 1:
                 queue_item = self.request_queue.get()
                 response = self.request_client.get(queue_item)
-                self.log(queue_item.get_url())
+                if response.status_code == 200:
+                    self.log(queue_item.get_url())
                 queue_item.add_response(response)
                 self.output_queue.put(queue_item)
         except Exception as e:
@@ -65,7 +80,7 @@ class ScraperQueueManager(StockDbBase):
         try:
             while 1:
                 queue_item = self.output_queue.get(block=True)
-                queue_item.callback(queue_item, self.request_queue)
+                queue_item.callback(queue_item)
         except Exception as e:
             self.log_exception(e)
             self.event.set()

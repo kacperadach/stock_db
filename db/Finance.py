@@ -44,14 +44,10 @@ class FinanceDB(StockDbBase):
 			self.client.close()
 
 	def insert(self, collection_name, documents):
-		try:
-			if isinstance(documents, dict):
-				documents = (documents,)
-			collection = self.mongo_client.get_collection(collection_name)
-			collection.insert_many(documents)
-		except BulkWriteError as e:
-			self.log_exception(e)
-			raise e
+		if isinstance(documents, dict):
+			documents = (documents,)
+		collection = self.mongo_client.get_collection(collection_name)
+		collection.insert_many(documents)
 
 	def find(self, collection_name, query, fields):
 		collection = self.mongo_client.get_collection(collection_name)
