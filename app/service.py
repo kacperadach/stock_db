@@ -9,8 +9,8 @@ from discord.webhook import DiscordWebhook
 from db.MongoIndexer import MongoIndexer
 from db.Finance import Finance_DB
 from config import App_Config
-from request.base.TorClient import Tor_Client
 from core.ScraperQueueManager import ScraperQueueManager
+from request.base.TorManager import Tor_Manager
 
 class MainService():
 
@@ -40,10 +40,12 @@ class MainService():
 
 	def main_service(self):
 		if self.use_tor:
+			self._log('Starting Tor instances')
+			Tor_Manager.start_instances()
 			self._log('Running Tor Test')
-			Tor_Client.test()
+			Tor_Manager.test()
 		MongoIndexer().create_indices()
-		ScraperQueueManager(use_tor=self.use_tor).start()
+		ScraperQueueManager().start()
 
 	def initialize_env_vars(self):
 		environment_vars = PROD_ENV_VARS if self.env.lower() == 'prod' else DEV_ENV_VARS

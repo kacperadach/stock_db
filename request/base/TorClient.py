@@ -7,13 +7,15 @@ from stem.process import launch_tor_with_config
 from utils.credentials import Credentials
 from core.StockDbBase import StockDbBase
 
-CONTROLLER_PORT = 9051
 IP_ADDRESS_API = 'http://bot.whatismyipaddress.com/'
 
 class TorClient(StockDbBase):
 
-    def __init__(self):
+    def __init__(self, SocksPort, ControlPort, DataDirectory):
         super(TorClient, self).__init__()
+        self.SocksPort = SocksPort
+        self.ControlPort = ControlPort
+        self.DataDirectory = DataDirectory
         credentials = Credentials()
         self.tor_pw = credentials.get_tor_password()
         self.tor_pw_hash = credentials.get_tor_password_hash()
@@ -21,22 +23,19 @@ class TorClient(StockDbBase):
         self.controller = None
 
     def start_tor(self):
-        try:
-            config = {
-                'ControlPort': '9051',
-                'CookieAuthentication': '1',
-                'HashedControlPassword': self.tor_pw_hash
-            }
-            launch_tor_with_config(tor_cmd=self.tor_path, config=config, take_ownership=True)
-        except OSError as e:
-            self.log("Error while launching tor: {}".format(e))
+        config = {
+            'SocksPort': str(self.SocksPort),
+            'ControlPort': str(self.ControlPort),
+            'DataDirectory': str(self.DataDirectory),
+            'CookieAuthentication': '1',
+            'HashedControlPassword': self.tor_pw_hash
+        }
+        launch_tor_with_config(tor_cmd=self.tor_path, config=config, take_ownership=True)
+        self.log('Successfully launched tor, SocksPort={}, ControlPort={}, DataDirectory={}'.format(self.SocksPort, self.ControlPort, self.DataDirectory))
 
     def connect(self):
-        try:
-            self.controller = Controller.from_port(port=CONTROLLER_PORT)
-            self.controller.authenticate(self.tor_pw)
-        except Exception as e:
-            self.log("Error trying to connect to tor: {}".format(e))
+        self.controller = Controller.from_port(port=self.ControlPort)
+        self.controller.authenticate(self.tor_pw)
 
     def disconnect(self):
         if self.controller and hasattr(self.controller, 'close'):
@@ -52,13 +51,11 @@ class TorClient(StockDbBase):
 
     def test(self):
         try:
-            self.log('Starting Tor')
-            self.start_tor()
             self.log('Connecting to Tor')
             self.connect()
             from request.base.RequestClient import RequestClient
             from core.QueueItem import QueueItem
-            rc = RequestClient(use_tor=True)
+            rc = RequestClient(use_tor=True, tor_client=self)
             response = rc.get(QueueItem(symbol='test', url=IP_ADDRESS_API, callback=map))
             if response.status_code != 200:
                 raise AssertionError("Unable to query IP address api")
@@ -82,5 +79,3 @@ class TorClient(StockDbBase):
         except Exception as e:
             self.log_exception(e)
             raise AssertionError(e)
-
-Tor_Client = TorClient()

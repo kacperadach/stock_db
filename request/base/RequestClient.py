@@ -3,11 +3,10 @@ from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ReadTimeout
 from requests import ConnectionError
 from fake_useragent import UserAgent
-from threading import Lock
+from copy import deepcopy
 
 from core.StockDbBase import StockDbBase
 from request.base.ResponseWrapper import ResponseWrapper
-from request.base.TorClient import Tor_Client
 
 HEADERS = {
     'content-type': "application/json",
@@ -16,24 +15,25 @@ HEADERS = {
 }
 
 TOR_PROXIES = {
-    'http': 'socks5://localhost:9050',
-    'https': 'socks5://localhost:9050'
+    'http': 'socks5h://localhost:{}',
+    'https': 'socks5h://localhost:{}'
 }
 
-CONTROLLER_PORT = 9051
 MAX_RETRIES = 2
-MIN_REQUEST_PER_NYM = 50
-TIMEOUT = 5
+TIMEOUT = 10
+
+class RequestClientException(Exception):
+    pass
 
 class RequestClient(StockDbBase):
 
-    def __init__(self, use_tor=False):
+    def __init__(self, use_tor=False, tor_client=None):
+        if use_tor and not tor_client:
+            raise RequestClientException('use_tor was set to True but no tor_client was supplied')
         self.ua = UserAgent()
         self.use_tor = use_tor
         self.max_retries = MAX_RETRIES
-        self.tor_client = Tor_Client
-        self.requests_made = 0
-        self.lock = Lock()
+        self.tor_client = tor_client
         if use_tor:
             self.tor_client.connect()
 
@@ -43,9 +43,15 @@ class RequestClient(StockDbBase):
         return headers
 
     def _get_proxies(self):
-        return TOR_PROXIES if self.use_tor else {}
+        if not self.use_tor:
+            return {}
+        proxies = deepcopy(TOR_PROXIES)
+        for key, value in proxies.iteritems():
+            proxies[key] = value.format(self.tor_client.SocksPort)
+        return proxies
 
     def get(self, request_item):
+        response = None
         retries = 0
         while retries < self.max_retries:
             try:
@@ -59,15 +65,12 @@ class RequestClient(StockDbBase):
             except ReadTimeout:
                 self.log('{} timed out after {} seconds'.format(request_item.url, TIMEOUT))
                 response = None
-            self.requests_made += 1
             retries += 1
 
             if response is not None and response.status_code == 200:
                 break
-            if self.use_tor and self.requests_made > MIN_REQUEST_PER_NYM:
-                new_nym = self.tor_client.new_nym()
-                if new_nym:
-                    self.requests_made = 0
+            if self.use_tor:
+                self.tor_client.new_nym()
         return ResponseWrapper(response)
 
     def post(self, url, data):

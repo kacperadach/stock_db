@@ -11,7 +11,7 @@ COLLECTION_INDICES = {
 class MongoIndexer(StockDbBase):
 
     def __init__(self):
-        super(StockDbBase, self).__init__()
+        super(MongoIndexer, self).__init__()
         self.finance_db = Finance_DB
 
     def create_indices(self):

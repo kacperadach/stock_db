@@ -49,5 +49,4 @@ class AppLogger():
 				last_benchmark += update_percent
 			yield i
 
-
 Logger = AppLogger()

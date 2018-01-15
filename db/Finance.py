@@ -44,16 +44,20 @@ class FinanceDB(StockDbBase):
 			self.client.close()
 
 	def insert(self, collection_name, documents):
-		if isinstance(documents, dict):
-			documents = (documents,)
-		collection = self.mongo_client.get_collection(collection_name)
-		collection.insert_many(documents)
+		try:
+			if isinstance(documents, dict):
+				documents = (documents,)
+			collection = self.mongo_client.get_collection(collection_name)
+			collection.insert_many(documents)
+		except BulkWriteError as e:
+			self.log_exception(e)
+			raise e
 
 	def find(self, collection_name, query, fields):
 		collection = self.mongo_client.get_collection(collection_name)
 		return collection.find(query, fields)
 
-	def replace_one(self, collection_name, filter, document, upsert=True):
+	def replace_one(self, collection_name, filter, document, upsert=False):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.replace_one(filter, document, upsert=upsert)
 

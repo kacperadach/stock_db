@@ -14,6 +14,7 @@ MAX_DAYS = 30
 ONE_MIN_DAY_RANGE = 29
 INTERVALS = ('1m', '2m', '5m', '15m', '30m', '60m', '90m', '1h', '1d')
 MAX_QUEUE_SIZE = 1000
+HISTORICAL_RETRY = 3
 
 """
 Daily Stock Scraping
@@ -39,8 +40,7 @@ class StockScraper(StockDbBase):
 
     def _reset(self):
         self.counter = 0
-        # self.stock_tickers = Financial_Symbols.get_all()
-        self.stock_tickers = ['AAPL', 'DQ', 'TTPH', 'FB', 'AMZN']
+        self.stock_tickers = Financial_Symbols.get_all()
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -76,7 +76,6 @@ class StockScraper(StockDbBase):
         if not response or response.status_code != 200:
             return
 
-        self.log('processing')
         response = YahooFinanceStockRequest.parse_response(queue_item.get_response().get_data())
         metadata = queue_item.get_metadata()
         if metadata['historical'] is False:
@@ -93,10 +92,13 @@ class StockScraper(StockDbBase):
             if documents[0]['time_interval'] != metadata['time_interval']:
                 return
 
+            min_date =  min(documents, key=lambda x: x['trading_date'])['trading_date']
+            max_date = max(documents, key=lambda x: x['trading_date'])['trading_date']
+
             new_documents = []
             existing_documents = list(self.db.find(
                 COLLECTION_NAME,
-                {'symbol': metadata['symbol'], 'time_interval': metadata['time_interval'], 'trading_date': {'$gte': metadata['period1'] - timedelta(days=1), '$lte': metadata['period2']}},
+                {'symbol': metadata['symbol'], 'time_interval': metadata['time_interval'], 'trading_date': {'$gte': min_date, '$lte': max_date}},
                 {'data': 1, 'trading_date': 1}
             ))
             for document in documents:
@@ -104,6 +106,7 @@ class StockScraper(StockDbBase):
                 if not existing_document:
                     new_documents.append(document)
                 elif len(existing_document[0]['data']) < len(document['data']):
+                    self.log("replacing document")
                     self.db.replace_one(COLLECTION_NAME, {'symbol': document['symbol'], 'time_interval': document['symbol'], 'trading_date': document['trading_date']}, document)
             if new_documents:
                 self.db.insert(COLLECTION_NAME, new_documents)
@@ -149,7 +152,7 @@ class StockScraper(StockDbBase):
             else:
                 period2 = datetime.combine(datetime.now(timezone('EST')).date(), time()).replace(tzinfo=timezone('EST'))
                 period1 = period2 - timedelta(days=MAX_DAYS)
-            self.historical_dict[current_ticker] = period2
+            self.historical_dict[current_ticker] = [period2, 1]
             request_url = YahooFinanceStockRequest(symbol=current_ticker, period1=period1, period2=period2, interval='1d').get_url()
             return QueueItem(symbol=current_ticker, url=request_url, callback=self.process_data, metadata={'historical': True, 'symbol': current_ticker, 'period1': period1, 'period2': period2, 'time_interval': '1d'})
         else:
@@ -157,10 +160,14 @@ class StockScraper(StockDbBase):
             if not oldest_document:
                 return None
             oldest_date = oldest_document[0]['trading_date'].replace(tzinfo=timezone('EST'))
-            if not oldest_date < self.historical_dict[current_ticker]:
-                return None
+            if not oldest_date < self.historical_dict[current_ticker][0]:
+                if self.historical_dict[current_ticker][1] > HISTORICAL_RETRY:
+                    return None
+                else:
+                    self.log('RETRYING')
+                    self.historical_dict[current_ticker][1] = self.historical_dict[current_ticker][1] + 1
             period2 = oldest_date.replace(tzinfo=timezone('EST'))
             period1 = period2 - timedelta(days=MAX_DAYS)
-            self.historical_dict[current_ticker] = period2
+            self.historical_dict[current_ticker][0] = period2
             request_url = YahooFinanceStockRequest(symbol=current_ticker, period1=period1, period2=period2, interval='1d').get_url()
             return QueueItem(symbol=current_ticker, url=request_url, callback=self.process_data, metadata={'historical': True, 'symbol': current_ticker, 'period1': period1, 'period2': period2, 'time_interval': '1d'})
