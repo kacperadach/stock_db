@@ -4,7 +4,7 @@ from core.StockDbBase import StockDbBase
 from TorClient import TorClient
 from utils.credentials import Credentials
 
-DEFAULT_NUM_TOR_INSTANCES = 10
+DEFAULT_NUM_TOR_INSTANCES = 5
 SOCKS_PORT = 9050
 CONTROL_PORT = 9051
 

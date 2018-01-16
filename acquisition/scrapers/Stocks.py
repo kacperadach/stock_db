@@ -1,4 +1,3 @@
-from Queue import Queue
 from datetime import datetime, time, timedelta
 from pytz import timezone
 
@@ -32,10 +31,8 @@ class StockScraper(StockDbBase):
     def __init__(self):
         super(StockScraper, self).__init__()
         self._reset()
-        now = datetime.now(timezone('EST'))
-        self.market_open = is_market_open(now)
+        self.market_open = is_market_open(datetime.now(timezone('EST')))
         self.db = Finance_DB
-        self.additional_request_queue = Queue(maxsize=MAX_QUEUE_SIZE)
         self.historical_dict = {}
 
     def _reset(self):
@@ -83,7 +80,11 @@ class StockScraper(StockDbBase):
             if documents:
                 document = documents[0]
                 if document['time_interval'] == '1m':
-                    self.db.replace_one(COLLECTION_NAME, {'symbol': document['symbol'], 'trading_date': document['trading_date']}, document)
+                    existing_document = list(self.db.find(COLLECTION_NAME, {'symbol': queue_item.get_symbol(), 'time_interval': '1m', 'trading_date': document['trading_date']}, {}).limit(1))
+                    if existing_document:
+                        self.db.replace_one(COLLECTION_NAME, {'symbol': document['symbol'], 'time_interval': '1m', 'trading_date': document['trading_date']}, document)
+                    else:
+                        self.db.insert(COLLECTION_NAME, document)
         else:
             documents = self.get_documents_from_response(response)
             if not documents:
@@ -133,7 +134,7 @@ class StockScraper(StockDbBase):
         now = datetime.now(timezone('EST'))
         market_open_datetime = datetime(year=now.year, month=now.month, day=now.day, hour=9, minute=30, tzinfo=timezone('EST'))
         request_url = YahooFinanceStockRequest(current_ticker, market_open_datetime, now, interval='1m').get_url()
-        queue_item = QueueItem(symbol=current_ticker, url=request_url, callback=self.process_data, metadata={'symbol': current_ticker, 'historical': False, 'time_interval': '1m', 'period1': market_open_datetime, 'period2': now})
+        queue_item = QueueItem(symbol=current_ticker, url=request_url, http_method='GET', callback=self.process_data, metadata={'symbol': current_ticker, 'historical': False, 'time_interval': '1m', 'period1': market_open_datetime, 'period2': now})
         return queue_item
 
     def get_historical_queue_item(self, current_ticker):
@@ -141,7 +142,7 @@ class StockScraper(StockDbBase):
             self.historical_dict[current_ticker] = None
             today_datetime = datetime.combine(datetime.now(timezone('EST')).date(), time()).replace(tzinfo=timezone('EST'))
             request_url = YahooFinanceStockRequest(current_ticker, today_datetime - timedelta(days=ONE_MIN_DAY_RANGE), today_datetime, interval='1m').get_url()
-            queue_item = QueueItem(symbol=current_ticker, url=request_url, callback=self.process_data, metadata={'symbol': current_ticker, 'historical': True, 'time_interval': '1m', 'period1': today_datetime - timedelta(days=ONE_MIN_DAY_RANGE), 'period2': today_datetime})
+            queue_item = QueueItem(symbol=current_ticker, url=request_url, http_method='GET', callback=self.process_data, metadata={'symbol': current_ticker, 'historical': True, 'time_interval': '1m', 'period1': today_datetime - timedelta(days=ONE_MIN_DAY_RANGE), 'period2': today_datetime})
             return queue_item
         elif self.historical_dict[current_ticker] is None:
             oldest_document = list(self.db.find(COLLECTION_NAME, {'symbol': current_ticker, 'time_interval': '1d'}, {'trading_date': 1}).limit(1))
@@ -154,7 +155,7 @@ class StockScraper(StockDbBase):
                 period1 = period2 - timedelta(days=MAX_DAYS)
             self.historical_dict[current_ticker] = [period2, 1]
             request_url = YahooFinanceStockRequest(symbol=current_ticker, period1=period1, period2=period2, interval='1d').get_url()
-            return QueueItem(symbol=current_ticker, url=request_url, callback=self.process_data, metadata={'historical': True, 'symbol': current_ticker, 'period1': period1, 'period2': period2, 'time_interval': '1d'})
+            return QueueItem(symbol=current_ticker, url=request_url, http_method='GET', callback=self.process_data, metadata={'historical': True, 'symbol': current_ticker, 'period1': period1, 'period2': period2, 'time_interval': '1d'})
         else:
             oldest_document = list(self.db.find(COLLECTION_NAME, {'symbol': current_ticker, 'time_interval': '1d'}, {'trading_date': 1}).sort('trading_date', 1).limit(1))
             if not oldest_document:
@@ -170,4 +171,4 @@ class StockScraper(StockDbBase):
             period1 = period2 - timedelta(days=MAX_DAYS)
             self.historical_dict[current_ticker][0] = period2
             request_url = YahooFinanceStockRequest(symbol=current_ticker, period1=period1, period2=period2, interval='1d').get_url()
-            return QueueItem(symbol=current_ticker, url=request_url, callback=self.process_data, metadata={'historical': True, 'symbol': current_ticker, 'period1': period1, 'period2': period2, 'time_interval': '1d'})
+            return QueueItem(symbol=current_ticker, url=request_url, http_method='GET', callback=self.process_data, metadata={'historical': True, 'symbol': current_ticker, 'period1': period1, 'period2': period2, 'time_interval': '1d'})

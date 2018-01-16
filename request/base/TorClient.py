@@ -56,7 +56,7 @@ class TorClient(StockDbBase):
             from request.base.RequestClient import RequestClient
             from core.QueueItem import QueueItem
             rc = RequestClient(use_tor=True, tor_client=self)
-            response = rc.get(QueueItem(symbol='test', url=IP_ADDRESS_API, callback=map))
+            response = rc.get(IP_ADDRESS_API)
             if response.status_code != 200:
                 raise AssertionError("Unable to query IP address api")
             ip_addr = response.response.content
@@ -69,7 +69,7 @@ class TorClient(StockDbBase):
                 if (datetime.now() - start).total_seconds() > 30:
                     break
             self.log('Found New NYM')
-            response = rc.get(QueueItem(symbol='test', url=IP_ADDRESS_API, callback=map))
+            response = rc.get(IP_ADDRESS_API)
             if response.status_code != 200:
                 raise AssertionError("Unable to query IP address api")
             assert ip_addr != response.response.content

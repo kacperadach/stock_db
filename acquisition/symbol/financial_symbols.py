@@ -14,7 +14,7 @@ EXCHANGES = ('nasdaq', 'nyse', 'amex')
 API_URL = 'http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange={}&render=download'
 CHECK_API_TIME_INTERVAL = 14400
 
-SYMBOLS_COLLECTION = 'symbols'
+SYMBOLS_COLLECTION = 'symbols_old'
 
 class FinancialSymbols(StockDbBase):
 

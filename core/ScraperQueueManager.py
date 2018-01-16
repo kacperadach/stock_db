@@ -3,14 +3,15 @@ from Queue import Queue
 from threading import Thread, Event
 
 from acquisition.scrapers.Stocks import StockScraper
+from acquisition.scrapers.Symbols import SymbolScraper
 from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
-URL_THREADS = 100
-OUTPUT_THREADS = 10
+URL_THREADS = 1
+OUTPUT_THREADS = 1
 MAX_QUEUE_SIZE = 5000
 QUEUE_LOG_FREQ_SEC = 10
 
@@ -25,7 +26,7 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self):
         super(ScraperQueueManager, self).__init__()
-        self.scrapers = (StockScraper(),)
+        self.scrapers = (StockScraper(), SymbolScraper())
         self.request_queue = ScraperQueue(MAX_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=MAX_QUEUE_SIZE)
         self.request_counter = Counter()
@@ -78,7 +79,10 @@ class ScraperQueueManager(StockDbBase):
         try:
             while 1:
                 queue_item = self.request_queue.get()
-                response = request_client.get(queue_item)
+                if queue_item.get_http_method() == 'GET':
+                    response = request_client.get(queue_item.get_url())
+                else:
+                    response = request_client.post(queue_item.get_url(), queue_item.get_body())
                 self.request_counter.increment()
                 if response.status_code == 200:
                     self.successful_request_counter.increment()
@@ -90,25 +94,12 @@ class ScraperQueueManager(StockDbBase):
         except Exception as e:
             self.log_exception(e)
             self.event.set()
-        # request_client = RequestClient(use_tor=True, tor_client=tor_client)
-        # try:
-        #     while 1:
-        #         queue_item = self.request_queue.get()
-        #         queue_item.url = 'http://ipinfo.io/ip'
-        #         response = request_client.get(queue_item)
-        #         self.log('{}: {}'.format(tor_client.SocksPort, response.get_data()))
-        #         new_nym = False
-        #         while not new_nym:
-        #             new_nym = tor_client.new_nym()
-        # except Exception as e:
-        #     self.log_exception(e)
-        #     self.event.set()
 
     def output_thread_worker(self):
         try:
             while 1:
                 queue_item = self.output_queue.get(block=True)
-                # queue_item.callback(queue_item)
+                queue_item.callback(queue_item)
         except Exception as e:
             self.log_exception(e)
             self.event.set()

@@ -1,3 +1,5 @@
+import json
+
 import requests
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ReadTimeout
@@ -50,12 +52,12 @@ class RequestClient(StockDbBase):
             proxies[key] = value.format(self.tor_client.SocksPort)
         return proxies
 
-    def get(self, request_item):
+    def get(self, url):
         response = None
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.get(request_item.url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), timeout=5)
+                response = requests.get(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), timeout=5)
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None
@@ -63,7 +65,7 @@ class RequestClient(StockDbBase):
                 self.log('ChunkedEncodingError occurred')
                 response = None
             except ReadTimeout:
-                self.log('{} timed out after {} seconds'.format(request_item.url, TIMEOUT))
+                self.log('{} timed out after {} seconds'.format(url, TIMEOUT))
                 response = None
             retries += 1
 
@@ -74,8 +76,18 @@ class RequestClient(StockDbBase):
         return ResponseWrapper(response)
 
     def post(self, url, data):
-        try:
-            response = requests.post(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), data=data)
-        except requests.ConnectionError:
-            response = None
+        response = None
+        retries = 0
+        while retries < self.max_retries:
+            try:
+                response = requests.post(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), data=json.dumps(data))
+            except requests.ConnectionError:
+                self.log('ConnectionError occurred')
+                response = None
+            retries += 1
+
+            if response is not None and response.status_code == 200:
+                break
+            if self.use_tor:
+                self.tor_client.new_nym()
         return ResponseWrapper(response)
