@@ -1,7 +1,6 @@
 from datetime import datetime, time, timedelta
 from pytz import timezone
 
-from acquisition.symbol.financial_symbols import Financial_Symbols
 from core.market.Market import is_market_open
 from core.QueueItem import QueueItem
 from db.Finance import Finance_DB
@@ -30,14 +29,14 @@ class StockScraper(StockDbBase):
 
     def __init__(self):
         super(StockScraper, self).__init__()
+        self.db = Finance_DB
         self._reset()
         self.market_open = is_market_open(datetime.now(timezone('EST')))
-        self.db = Finance_DB
         self.historical_dict = {}
 
     def _reset(self):
         self.counter = 0
-        self.stock_tickers = Financial_Symbols.get_all()
+        self.stock_tickers = map(lambda x: x['symbol'], self.db.find('symbols', {}, {'symbol': 1}))
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))

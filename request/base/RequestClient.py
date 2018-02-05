@@ -57,7 +57,7 @@ class RequestClient(StockDbBase):
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.get(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), timeout=5)
+                response = requests.get(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), timeout=TIMEOUT)
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None
@@ -80,9 +80,15 @@ class RequestClient(StockDbBase):
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.post(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), data=json.dumps(data))
-            except requests.ConnectionError:
+                response = requests.post(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), data=json.dumps(data), timeout=TIMEOUT)
+            except ConnectionError:
                 self.log('ConnectionError occurred')
+                response = None
+            except ChunkedEncodingError:
+                self.log('ChunkedEncodingError occurred')
+                response = None
+            except ReadTimeout:
+                self.log('{} timed out after {} seconds'.format(url, TIMEOUT))
                 response = None
             retries += 1
 

@@ -4,19 +4,19 @@ from pytz import timezone
 
 from core.StockDbBase import StockDbBase
 from core.market.Market import is_market_open
-from request.YahooFinanceSymbolRequest import YahooFinanceSymbolRequest, REGIONS
 from core.QueueItem import QueueItem
+from request.YahooFinanceSymbolRequest import YahooFinanceSymbolRequest, REGIONS
 from db.Finance import Finance_DB
 
-COLLECTION_NAME = 'symbols'
 OFFSET_INTERVAL = 250
-REQUIRED_FIELDS = ('symbol', 'fullExchangeName')
+COLLECTION_NAME = 'symbols'
 DESIRED_FIELDS = ('currency', 'exchange', 'exchangeTimezoneShortName', 'fullExchangeName', 'market', 'longName', 'quoteType', 'shortName', 'symbol', 'tradeable')
+REQUIRED_FIELDS = ('symbol', 'fullExchangeName')
 
-class SymbolScraper(StockDbBase):
+class ETFSymbolScraper(StockDbBase):
 
     def __init__(self):
-        super(SymbolScraper, self).__init__()
+        super(ETFSymbolScraper, self).__init__()
         self.current_day = datetime.now(timezone('EST')).date()
         self.query_dict = {}
         self.counter = 0
@@ -38,7 +38,7 @@ class SymbolScraper(StockDbBase):
         current_region = self.regions[self.counter]
         self.counter += 1
         if current_region not in self.query_dict.keys():
-            symbol_request = YahooFinanceSymbolRequest(regions=[current_region], quote_type='EQUITY', offset=0)
+            symbol_request = YahooFinanceSymbolRequest(regions=[current_region], quote_type='ETF', offset=0)
             self.query_dict[current_region] = {'offset': 0, 'total': None}
             return QueueItem(
                 symbol=current_region,
@@ -54,7 +54,7 @@ class SymbolScraper(StockDbBase):
         offset = self.query_dict[current_region]['offset']
         if offset <= self.query_dict[current_region]['total']:
             new_offset = offset + OFFSET_INTERVAL
-            symbol_request = YahooFinanceSymbolRequest(regions=[current_region], quote_type='EQUITY', offset=new_offset)
+            symbol_request = YahooFinanceSymbolRequest(regions=[current_region], quote_type='ETF', offset=new_offset)
             self.query_dict[current_region]['offset'] = new_offset
             return QueueItem(
                 symbol=current_region,
@@ -89,7 +89,6 @@ class SymbolScraper(StockDbBase):
                         document = {}
                         break
             if document:
-                document['region'] = region
                 documents.append(document)
 
         if not documents:

@@ -4,15 +4,17 @@ from threading import Thread, Event
 
 from acquisition.scrapers.Stocks import StockScraper
 from acquisition.scrapers.Symbols import SymbolScraper
+from acquisition.scrapers.ETFSymbols import ETFSymbolScraper
 from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
-URL_THREADS = 1
-OUTPUT_THREADS = 1
-MAX_QUEUE_SIZE = 5000
+URL_THREADS = 100
+OUTPUT_THREADS = 10
+REQUEST_QUEUE_SIZE = 5000
+OUTPUT_QUEUE_SIZE = 2000
 QUEUE_LOG_FREQ_SEC = 10
 
 """
@@ -26,9 +28,9 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self):
         super(ScraperQueueManager, self).__init__()
-        self.scrapers = (StockScraper(), SymbolScraper())
-        self.request_queue = ScraperQueue(MAX_QUEUE_SIZE)
-        self.output_queue = Queue(maxsize=MAX_QUEUE_SIZE)
+        self.scrapers = (StockScraper(), SymbolScraper(), ETFSymbolScraper())
+        self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
+        self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()
         self.successful_request_counter = Counter()
         self.failed_request_counter = Counter()

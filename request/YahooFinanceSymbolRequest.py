@@ -9,7 +9,7 @@ REGIONS = ('us', 'ar', 'dk', 'au', 'bh', 'ca', 'cl', 'cz', 'at', 'be', 'br', 'ch
 BODY = {
     "size":250,
     "offset":0,
-    "sortField":"intradaymarketcap",
+    "sortField":"",
     "sortType":"DESC",
     "quoteType":"EQUITY",
     "topOperator":"AND",
@@ -28,17 +28,25 @@ BODY = {
     "userIdType":"guid"
 }
 OPERAND = {"operator":"EQ","operands":["region",""]}
+QUOTE_TYPES = ("EQUITY", "ETF")
+SORT_FIELD = {
+    "EQUITY": "intradaymarketcap",
+    "ETF": "fundnetassets"
+}
 
 class YahooFinanceSymbolRequestException(Exception):
     pass
 
 class YahooFinanceSymbolRequest(StockDbBase):
 
-    def __init__(self, regions, offset=0):
+    def __init__(self, regions, quote_type, offset=0):
         super(YahooFinanceSymbolRequest, self).__init__()
         if not set(regions).issubset(REGIONS):
             raise YahooFinanceSymbolRequestException('Invalid region')
+        if quote_type not in QUOTE_TYPES:
+            raise YahooFinanceSymbolRequestException('Invalid quote type')
         self.regions = regions
+        self.quote_type = quote_type
         self.offset = offset
 
     def get_url(self):
@@ -56,6 +64,8 @@ class YahooFinanceSymbolRequest(StockDbBase):
         body = deepcopy(BODY)
         body['query']['operands'][0]['operands'] = map(self._get_operand, self.regions)
         body['offset'] = self.offset
+        body['quoteType'] = self.quote_type
+        body['sortField'] = SORT_FIELD[self.quote_type]
         return body
 
     @staticmethod
