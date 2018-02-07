@@ -12,9 +12,9 @@ from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
 URL_THREADS = 100
-OUTPUT_THREADS = 10
+OUTPUT_THREADS = 20
 REQUEST_QUEUE_SIZE = 5000
-OUTPUT_QUEUE_SIZE = 2000
+OUTPUT_QUEUE_SIZE = 1500
 QUEUE_LOG_FREQ_SEC = 10
 
 """

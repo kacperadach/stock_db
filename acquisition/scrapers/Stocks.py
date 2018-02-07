@@ -23,6 +23,7 @@ Market Closed:
     - Grab last 30 days 1m data
     - Then find oldest document and scrape MAX_DAYS in the past
         - if more data is found repeat
+        - built-in HISTORICAL_RETRY
 """
 
 class StockScraper(StockDbBase):

@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import requests
 from requests.exceptions import ChunkedEncodingError
@@ -30,6 +31,7 @@ class RequestClientException(Exception):
 class RequestClient(StockDbBase):
 
     def __init__(self, use_tor=False, tor_client=None):
+        super(RequestClient, self).__init__()
         if use_tor and not tor_client:
             raise RequestClientException('use_tor was set to True but no tor_client was supplied')
         self.ua = UserAgent()
@@ -39,9 +41,11 @@ class RequestClient(StockDbBase):
         if use_tor:
             self.tor_client.connect()
 
-    def _get_headers(self):
-        headers = HEADERS
+    def _get_headers(self, additional_headers):
+        headers = deepcopy(HEADERS)
         headers['User-Agent'] = self.ua.random
+        if additional_headers:
+            headers.update(additional_headers)
         return headers
 
     def _get_proxies(self):
@@ -52,12 +56,12 @@ class RequestClient(StockDbBase):
             proxies[key] = value.format(self.tor_client.SocksPort)
         return proxies
 
-    def get(self, url):
+    def get(self, url, headers={}):
         response = None
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.get(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), timeout=TIMEOUT)
+                response = requests.get(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), timeout=TIMEOUT)
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None
@@ -67,6 +71,10 @@ class RequestClient(StockDbBase):
             except ReadTimeout:
                 self.log('{} timed out after {} seconds'.format(url, TIMEOUT))
                 response = None
+            except MemoryError:
+                self.log('MemoryError occurred')
+                self.log('url: {}'.format(url))
+                raise MemoryError
             retries += 1
 
             if response is not None and response.status_code == 200:

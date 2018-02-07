@@ -1,16 +1,18 @@
 from os import environ
 from contextlib import contextmanager
+import sys
 
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
 
 from app.constants import DEV_ENV_VARS
 from utils.credentials import Credentials
-from logger import Logger
 from core.StockDbBase import StockDbBase
+from utils.batch import batch
 
 QUEUE_TIMEOUT = 30
 OUTPUT_QUEUE_SIZE = 100
+INSERT_BATCH_SIZE = 50
 
 class FinanceDBError(Exception):
 	pass
@@ -48,14 +50,24 @@ class FinanceDB(StockDbBase):
 			if isinstance(documents, dict):
 				documents = (documents,)
 			collection = self.mongo_client.get_collection(collection_name)
-			collection.insert_many(documents)
+			for document_batch in batch(documents, INSERT_BATCH_SIZE):
+				collection.insert_many(document_batch)
 		except BulkWriteError as e:
+			self.log('Documents size: {}'.format(sys.getsizeof(documents)))
+			self.log_exception(e)
+			raise e
+		except MemoryError as e:
+			self.log('Documents size: {}'.format(sys.getsizeof(documents)))
 			self.log_exception(e)
 			raise e
 
 	def find(self, collection_name, query, fields):
-		collection = self.mongo_client.get_collection(collection_name)
-		return collection.find(query, fields)
+		try:
+			collection = self.mongo_client.get_collection(collection_name)
+			return collection.find(query, fields)
+		except MemoryError:
+			self.log('collection: {}'.format(collection_name))
+			self.log('query: {}'.format(query))
 
 	def replace_one(self, collection_name, filter, document, upsert=False):
 		collection = self.mongo_client.get_collection(collection_name)

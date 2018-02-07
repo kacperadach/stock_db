@@ -15,7 +15,7 @@ class YahooFinanceStockRequestError(Exception):
 
 class YahooFinanceStockRequest():
 	"""
-	Perdiod1 and Period2 should be datetime objects with EST or UTC timezone
+	Period1 and Period2 should be datetime objects with EST or UTC timezone
 	"""
 	def __init__(self, symbol, period1, period2, interval='1m'):
 		self._validate_inputs(period1, period2, interval)
@@ -106,6 +106,7 @@ class YahooFinanceStockRequest():
 						}))
 					data['data'] = data_arr
 		return data
+
 
 	def _make_url(self):
 		url = BASE_URL.format(self.symbol)
