@@ -14,7 +14,7 @@ class ResponseWrapper():
         return 404
 
     def get_data(self):
-        data = None
+        data = {}
         if self.response is not None and hasattr(self.response, 'text'):
             try:
                 data = json.loads(self.response.text)

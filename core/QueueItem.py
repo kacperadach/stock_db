@@ -5,7 +5,7 @@ HTTP_METHODS = ('GET', 'POST')
 
 class QueueItem():
 
-    def __init__(self, symbol, url, http_method, callback, body={}, metadata={}):
+    def __init__(self, symbol, url, http_method, callback, body={}, headers={}, metadata={}):
         if not callable(callback):
             raise QueueItemException("callback supplied was not a function")
         if http_method.upper() not in HTTP_METHODS:
@@ -15,6 +15,7 @@ class QueueItem():
         self.http_method = http_method
         self.callback = callback
         self.body = body
+        self.headers = headers
         self.metadata = metadata
         self.response = None
 
@@ -29,6 +30,9 @@ class QueueItem():
 
     def get_body(self):
         return self.body
+
+    def get_headers(self):
+        return self.headers
 
     def add_response(self, response):
         if not isinstance(response, ResponseWrapper):

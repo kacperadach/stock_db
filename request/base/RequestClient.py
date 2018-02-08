@@ -41,7 +41,7 @@ class RequestClient(StockDbBase):
         if use_tor:
             self.tor_client.connect()
 
-    def _get_headers(self, additional_headers):
+    def _get_headers(self, additional_headers={}):
         headers = deepcopy(HEADERS)
         headers['User-Agent'] = self.ua.random
         if additional_headers:
@@ -83,12 +83,12 @@ class RequestClient(StockDbBase):
                 self.tor_client.new_nym()
         return ResponseWrapper(response)
 
-    def post(self, url, data):
+    def post(self, url, data, headers={}):
         response = None
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.post(url.strip(), headers=self._get_headers(), proxies=self._get_proxies(), data=json.dumps(data), timeout=TIMEOUT)
+                response = requests.post(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), data=json.dumps(data), timeout=TIMEOUT)
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None

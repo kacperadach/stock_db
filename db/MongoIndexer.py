@@ -7,9 +7,15 @@ from MongoIndex import MongoIndex
 COLLECTION_INDICES = {
     'stocks': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True),
                 MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
-                MongoIndex(name='symbol', index={'symbol': 1}, unique=False)
-               ),
-    'symbols': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True), MongoIndex(name='fullExchangeName', index={'fullExchangeName': 1}, unique=False))
+                MongoIndex(name='symbol', index={'symbol': 1}, unique=False)),
+    'symbols': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True),
+                MongoIndex(name='fullExchangeName', index={'fullExchangeName': 1}, unique=False)),
+    'forex_pairs': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True),
+                    MongoIndex(name='base', index={'base': 1}, unique=False),
+                    MongoIndex(name='quote', index={'quote': 1}, unique=False)),
+    'forex': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True),
+                MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
+                MongoIndex(name='symbol', index={'symbol': 1}, unique=False))
 }
 
 class MongoIndexer(StockDbBase):

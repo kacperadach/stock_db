@@ -1,6 +1,7 @@
 from os import environ
 from contextlib import contextmanager
 import sys
+from cPickle import dumps
 
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
@@ -53,11 +54,11 @@ class FinanceDB(StockDbBase):
 			for document_batch in batch(documents, INSERT_BATCH_SIZE):
 				collection.insert_many(document_batch)
 		except BulkWriteError as e:
-			self.log('Documents size: {}'.format(sys.getsizeof(documents)))
+			self.log('Documents size: {}'.format(sys.getsizeof(dumps(documents))))
 			self.log_exception(e)
 			raise e
 		except MemoryError as e:
-			self.log('Documents size: {}'.format(sys.getsizeof(documents)))
+			self.log('Documents size: {}'.format(sys.getsizeof(dumps(documents))))
 			self.log_exception(e)
 			raise e
 

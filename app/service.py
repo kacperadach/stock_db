@@ -15,6 +15,7 @@ from request.base.TorManager import Tor_Manager
 class MainService():
 
 	def __init__(self):
+		self.start = datetime.now()
 		self.thread_name = 'MainService'
 		App_Config.set_config(sys.argv)
 		self.env = App_Config.env
@@ -34,6 +35,7 @@ class MainService():
 		self.main_service()
 		if self.env == 'prod':
 			DiscordWebhook().alert_start()
+		Logger.log('Service finished, total time running: {}'.format(datetime.now()-self.start))
 
 	def _log(self, msg, level='info'):
 		Logger.log(msg, level=level, threadname=self.thread_name)

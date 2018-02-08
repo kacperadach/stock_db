@@ -11,6 +11,11 @@ TIME_AND_STEP = {
     'P1D': 'P10Y'
 }
 
+STEP_TRANSLATION = {
+    '1m': 'PT1M',
+    '1d': 'P1D'
+}
+
 class MarketWatchForexRequestException(Exception):
    pass
 
@@ -18,10 +23,10 @@ class MarketWatchForexRequest():
     def __init__(self, currency_pair, step_interval):
         if currency_pair not in CURRENCY_PAIRS:
             raise MarketWatchForexRequestException('Invalid currency pair supplied: {}'.format(currency_pair))
-        if step_interval not in TIME_AND_STEP.keys():
+        if step_interval not in STEP_TRANSLATION.keys():
             raise MarketWatchForexRequestException('Invalid step interval supplied: {}'.format(step_interval))
         self.currency_pair = currency_pair
-        self.step_interval = step_interval
+        self.step_interval = STEP_TRANSLATION[step_interval]
 
     def get_http_method(self):
         return 'GET'
@@ -41,28 +46,31 @@ class MarketWatchForexRequest():
     def parse_response(response):
         data = {}
         data['data'] = []
-        timeinfo = response['TimeInfo']
-        step = timeinfo['Step']
-        if step == 60000:
-            data['time_interval'] = '1m'
-        elif step == 86400000:
-            data['time_interval'] = '1d'
-        else:
-            raise MarketWatchForexRequestException('Time interval was not 1m or 1d: {}'.format(step))
+        try:
+            timeinfo = response['TimeInfo']
+            step = timeinfo['Step']
+            if step == 60000:
+                data['time_interval'] = '1m'
+            elif step == 86400000:
+                data['time_interval'] = '1d'
+            else:
+                raise MarketWatchForexRequestException('Time interval was not 1m or 1d: {}'.format(step))
 
-        ticks = timeinfo['Ticks']
-        series_data = {}
-        for s in response['Series']:
-            if s['Ticker']:
-                data['currency_pair'] = s['Ticker']
-            if s['CommonName']:
-                data['common_name'] = s['CommonName']
-            if s['TimeZoneData']:
-                data['timezone'] = s['TimeZoneData']['StandardAbbreviation']
-            for label in s['DesiredDataPoints']:
-                index = s['DesiredDataPoints'].index(label)
-                data_points = [x[index] for x in s['DataPoints']]
-                series_data[label] = data_points
+            ticks = timeinfo['Ticks']
+            series_data = {}
+            for s in response['Series']:
+                if s['Ticker']:
+                    data['symbol'] = s['Ticker']
+                if s['CommonName']:
+                    data['common_name'] = s['CommonName']
+                if s['TimeZoneData']:
+                    data['time_zone'] = s['TimeZoneData']['StandardAbbreviation']
+                for label in s['DesiredDataPoints']:
+                    index = s['DesiredDataPoints'].index(label)
+                    data_points = [x[index] for x in s['DataPoints']]
+                    series_data[label] = data_points
+        except Exception:
+            return data
 
         if not all(len(x) == len(ticks) for x in series_data.values()):
             return data
@@ -70,7 +78,7 @@ class MarketWatchForexRequest():
         all_data = []
         for i, tick in enumerate(ticks):
             d = {}
-            dt = datetime.fromtimestamp(tick/1000).replace(tzinfo=timezone(data['timezone']))
+            dt = datetime.fromtimestamp(tick/1000).replace(tzinfo=timezone(data['time_zone']))
             d['datetime'] = dt
             for key, val in series_data.iteritems():
                 d[key] = val[i]
@@ -89,18 +97,20 @@ class MarketWatchForexRequest():
                 bs = BeautifulSoup(req.content, 'html.parser')
                 html_rows = bs.find('table').find('tbody').find_all('tr')
                 pairs = map(lambda x: x.find('small').text.strip(')').strip('('), html_rows)
+
                 all_pairs += pairs
                 print pairs
             except Exception:
                 pass
         return all_pairs
 
+
 if __name__ == '__main__':
     today = datetime.now(timezone('EST')).date()
     today = datetime(year=today.year, month=today.month, day=today.day)
-    a = MarketWatchForexRequest('AUDCAD', 'PT1M')
+    a = MarketWatchForexRequest('AUDCAD', '1m')
     import requests
     from request.base.ResponseWrapper import ResponseWrapper
     req = requests.get(a.get_url(), headers=a.get_headers())
     response = ResponseWrapper(req)
-    MarketWatchForexRequest.parse_response(response.get_data())
+    print MarketWatchForexRequest.parse_response(response.get_data())

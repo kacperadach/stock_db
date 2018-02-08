@@ -5,6 +5,7 @@ from threading import Thread, Event
 from acquisition.scrapers.Stocks import StockScraper
 from acquisition.scrapers.Symbols import SymbolScraper
 from acquisition.scrapers.ETFSymbols import ETFSymbolScraper
+from acquisition.scrapers.Forex import ForexScraper
 from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
@@ -12,10 +13,11 @@ from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
 URL_THREADS = 100
-OUTPUT_THREADS = 20
+OUTPUT_THREADS = 30
 REQUEST_QUEUE_SIZE = 5000
-OUTPUT_QUEUE_SIZE = 1500
+OUTPUT_QUEUE_SIZE = 1000
 QUEUE_LOG_FREQ_SEC = 10
+INPUT_REQUEST_DELAY = 0.01
 
 """
 This class is in charge of:
@@ -28,7 +30,8 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self):
         super(ScraperQueueManager, self).__init__()
-        self.scrapers = (StockScraper(), SymbolScraper(), ETFSymbolScraper())
+        # self.scrapers = (ForexScraper(),)
+        self.scrapers = (StockScraper(), SymbolScraper(), ETFSymbolScraper(), ForexScraper())
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()
@@ -57,6 +60,7 @@ class ScraperQueueManager(StockDbBase):
                     request_queue_input = task.get_next_input()
                     if request_queue_input:
                         self.request_queue.put(request_queue_input)
+                sleep(INPUT_REQUEST_DELAY)
         except Exception as e:
             self.log_exception(e)
 
@@ -82,13 +86,13 @@ class ScraperQueueManager(StockDbBase):
             while 1:
                 queue_item = self.request_queue.get()
                 if queue_item.get_http_method() == 'GET':
-                    response = request_client.get(queue_item.get_url())
+                    response = request_client.get(queue_item.get_url(), headers=queue_item.get_headers())
                 else:
-                    response = request_client.post(queue_item.get_url(), queue_item.get_body())
+                    response = request_client.post(queue_item.get_url(), queue_item.get_body(), headers=queue_item.get_headers())
                 self.request_counter.increment()
+                self.log(queue_item.get_symbol())
                 if response.status_code == 200:
                     self.successful_request_counter.increment()
-                    self.log(queue_item.get_url())
                 else:
                     self.failed_request_counter.increment()
                 queue_item.add_response(response)
