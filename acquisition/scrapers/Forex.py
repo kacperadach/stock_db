@@ -11,7 +11,7 @@ from request.MarketWatchForexRequestConstants import CURRENCY_PAIRS_URL
 
 DATA_COLLECTION_NAME = 'forex'
 CURRENCY_PAIR_COLLECTION_NAME = 'forex_pairs'
-REAL_TIME_SCRAPE_MINUTE_FREQ = 1
+REAL_TIME_SCRAPE_MINUTE_FREQ = 5
 
 class ForexScraper(StockDbBase):
     def __init__(self):

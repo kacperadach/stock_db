@@ -66,9 +66,11 @@ class FinanceDB(StockDbBase):
 		try:
 			collection = self.mongo_client.get_collection(collection_name)
 			return collection.find(query, fields)
-		except MemoryError:
+		except MemoryError as e:
+			self.log_exception(e)
 			self.log('collection: {}'.format(collection_name))
 			self.log('query: {}'.format(query))
+			raise e
 
 	def replace_one(self, collection_name, filter, document, upsert=False):
 		collection = self.mongo_client.get_collection(collection_name)
@@ -77,5 +79,10 @@ class FinanceDB(StockDbBase):
 	def create_index(self, collection_name, index_name, keys, unique=False):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.create_index(keys, name=index_name, unique=unique)
+
+	def distinct(self, collection_name, field, query):
+		collection = self.mongo_client.get_collection(collection_name)
+		return collection.distinct(field, query)
+
 
 Finance_DB = FinanceDB()

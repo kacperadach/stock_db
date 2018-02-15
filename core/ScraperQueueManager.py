@@ -13,7 +13,7 @@ from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
 URL_THREADS = 100
-OUTPUT_THREADS = 30
+OUTPUT_THREADS = 1
 REQUEST_QUEUE_SIZE = 5000
 OUTPUT_QUEUE_SIZE = 1000
 QUEUE_LOG_FREQ_SEC = 10
@@ -30,8 +30,8 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self):
         super(ScraperQueueManager, self).__init__()
-        # self.scrapers = (ForexScraper(),)
-        self.scrapers = (StockScraper(), SymbolScraper(), ETFSymbolScraper(), ForexScraper())
+        self.scrapers = (ETFSymbolScraper(),)
+        # self.scrapers = (StockScraper(), SymbolScraper(), ETFSymbolScraper(), ForexScraper())
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()

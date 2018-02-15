@@ -38,7 +38,7 @@ class ETFSymbolScraper(StockDbBase):
         current_region = self.regions[self.counter]
         self.counter += 1
         if current_region not in self.query_dict.keys():
-            symbol_request = YahooFinanceSymbolRequest(regions=[current_region], quote_type='ETF', offset=0)
+            symbol_request = YahooFinanceSymbolRequest(regions=[current_region], sectors=[], quote_type='ETF', offset=0)
             self.query_dict[current_region] = {'offset': 0, 'total': None}
             return QueueItem(
                 symbol=current_region,
