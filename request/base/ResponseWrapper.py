@@ -13,6 +13,9 @@ class ResponseWrapper():
             return response.code
         return 404
 
+    def is_successful(self):
+        return self.status_code == 200
+
     def get_data(self):
         data = {}
         if self.response is not None and hasattr(self.response, 'text'):

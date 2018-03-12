@@ -2,6 +2,7 @@ from os import environ
 from contextlib import contextmanager
 import sys
 from cPickle import dumps
+from datetime import datetime
 
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
@@ -11,9 +12,7 @@ from utils.credentials import Credentials
 from core.StockDbBase import StockDbBase
 from utils.batch import batch
 
-QUEUE_TIMEOUT = 30
-OUTPUT_QUEUE_SIZE = 100
-INSERT_BATCH_SIZE = 50
+INSERT_BATCH_SIZE = 100
 
 class FinanceDBError(Exception):
 	pass
@@ -83,6 +82,5 @@ class FinanceDB(StockDbBase):
 	def distinct(self, collection_name, field, query):
 		collection = self.mongo_client.get_collection(collection_name)
 		return collection.distinct(field, query)
-
 
 Finance_DB = FinanceDB()

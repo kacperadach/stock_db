@@ -6,13 +6,16 @@ from acquisition.scrapers.Stocks import StockScraper
 from acquisition.scrapers.Symbols import SymbolScraper
 from acquisition.scrapers.ETFSymbols import ETFSymbolScraper
 from acquisition.scrapers.Forex import ForexScraper
+from acquisition.scrapers.MarketWatchFutures import MarketWatchFuturesScraper
+from acquisition.scrapers.MarketWatchSymbols import MarketWatchSymbols
+from acquisition.scrapers.MarketWatchScraper import MarketWatchScraper
 from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
-URL_THREADS = 100
+URL_THREADS = 1
 OUTPUT_THREADS = 1
 REQUEST_QUEUE_SIZE = 5000
 OUTPUT_QUEUE_SIZE = 1000
@@ -31,7 +34,8 @@ class ScraperQueueManager(StockDbBase):
     def __init__(self):
         super(ScraperQueueManager, self).__init__()
         self.scrapers = (ETFSymbolScraper(),)
-        # self.scrapers = (StockScraper(), SymbolScraper(), ETFSymbolScraper(), ForexScraper())
+        # self.scrapers = (ForexScraper(), )
+        self.scrapers = (MarketWatchScraper(), )
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()
@@ -90,7 +94,7 @@ class ScraperQueueManager(StockDbBase):
                 else:
                     response = request_client.post(queue_item.get_url(), queue_item.get_body(), headers=queue_item.get_headers())
                 self.request_counter.increment()
-                self.log(queue_item.get_symbol())
+                self.log(queue_item.get_url())
                 if response.status_code == 200:
                     self.successful_request_counter.increment()
                 else:

@@ -15,7 +15,10 @@ COLLECTION_INDICES = {
                     MongoIndex(name='quote', index={'quote': 1}, unique=False)),
     'forex': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True),
                 MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
-                MongoIndex(name='symbol', index={'symbol': 1}, unique=False))
+                MongoIndex(name='symbol', index={'symbol': 1}, unique=False)),
+    'futures_symbols': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True), ),
+    'market_watch_symbols': (MongoIndex(name='symbol', index={'symbol': 1, 'instrument_type': 1}, unique=False),
+                            MongoIndex(name='instrument_type', index={'instrument_type': 1}, unique=False))
 }
 
 class MongoIndexer(StockDbBase):

@@ -1,3 +1,23 @@
 https://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/TextView.aspx?data=yieldYear&year=2018
 
 http://www.spvixviews.com/indices/
+
+https://www.marketwatch.com/tools/futures
+
+https://www.marketwatch.com/tools/markets/indexes/a-z
+
+https://www.marketwatch.com/tools/markets/futures/a-z/
+
+https://www.marketwatch.com/tools/markets/stocks/a-z/B
+
+https://www.marketwatch.com/tools/markets/currencies/a-z/
+
+https://www.marketwatch.com/tools/markets/bonds/a-z/
+
+https://www.marketwatch.com/tools/futures
+
+http://quotes.ino.com/exchanges/contracts.html?r=NYMEX_CL
+
+https://www.marketwatch.com/tools/stockresearch/globalmarkets/intIndices.asp
+
+https://www.bls.gov/bls/news-release/empsit.htm

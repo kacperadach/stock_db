@@ -1,11 +1,13 @@
 from request.base.ResponseWrapper import ResponseWrapper
 
-MAX_RETRIES = 2
 HTTP_METHODS = ('GET', 'POST')
+
+class QueueItemException(Exception):
+    pass
 
 class QueueItem():
 
-    def __init__(self, symbol, url, http_method, callback, body={}, headers={}, metadata={}):
+    def __init__(self, url, http_method, callback, symbol='', body={}, headers={}, metadata={}):
         if not callable(callback):
             raise QueueItemException("callback supplied was not a function")
         if http_method.upper() not in HTTP_METHODS:
@@ -44,6 +46,3 @@ class QueueItem():
 
     def get_response(self):
         return self.response
-
-class QueueItemException(Exception):
-    pass

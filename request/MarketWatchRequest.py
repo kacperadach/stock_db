@@ -16,16 +16,14 @@ STEP_TRANSLATION = {
     '1d': 'P1D'
 }
 
-class MarketWatchForexRequestException(Exception):
+class MarketWatchRequestException(Exception):
    pass
 
-class MarketWatchForexRequest():
-    def __init__(self, currency_pair, step_interval):
-        if currency_pair not in CURRENCY_PAIRS:
-            raise MarketWatchForexRequestException('Invalid currency pair supplied: {}'.format(currency_pair))
+class MarketWatchRequest():
+    def __init__(self, symbol, step_interval):
         if step_interval not in STEP_TRANSLATION.keys():
-            raise MarketWatchForexRequestException('Invalid step interval supplied: {}'.format(step_interval))
-        self.currency_pair = currency_pair
+            raise MarketWatchRequestException('Invalid step interval supplied: {}'.format(step_interval))
+        self.symbol = symbol
         self.step_interval = STEP_TRANSLATION[step_interval]
 
     def get_http_method(self):
@@ -37,7 +35,7 @@ class MarketWatchForexRequest():
     def get_url(self):
         query_params = deepcopy(QUERY_PARAMETER_JSON)
         key = query_params['Series'][0]['Key']
-        query_params['Series'][0]['Key'] = key.format(self.currency_pair)
+        query_params['Series'][0]['Key'] = self.symbol
         query_params['Step'] = self.step_interval
         query_params['TimeFrame'] = TIME_AND_STEP[self.step_interval]
         return GRAPH_URL.format(quote_plus(str(json.dumps(query_params)).replace(' ', '')))
@@ -54,7 +52,7 @@ class MarketWatchForexRequest():
             elif step == 86400000:
                 data['time_interval'] = '1d'
             else:
-                raise MarketWatchForexRequestException('Time interval was not 1m or 1d: {}'.format(step))
+                return {}
 
             ticks = timeinfo['Ticks']
             series_data = {}
@@ -65,27 +63,27 @@ class MarketWatchForexRequest():
                     data['common_name'] = s['CommonName']
                 if s['TimeZoneData']:
                     data['time_zone'] = s['TimeZoneData']['StandardAbbreviation']
+                    data['utc_offset'] = s['UtcOffset']
                 for label in s['DesiredDataPoints']:
                     index = s['DesiredDataPoints'].index(label)
                     data_points = [x[index] for x in s['DataPoints']]
                     series_data[label] = data_points
         except Exception:
-            return data
+            return {}
 
-        if not all(len(x) == len(ticks) for x in series_data.values()):
-            return data
+        if not all(len(x) == len(ticks) for x in series_data.values()) or 'utc_offset' not in data.keys():
+            return {}
 
         all_data = []
         for i, tick in enumerate(ticks):
             d = {}
-            time_zone = data['time_zone']
-            if time_zone is None:
-                time_zone = 'UTC'
-            dt = datetime.fromtimestamp(tick/1000).replace(tzinfo=timezone(time_zone))
-            d['datetime'] = dt
+            dt = datetime.fromtimestamp((tick / 1000) + (data['utc_offset'] * 60))
             for key, val in series_data.iteritems():
-                d[key] = val[i]
-            all_data.append(d)
+                if val[i] is not None:
+                    d[key] = val[i]
+            if d:
+                d['datetime'] = dt
+                all_data.append(d)
         data['data'] = all_data
         return data
 
@@ -106,13 +104,3 @@ class MarketWatchForexRequest():
             except Exception:
                 pass
         return all_pairs
-
-if __name__ == '__main__':
-    today = datetime.now(timezone('EST')).date()
-    today = datetime(year=today.year, month=today.month, day=today.day)
-    a = MarketWatchForexRequest('AUDCAD', '1m')
-    import requests
-    from request.base.ResponseWrapper import ResponseWrapper
-    req = requests.get(a.get_url(), headers=a.get_headers())
-    response = ResponseWrapper(req)
-    print MarketWatchForexRequest.parse_response(response.get_data())

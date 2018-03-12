@@ -7,7 +7,7 @@ from core.StockDbBase import StockDbBase
 from core.QueueItem import QueueItem
 from db.Finance import Finance_DB
 from request.MarketWatchForexRequest import MarketWatchForexRequest
-from request.MarketWatchForexRequestConstants import CURRENCY_PAIRS_URL
+from request.MarketWatchRequestConstants import CURRENCY_PAIRS_URL
 
 DATA_COLLECTION_NAME = 'forex'
 CURRENCY_PAIR_COLLECTION_NAME = 'forex_pairs'

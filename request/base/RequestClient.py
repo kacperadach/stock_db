@@ -24,6 +24,7 @@ TOR_PROXIES = {
 
 MAX_RETRIES = 2
 TIMEOUT = 10
+REQUESTS_PER_NYM = 25
 
 class RequestClientException(Exception):
     pass
@@ -38,6 +39,7 @@ class RequestClient(StockDbBase):
         self.use_tor = use_tor
         self.max_retries = MAX_RETRIES
         self.tor_client = tor_client
+        self.request_counter = 0
         if use_tor:
             self.tor_client.connect()
 
@@ -81,6 +83,10 @@ class RequestClient(StockDbBase):
                 break
             if self.use_tor:
                 self.tor_client.new_nym()
+        self.request_counter += retries
+        if self.request_counter >= REQUESTS_PER_NYM:
+            self.tor_client.new_nym()
+            self.request_counter = 0
         return ResponseWrapper(response)
 
     def post(self, url, data, headers={}):
@@ -104,4 +110,8 @@ class RequestClient(StockDbBase):
                 break
             if self.use_tor:
                 self.tor_client.new_nym()
+        self.request_counter += retries
+        if self.request_counter >= REQUESTS_PER_NYM:
+            self.tor_client.new_nym()
+            self.request_counter = 0
         return ResponseWrapper(response)

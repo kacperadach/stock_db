@@ -1,0 +1,75 @@
+# Stocks
+
+# STOCK/US/OOTC/DRWN
+# STOCK/countryCode/Exchange/symbol
+
+# ____________________
+
+# Rates:
+# LOANRATE/03/BK.RT/BR2_ZZA40
+# LOANRATE/countryCode/Exchange/symbol
+
+# INTERESTRATE/MR//DKK.PLN
+# INTERESTRATE/countryCode//symbol
+
+# LOANRATE/US/DJ.M/FEDFUND
+# LOANRATE/countryCode/Exchange/symbol
+
+# INTERESTRATE/MR/IBAL/LIBORUSD3M
+# INTERESTRATE/countryCode/Exchange/symbol
+
+# if country == 'Money Rates' then INTERESTRATE else LOANRATE
+
+# ____________________
+
+# Funds:
+# FUND/US/XNAS/AFNIX
+# FUND/countryCode/Exchange/symbol
+
+# ____________________
+
+# Bonds:
+# BOND/CA/XTSE/ARE.DB.B
+# BOND/countryCode/Exchange/symbol
+
+# ____________________
+
+# Benchmarks
+# STOCK
+
+# ____________________
+
+# american-depository-receipt-stocks
+# STOCK
+
+# ____________________
+
+# exchange-traded-notes
+# STOCK
+
+# ____________________
+
+# warrants
+# STOCK
+
+# ____________________
+
+# indexes
+# INDEX
+
+# ____________________
+
+# exchange-traded-funds
+# FUND
+
+# ____________________
+
+# currencies
+# CURRENCY/US/XTUP/ARSBHD
+
+# ____________________
+
+# crypto-currencies
+# CRYPTOCURRENCY
+
+
