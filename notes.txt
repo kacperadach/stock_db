@@ -21,3 +21,7 @@ http://quotes.ino.com/exchanges/contracts.html?r=NYMEX_CL
 https://www.marketwatch.com/tools/stockresearch/globalmarkets/intIndices.asp
 
 https://www.bls.gov/bls/news-release/empsit.htm
+
+https://www.mrci.com/web/online-explanation-pages/symbols-a-codes.html
+
+https://fred.stlouisfed.org/

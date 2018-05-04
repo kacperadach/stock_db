@@ -10,10 +10,10 @@ from request.MarketWatchRequest import MarketWatchRequest
 SYMBOL_COLLECTION = 'market_watch_symbols'
 LIVE_SCRAPE_PERIOD_SEC = 900
 
-class MarketWatchScraper(StockDbBase):
+class MarketWatchHistoricalScraper(StockDbBase):
 
     def __init__(self):
-        super(MarketWatchScraper, self).__init__()
+        super(MarketWatchHistoricalScraper, self).__init__()
         self.today = datetime.now(timezone('EST')).date()
         self.db = Finance_DB
         self.scrape_dict = {}
@@ -21,7 +21,7 @@ class MarketWatchScraper(StockDbBase):
         self.get_symbols()
 
     def get_symbols(self):
-        self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {'instrument_type': 'stocks'}, {'symbol': 1, 'instrument_type': 1, 'Exchange': 1, 'Country': 1, 'countryCode': 1})
+        self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {}, {'symbol': 1, 'instrument_type': 1, 'Exchange': 1, 'Country': 1, 'countryCode': 1})
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -29,23 +29,14 @@ class MarketWatchScraper(StockDbBase):
         if now.date() != self.today:
             self.today = now.date()
             self.scrape_dict = {}
+            self.get_symbols()
 
         for symbol in self.symbols_cursor:
             unique_id = self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['Exchange'])
             if unique_id not in self.scrape_dict.keys():
-                self.scrape_dict[unique_id] = {'live': now, 'historical': False}
-                mwr = MarketWatchRequest(symbol=self.get_symbol(symbol), step_interval='1m')
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'live'})
-            elif (now - self.scrape_dict[unique_id]['live']).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
-                self.scrape_dict[unique_id]['live'] = now
-                mwr = MarketWatchRequest(symbol=self.get_symbol(symbol), step_interval='1m')
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'live'})
-            elif self.scrape_dict[unique_id]['historical'] is False:
-                self.scrape_dict[unique_id]['historical'] = True
+                self.scrape_dict[unique_id] = True
                 mwr = MarketWatchRequest(symbol=self.get_symbol(symbol), step_interval='1d')
                 return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'historical'})
-
-        self.get_symbols()
 
     def get_symbol(self, symbol):
         instrument_type = symbol['instrument_type']
@@ -125,7 +116,4 @@ class MarketWatchScraper(StockDbBase):
         new_documents = filter(lambda x: x['trading_date'] not in map(lambda x: x['trading_date'], existing_documents), documents)
 
         if new_documents:
-            try:
-                self.db.insert(collection_name, new_documents)
-            except Exception:
-                pass
+            self.db.insert(collection_name, new_documents)

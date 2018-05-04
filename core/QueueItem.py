@@ -21,6 +21,13 @@ class QueueItem():
         self.metadata = metadata
         self.response = None
 
+    def __repr__(self):
+        return self.symbol + ': ' + str(self.metadata)
+
+    @staticmethod
+    def from_request(request, callback, metadata=None):
+        return QueueItem(request.get_url(), request.get_http_method(), callback, body=request.get_body(), headers=request.get_headers(), metadata=metadata)
+
     def get_http_method(self):
         return self.http_method
 
