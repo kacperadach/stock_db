@@ -20,10 +20,13 @@ class MarketWatchRequestException(Exception):
    pass
 
 class MarketWatchRequest():
-    def __init__(self, symbol, step_interval):
+    def __init__(self, symbol, instrument_type, step_interval):
+        if instrument_type not in INSTRUMENT_TYPES:
+            raise MarketWatchRequestException('invalid instrument_type')
         if step_interval not in STEP_TRANSLATION.keys():
             raise MarketWatchRequestException('Invalid step interval supplied: {}'.format(step_interval))
-        self.symbol = symbol
+        self.instrument_type = instrument_type
+        self.symbol = self.get_symbol(symbol, instrument_type)
         self.step_interval = STEP_TRANSLATION[step_interval]
 
     def get_http_method(self):
@@ -34,11 +37,43 @@ class MarketWatchRequest():
 
     def get_url(self):
         query_params = deepcopy(QUERY_PARAMETER_JSON)
-        key = query_params['Series'][0]['Key']
         query_params['Series'][0]['Key'] = self.symbol
         query_params['Step'] = self.step_interval
         query_params['TimeFrame'] = TIME_AND_STEP[self.step_interval]
         return GRAPH_URL.format(quote_plus(str(json.dumps(query_params)).replace(' ', '')))
+
+    def get_symbol(self, symbol, instrument_type):
+        if instrument_type.lower() == 'rates':
+            if symbol['Country'] == 'Money Rates':
+                return 'INTERSTATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            else:
+                return 'LOANRATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'funds':
+            return 'FUND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'bonds':
+            return 'BOND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'benchmarks':
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'american-depository-receipt-stocks':
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'exchange-traded-notes':
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'warrants':
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'stocks':
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'indexes':
+            return 'INDEX/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'exchange-traded-funds':
+            return 'FUND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'currencies':
+            return 'CURRENCY/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'crypto-currencies':
+            return 'CRYPTOCURRENCY/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'real-estate-investment-trusts':
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        else:
+            raise MarketWatchRequestException('Invalid instrument type')
 
     @staticmethod
     def parse_response(response):
@@ -104,3 +139,8 @@ class MarketWatchRequest():
             except Exception:
                 pass
         return all_pairs
+
+
+if __name__ == '__main__':
+    a = MarketWatchRequest('aapl', '1d')
+    i = 1

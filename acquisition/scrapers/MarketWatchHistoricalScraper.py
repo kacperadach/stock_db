@@ -21,7 +21,7 @@ class MarketWatchHistoricalScraper(StockDbBase):
         self.get_symbols()
 
     def get_symbols(self):
-        self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {}, {'symbol': 1, 'instrument_type': 1, 'Exchange': 1, 'Country': 1, 'countryCode': 1})
+        self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {'instrument_type': 'stocks', 'Country': 'United States'}, {'symbol': 1, 'instrument_type': 1, 'Exchange': 1, 'Country': 1, 'countryCode': 1})
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -35,7 +35,7 @@ class MarketWatchHistoricalScraper(StockDbBase):
             unique_id = self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['Exchange'])
             if unique_id not in self.scrape_dict.keys():
                 self.scrape_dict[unique_id] = True
-                mwr = MarketWatchRequest(symbol=self.get_symbol(symbol), step_interval='1d')
+                mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'])
                 return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'historical'})
 
     def get_symbol(self, symbol):

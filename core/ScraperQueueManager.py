@@ -11,16 +11,18 @@ from acquisition.scrapers.MarketWatchSymbols import MarketWatchSymbols
 from acquisition.scrapers.MarketWatchScraper import MarketWatchScraper
 from acquisition.scrapers.MarketWatchHistoricalScraper import MarketWatchHistoricalScraper
 from acquisition.scrapers.MarketWatchLiveScraper import MarketWatchLiveScraper
+from acquisition.scrapers.USTreasuryScraper import USTreasuryScraper
+from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
 from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
-URL_THREADS = 100
-OUTPUT_THREADS = 20
-REQUEST_QUEUE_SIZE = 5000
-OUTPUT_QUEUE_SIZE = 1000
+URL_THREADS = 10
+OUTPUT_THREADS = 1
+REQUEST_QUEUE_SIZE = 10
+OUTPUT_QUEUE_SIZE = 1
 QUEUE_LOG_FREQ_SEC = 10
 INPUT_REQUEST_DELAY = 0.01
 
@@ -35,7 +37,7 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self):
         super(ScraperQueueManager, self).__init__()
-        self.scrapers = (MarketWatchSymbols(), MarketWatchLiveScraper(), MarketWatchHistoricalScraper())
+        self.scrapers = (MarketWatchLiveScraper(), )
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()

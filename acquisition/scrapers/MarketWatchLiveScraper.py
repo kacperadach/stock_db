@@ -4,10 +4,13 @@ from pytz import timezone
 
 from core.StockDbBase import StockDbBase
 from core.QueueItem import QueueItem
+from core.market.Market import is_market_open
 from db.Finance import Finance_DB
+from core.data.QuoteRepository import Quote_Repository
 from request.MarketWatchRequest import MarketWatchRequest
 
-SYMBOL_COLLECTION = 'market_watch_symbols'
+MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
+SYMBOLS_COLLECTION = 'symbols'
 LIVE_SCRAPE_PERIOD_SEC = 900
 
 class MarketWatchLiveScraper(StockDbBase):
@@ -16,12 +19,16 @@ class MarketWatchLiveScraper(StockDbBase):
         super(MarketWatchLiveScraper, self).__init__()
         self.today = datetime.now(timezone('EST')).date()
         self.db = Finance_DB
+        self.quote_repository = Quote_Repository
         self.scrape_dict = {}
-        self.symbols = []
+        self.ignored_symbols = {}
         self.get_symbols()
 
     def get_symbols(self):
-        self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {'instrument_type': 'stocks'}, {'symbol': 1, 'instrument_type': 1, 'Exchange': 1, 'Country': 1, 'countryCode': 1})
+        # if is_market_open(datetime.now(timezone('EST'))):
+        self.symbols_cursor = self.db.find(MARKET_WATCH_SYMBOL_COLLECTION, {'instrument_type': 'stocks', 'country': 'united-states'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
+        # else:
+        #     self.symbols_cursor = self.db.find(MARKET_WATCH_SYMBOL_COLLECTION, {})
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -29,67 +36,34 @@ class MarketWatchLiveScraper(StockDbBase):
         if now.date() != self.today:
             self.today = now.date()
             self.scrape_dict = {}
+            self.ignored_symbols = {}
             self.get_symbols()
 
         for symbol in self.symbols_cursor:
-            unique_id = self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['Exchange'])
+            unique_id = self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['exchange'])
+            if unique_id in self.ignored_symbols:
+                continue
             if unique_id not in self.scrape_dict.keys():
                 self.scrape_dict[unique_id] = now
-                mwr = MarketWatchRequest(symbol=self.get_symbol(symbol), step_interval='1m')
+                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
                 return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'live'})
             elif (now - self.scrape_dict[unique_id]).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
                 self.scrape_dict[unique_id] = now
-                mwr = MarketWatchRequest(symbol=self.get_symbol(symbol), step_interval='1m')
+                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
                 return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'live'})
 
         self.get_symbols()
-
-    def get_symbol(self, symbol):
-        instrument_type = symbol['instrument_type']
-        if instrument_type.lower() == 'rates':
-            if symbol['Country'] == 'Money Rates':
-                return 'INTERSTATE/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-            else:
-                return 'LOANRATE/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'funds':
-            return 'FUND/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'bonds':
-            return 'BOND/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'benchmarks':
-            return 'STOCK/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'american-depository-receipt-stocks':
-            return 'STOCK/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'exchange-traded-notes':
-            return 'STOCK/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'warrants':
-            return 'STOCK/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'stocks':
-            return 'STOCK/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'indexes':
-            return 'INDEX/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'exchange-traded-funds':
-            return 'FUND/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'currencies':
-            return 'CURRENCY/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'crypto-currencies':
-            return 'CRYPTOCURRENCY/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        elif instrument_type.lower() == 'real-estate-investment-trusts':
-            return 'STOCK/{}/{}/{}'.format(symbol['countryCode'], symbol['Exchange'], symbol['symbol'])
-        else:
-            self.log(instrument_type)
-            raise AssertionError('This shouldnt happen!')
 
     # for the purpose of storing in scrape_dict
     def get_unique_id(self, symbol, instrument_type, exchange):
         return str(symbol) + str(instrument_type) + str(exchange)
 
-    def get_collection_name(self, instrument_type):
-        return 'market_watch_' + str(instrument_type)
-
     def process_data(self, queue_item):
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
 
         if not data:
+            symbol = queue_item.get_metadata()['symbol']
+            self.ignored_symbols[self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['exchange'])] = True
             return
 
         metadata = queue_item.get_metadata()
@@ -97,7 +71,7 @@ class MarketWatchLiveScraper(StockDbBase):
             self.log('symbol from request does not match response', level='warn')
             return
 
-        data['exchange'] = metadata['symbol']['Exchange']
+        data['exchange'] = metadata['symbol']['exchange']
 
         days = {}
         for d in data['data']:
@@ -107,7 +81,6 @@ class MarketWatchLiveScraper(StockDbBase):
                 days[d['datetime'].date()] += [d]
 
         del data['data']
-        collection_name = self.get_collection_name(metadata['symbol']['instrument_type'])
         documents = []
         for day, d in days.iteritems():
             trading_date = datetime.combine(day, datetime.min.time())
@@ -117,9 +90,15 @@ class MarketWatchLiveScraper(StockDbBase):
             documents.append(new_document)
 
         trading_days = map(lambda x: x['trading_date'], documents)
-        existing_documents = list(self.db.find(collection_name, {'trading_date': {'$in': trading_days}, 'symbol': metadata['symbol']['symbol'], 'exchange': metadata['symbol']['Exchange'], 'time_interval': data['time_interval']}, {'trading_date': 1, 'data': 1}))
-
+        existing_documents = list(self.quote_repository.find_all(
+            symbol=metadata['symbol']['symbol'],
+            exchange=metadata['symbol']['exchange'],
+            instrument_type=metadata['symbol']['instrument_type'],
+            time_interval='1m',
+            trading_dates=trading_days,
+            fields={'trading_date': 1})
+        )
         new_documents = filter(lambda x: x['trading_date'] not in map(lambda x: x['trading_date'], existing_documents), documents)
 
         if new_documents:
-            self.db.insert(collection_name, new_documents)
+            self.quote_repository.insert(new_documents, metadata['symbol']['instrument_type'])

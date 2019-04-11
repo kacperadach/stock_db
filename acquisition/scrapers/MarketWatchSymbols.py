@@ -12,7 +12,7 @@ class MarketWatchSymbols(StockDbBase):
 
     def __init__(self):
         super(MarketWatchSymbols, self).__init__()
-        self.db = Finance_DB
+        self.symbol_repository = Finance_DB
         self.today = datetime.now(timezone('EST'))
         self.scrape_dict = {}
         self.letter_options = MarketWatchSymbolsRequest.get_letter_options()

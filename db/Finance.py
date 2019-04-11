@@ -53,7 +53,7 @@ class FinanceDB(StockDbBase):
 			for document_batch in batch(documents, INSERT_BATCH_SIZE):
 				collection.insert_many(document_batch)
 		except BulkWriteError as e:
-			self.log('Documents size: {}'.format(sys.getsizeof(dumps(documents))))
+			self.log('Documents: {}'.format(documents))
 			self.log_exception(e)
 			raise e
 		except MemoryError as e:

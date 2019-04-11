@@ -25,3 +25,7 @@ https://www.bls.gov/bls/news-release/empsit.htm
 https://www.mrci.com/web/online-explanation-pages/symbols-a-codes.html
 
 https://fred.stlouisfed.org/
+
+https://www.bls.gov/developers/api_signature_v2.htm
+
+http://www.multpl.com/sitemap

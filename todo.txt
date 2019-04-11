@@ -1,0 +1,5 @@
+- fix symbol call, use different url
+
+- specifically pick priority regions
+
+- get other indicators
