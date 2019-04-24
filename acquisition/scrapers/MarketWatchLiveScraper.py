@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 from pytz import timezone
+import time
 
 from core.StockDbBase import StockDbBase
 from core.QueueItem import QueueItem
@@ -9,11 +10,12 @@ from db.Finance import Finance_DB
 from core.data.QuoteRepository import Quote_Repository
 from request.MarketWatchRequest import MarketWatchRequest
 
-MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
+
 SYMBOLS_COLLECTION = 'symbols'
 LIVE_SCRAPE_PERIOD_SEC = 900
 
 class MarketWatchLiveScraper(StockDbBase):
+    MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
 
     def __init__(self):
         super(MarketWatchLiveScraper, self).__init__()
@@ -25,10 +27,13 @@ class MarketWatchLiveScraper(StockDbBase):
         self.get_symbols()
 
     def get_symbols(self):
-        # if is_market_open(datetime.now(timezone('EST'))):
-        self.symbols_cursor = self.db.find(MARKET_WATCH_SYMBOL_COLLECTION, {'instrument_type': 'stocks', 'country': 'united-states'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
-        # else:
-        #     self.symbols_cursor = self.db.find(MARKET_WATCH_SYMBOL_COLLECTION, {})
+        time.sleep(1)
+        self.symbols_cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
+
+        # # if is_market_open(datetime.now(timezone('EST'))):
+        # self.symbols_cursor = self.db.find(MARKET_WATCH_SYMBOL_COLLECTION, {'instrument_type': 'stocks', 'country': 'united-states'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
+        # # else:
+        # #
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -46,17 +51,16 @@ class MarketWatchLiveScraper(StockDbBase):
             if unique_id not in self.scrape_dict.keys():
                 self.scrape_dict[unique_id] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'live'})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m'})
             elif (now - self.scrape_dict[unique_id]).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
                 self.scrape_dict[unique_id] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'live'})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m'})
 
         self.get_symbols()
 
-    # for the purpose of storing in scrape_dict
     def get_unique_id(self, symbol, instrument_type, exchange):
-        return str(symbol) + str(instrument_type) + str(exchange)
+        return str(symbol) + str(instrument_type) +  str(exchange)
 
     def process_data(self, queue_item):
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
@@ -70,6 +74,9 @@ class MarketWatchLiveScraper(StockDbBase):
         if metadata['symbol']['symbol'] != data['symbol']:
             self.log('symbol from request does not match response', level='warn')
             return
+
+        if 'time_interval' not in metadata.keys():
+            raise RuntimeError('need time_interval in meta')
 
         data['exchange'] = metadata['symbol']['exchange']
 
@@ -94,7 +101,7 @@ class MarketWatchLiveScraper(StockDbBase):
             symbol=metadata['symbol']['symbol'],
             exchange=metadata['symbol']['exchange'],
             instrument_type=metadata['symbol']['instrument_type'],
-            time_interval='1m',
+            time_interval=metadata['time_interval'],
             trading_dates=trading_days,
             fields={'trading_date': 1})
         )

@@ -47,7 +47,7 @@ class MainService():
 			self._log('Running Tor Test')
 			Tor_Manager.test()
 		MongoIndexer().create_indices()
-		ScraperQueueManager().start()
+		ScraperQueueManager(use_tor=self.use_tor).start()
 
 	def initialize_env_vars(self):
 		environment_vars = PROD_ENV_VARS if self.env.lower() == 'prod' else DEV_ENV_VARS

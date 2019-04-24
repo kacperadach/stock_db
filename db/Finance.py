@@ -62,6 +62,7 @@ class FinanceDB(StockDbBase):
 			raise e
 
 	def find(self, collection_name, query, fields):
+		fields['_id'] = False
 		try:
 			collection = self.mongo_client.get_collection(collection_name)
 			return collection.find(query, fields)
@@ -82,5 +83,9 @@ class FinanceDB(StockDbBase):
 	def distinct(self, collection_name, field, query):
 		collection = self.mongo_client.get_collection(collection_name)
 		return collection.distinct(field, query)
+
+	def delete_many(self, collection_name, query):
+		collection = self.mongo_client.get_collection(collection_name)
+		collection.delete_many(query)
 
 Finance_DB = FinanceDB()

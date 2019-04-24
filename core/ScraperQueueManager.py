@@ -2,6 +2,7 @@ from time import sleep
 from Queue import Queue
 from threading import Thread, Event
 
+from acquisition.scrapers.MarketWatchRequestLiveScraper import MarketWatchRequestLiveScraper
 from acquisition.scrapers.Stocks import StockScraper
 from acquisition.scrapers.Symbols import SymbolScraper
 from acquisition.scrapers.ETFSymbols import ETFSymbolScraper
@@ -35,20 +36,23 @@ This class is in charge of:
 
 class ScraperQueueManager(StockDbBase):
 
-    def __init__(self):
+    def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
-        self.scrapers = (MarketWatchLiveScraper(), )
+        self.priority_scrapers = (MarketWatchRequestLiveScraper(),)
+        self.scrapers = ()
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()
         self.successful_request_counter = Counter()
         self.failed_request_counter = Counter()
         self.event = Event()
-        self.tor_manager = Tor_Manager
+        self.use_tor = use_tor
+        self.tor_manager = Tor_Manager if use_tor else None
 
     def start(self):
         for x in range(URL_THREADS):
-            t = Thread(target=self.request_thread_worker, args=(self.tor_manager.tor_instances[x % self.tor_manager.num_tor_instances],))
+            args = (self.tor_manager.tor_instances[x % self.tor_manager.num_tor_instances],) if self.use_tor else ()
+            t = Thread(target=self.request_thread_worker, args=args)
             t.setDaemon(True)
             t.start()
         self.log("Created {} request threads".format(URL_THREADS))
@@ -62,11 +66,12 @@ class ScraperQueueManager(StockDbBase):
         self.launch_queue_logger()
         try:
             while not self.event.is_set():
-                for task in self.scrapers:
-                    request_queue_input = task.get_next_input()
-                    if request_queue_input:
-                        self.request_queue.put(request_queue_input)
-                sleep(INPUT_REQUEST_DELAY)
+                for scraper in (self.priority_scrapers, self.scrapers):
+                    for task in scraper:
+                        request_queue_input = task.get_next_input()
+                        if request_queue_input:
+                            self.request_queue.put(request_queue_input)
+                            sleep(INPUT_REQUEST_DELAY)
         except Exception as e:
             self.log_exception(e)
 
@@ -86,8 +91,8 @@ class ScraperQueueManager(StockDbBase):
             self.failed_request_counter.reset()
             sleep(QUEUE_LOG_FREQ_SEC)
 
-    def request_thread_worker(self, tor_client):
-        request_client = RequestClient(use_tor=True, tor_client=tor_client)
+    def request_thread_worker(self, tor_client=None):
+        request_client = RequestClient(use_tor=bool(tor_client), tor_client=tor_client)
         try:
             while 1:
                 queue_item = self.request_queue.get()

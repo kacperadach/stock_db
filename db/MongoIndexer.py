@@ -31,7 +31,8 @@ COLLECTION_INDICES = {
     'market_watch_indexes': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
     'market_watch_rates': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
     'market_watch_real-estate-investment-trusts': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_warrants': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), )
+    'market_watch_warrants': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
+    'market_watch_request': (MongoIndex(name='instrument_type_exchange_symbol_timestamp', index={'instrument_type': 1, 'exchange': 1, 'symbol': 1, 'timestamp': 1}, unique=False), ),
 }
 
 class MongoIndexer(StockDbBase):

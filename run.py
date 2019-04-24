@@ -4,11 +4,8 @@ import sys
 from app.service import MainService
 
 def run():
-	try:
-		MainService()
-	except BaseException as e:
-		from logger import Logger
-		Logger.log("Unexpected error occurred in main service: {}".format(e), 'error', 'Main')
+	MainService()
+
 
 		# from discord.webhook import DiscordWebhook
 		# if len(sys.argv) > 1 and sys.argv[1].lower() == 'prod':

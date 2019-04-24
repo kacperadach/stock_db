@@ -7,6 +7,8 @@ from core.data.SymbolRepository import Symbol_Repository
 from request.MarketWatchSymbolsRequestV2 import MarketWatchSymbolsRequestV2
 from request.MarketWatchRequestConstants import COUNTRIES, INSTRUMENT_TYPES
 
+#https://quotes.wsj.com/company-list/a-z/W
+
 class MarketWatchSymbolsV2(StockDbBase):
 
     def __init__(self):
