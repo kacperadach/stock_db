@@ -4,7 +4,20 @@ REQUEST_HEADER = {'Dylan2010.EntitlementToken': 'f9471dd374424d13bcc79e5ca933473
 ENTITLEMENT_TOKEN = 'f9471dd374424d13bcc79e5ca933473e'
 CURRENCY_PAIRS_URL = 'https://www.marketwatch.com/tools/markets/currencies/{}'
 GRAPH_URL = 'https://api-secure.wsj.net/api/michelangelo/timeseries/history?json={}&ckey=f9471dd374'
-QUERY_PARAMETER_JSON = {"Step":"PT1M","TimeFrame":"D1","StartDate":1517961600000,"EndDate":1517961600000,"EntitlementToken":"f9471dd374424d13bcc79e5ca933473e","IncludeMockTick":True,"FilterNullSlots":False,"FilterClosedPoints":True,"IncludeClosedSlots":False,"IncludeOfficialClose":True,"InjectOpen":False,"ShowPreMarket":True,"ShowAfterHours":True,"UseExtendedTimeFrame":True,"WantPriorClose":False,"IncludeCurrentQuotes":False,"ResetTodaysAfterHoursPercentChange":False,"Series":[{"Key":"CURRENCY/US/XTUP/{}","Dialect":"Charting","Kind":"Ticker","SeriesId":"s1","DataTypes":["Open","High","Low","Last"],"Indicators":[{"Parameters":[{"Name":"Period","Value":"50"}],"Kind":"SimpleMovingAverage","SeriesId":"i2"},{"Parameters":[{"Name":"EMA1","Value":12},{"Name":"EMA2","Value":26},{"Name":"SignalLine","Value":9}],"Kind":"MovingAverageConvergenceDivergence","SeriesId":"i3"},{"Parameters":[{"Name":"ShowOpen"},{"Name":"ShowHigh"},{"Name":"ShowLow"},{"Name":"ShowPriorClose","Value":True},{"Name":"Show52WeekHigh"},{"Name":"Show52WeekLow"}],"Kind":"OpenHighLowLines","SeriesId":"i4"}]}]}
+QUERY_PARAMETER_JSON = {"Step": "PT1M", "TimeFrame": "D1", "StartDate": 1517961600000, "EndDate": 1517961600000, "EntitlementToken": "f9471dd374424d13bcc79e5ca933473e", "IncludeMockTick": True,
+                        "FilterNullSlots": False, "FilterClosedPoints": True, "IncludeClosedSlots": False, "IncludeOfficialClose": True, "InjectOpen": False, "ShowPreMarket": True,
+                        "ShowAfterHours": True, "UseExtendedTimeFrame": True, "WantPriorClose": False, "IncludeCurrentQuotes": False, "ResetTodaysAfterHoursPercentChange": False, "Series": [
+        {"Key": "CURRENCY/US/XTUP/{}", "Dialect": "Charting", "Kind": "Ticker", "SeriesId": "s1", "DataTypes": ["Open", "High", "Low", "Last"],
+         "Indicators": [{"Parameters": [{"Name": "Period", "Value": "50"}], "Kind": "SimpleMovingAverage", "SeriesId": "i2"}, {"Parameters":[],"Kind":"Volume","SeriesId":"i3"},
+                        {"Parameters": [{"Name": "EMA1", "Value": 12}, {"Name": "EMA2", "Value": 26}, {"Name": "SignalLine", "Value": 9}], "Kind": "MovingAverageConvergenceDivergence",
+                         "SeriesId": "i3"}, {"Parameters": [{"Name": "ShowOpen"}, {"Name": "ShowHigh"}, {"Name": "ShowLow"}, {"Name": "ShowPriorClose", "Value": True}, {"Name": "Show52WeekHigh"},
+                                                            {"Name": "Show52WeekLow"}], "Kind": "OpenHighLowLines", "SeriesId": "i4"}]}]}
+
+
+# QUERY_PARAMETER_JSON ={"Step":"P1D","TimeFrame":"YTD","StartDate":1546300800000,"EndDate":1556582400000,"EntitlementToken":"cecc4267a0194af89ca343805a3e57af","IncludeMockTick":True,"FilterNullSlots":False,"FilterClosedPoints":True,"IncludeClosedSlots":False,"IncludeOfficialClose":True,"InjectOpen":False,"ShowPreMarket":False,"ShowAfterHours":False,"UseExtendedTimeFrame":True,"WantPriorClose":False,"IncludeCurrentQuotes":False,"ResetTodaysAfterHoursPercentChange":False,"Series":[{"Key":"STOCK/US/XNYS/BAC","Dialect":"Charting","Kind":"Ticker","SeriesId":"s1","DataTypes":["Open","High","Low","Last"],"Indicators":[{"Parameters":[],"Kind":"Volume","SeriesId":"i3"},{"Parameters":[{"Name":"EMA1","Value":12},{"Name":"EMA2","Value":26},{"Name":"SignalLine","Value":9}],"Kind":"MovingAverageConvergenceDivergence","SeriesId":"i4"},{"Parameters":[{"Name":"YearOverYear"}],"Kind":"EarningsEvents","SeriesId":"i5"},{"Parameters":[{"Name":"EmaPeriod","Value":20},{"Name":"Multiplier","Value":2},{"Name":"AtrPeriod","Value":10}],"Kind":"KeltnerChannels","SeriesId":"i8"}]}]}
+
+
+
 INSTRUMENT_TYPES = (
     'rates',
     'funds',

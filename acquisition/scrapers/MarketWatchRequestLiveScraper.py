@@ -20,6 +20,7 @@ FIELDS = {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'count
 
 LIVE_SCRAPE_PERIOD_SEC = 60
 
+""" Looks at REQUEST_COLLECTION and scrapes those symbols """
 class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
     def get_symbols(self):
         time.sleep(1)
@@ -28,7 +29,6 @@ class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
         self.symbols_cursor = []
         if requests.values():
             self.symbols_cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'$or': requests.values()}, FIELDS)
-
 
     def get_next_input(self):
         now = datetime.now()
@@ -57,5 +57,4 @@ class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
     def process_data(self, queue_item):
         meta = queue_item.get_metadata()
         Quote_Repository.delete_request_quote(meta['symbol']['instrument_type'], meta['symbol']['exchange'], meta['symbol']['symbol'])
-
         super(MarketWatchRequestLiveScraper, self).process_data(queue_item=queue_item)

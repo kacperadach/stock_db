@@ -5,9 +5,13 @@ HTTP_METHODS = ('GET', 'POST')
 class QueueItemException(Exception):
     pass
 
-class QueueItem():
+class QueueItem:
 
-    def __init__(self, url, http_method, callback, symbol='', body={}, headers={}, metadata={}):
+    def __init__(self, url, http_method, callback, symbol='', body=None, headers=None, metadata=None):
+        body = {} if body is None else body
+        headers = {} if headers is None else headers
+        metadata = {} if metadata is None else metadata
+
         if not callable(callback):
             raise QueueItemException("callback supplied was not a function")
         if http_method.upper() not in HTTP_METHODS:

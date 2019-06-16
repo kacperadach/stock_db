@@ -3,32 +3,35 @@ from datetime import datetime
 from pytz import timezone
 import time
 
-from core.StockDbBase import StockDbBase
+from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
 from core.market.Market import is_market_open
 from db.Finance import Finance_DB
 from core.data.QuoteRepository import Quote_Repository
 from request.MarketWatchRequest import MarketWatchRequest
-
+from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
 SYMBOLS_COLLECTION = 'symbols'
 LIVE_SCRAPE_PERIOD_SEC = 900
 
-class MarketWatchLiveScraper(StockDbBase):
+class MarketWatchLiveScraper(BaseScraper):
     MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
 
-    def __init__(self):
+    def __init__(self, indicators=None):
         super(MarketWatchLiveScraper, self).__init__()
         self.today = datetime.now(timezone('EST')).date()
         self.db = Finance_DB
         self.quote_repository = Quote_Repository
         self.scrape_dict = {}
         self.ignored_symbols = {}
+        if indicators is None:
+            indicators = MarketWatchRequestIndicators(use_default=True)
+        self.indicators = indicators
         self.get_symbols()
 
     def get_symbols(self):
         time.sleep(1)
-        self.symbols_cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
+        self.symbols_cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'symbol': 'AAPL', 'country': 'united-states'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
 
         # # if is_market_open(datetime.now(timezone('EST'))):
         # self.symbols_cursor = self.db.find(MARKET_WATCH_SYMBOL_COLLECTION, {'instrument_type': 'stocks', 'country': 'united-states'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
@@ -50,8 +53,8 @@ class MarketWatchLiveScraper(StockDbBase):
                 continue
             if unique_id not in self.scrape_dict.keys():
                 self.scrape_dict[unique_id] = now
-                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m'})
+                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
             elif (now - self.scrape_dict[unique_id]).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
                 self.scrape_dict[unique_id] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
@@ -79,33 +82,4 @@ class MarketWatchLiveScraper(StockDbBase):
             raise RuntimeError('need time_interval in meta')
 
         data['exchange'] = metadata['symbol']['exchange']
-
-        days = {}
-        for d in data['data']:
-            if d['datetime'].date() not in days.keys():
-                days[d['datetime'].date()] = [d]
-            else:
-                days[d['datetime'].date()] += [d]
-
-        del data['data']
-        documents = []
-        for day, d in days.iteritems():
-            trading_date = datetime.combine(day, datetime.min.time())
-            new_document = deepcopy(data)
-            new_document['data'] = d
-            new_document['trading_date'] = trading_date
-            documents.append(new_document)
-
-        trading_days = map(lambda x: x['trading_date'], documents)
-        existing_documents = list(self.quote_repository.find_all(
-            symbol=metadata['symbol']['symbol'],
-            exchange=metadata['symbol']['exchange'],
-            instrument_type=metadata['symbol']['instrument_type'],
-            time_interval=metadata['time_interval'],
-            trading_dates=trading_days,
-            fields={'trading_date': 1})
-        )
-        new_documents = filter(lambda x: x['trading_date'] not in map(lambda x: x['trading_date'], existing_documents), documents)
-
-        if new_documents:
-            self.quote_repository.insert(new_documents, metadata['symbol']['instrument_type'])
+        self.quote_repository.insert(data, metadata)

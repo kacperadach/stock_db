@@ -63,24 +63,62 @@ class QuoteRepository(StockDbBase):
         }
         return self.db.find(collection, query, fields)
 
-    def insert(self, documents, instrument_type):
+    def insert(self, data, request_metadata):
+        instrument_type = request_metadata['symbol']['instrument_type']
         if instrument_type not in INSTRUMENT_TYPES:
             raise QuoteRepositoryException('invalid instrument_type')
         collection = COLLECTION_NAME + instrument_type
 
-        new_documents = []
-        for d in documents:
-            new_document = {}
-            for k, v in d.iteritems():
-                new_key = SnakeCase.to_snake_case(k)
-                if new_key in FIELD_NAMES:
-                    if k == 'symbol':
-                        v = v.upper()
-                    new_document[new_key] = v
-            new_documents.append(new_document)
+        trading_dates = list({datetime.combine(x['datetime'].date(), datetime.min.time()) for x in data['data']})
+        existing_cursor = self.find_all(data['symbol'], data['exchange'], instrument_type, data['time_interval'], trading_dates)
 
-        self.db.insert(collection, new_documents)
+        existing_dict = {}
+        for existing_document in existing_cursor:
+            existing_dict[existing_document['trading_date'].date()] = {d['datetime']: d for d in existing_document['data']}
 
+        days = {}
+        metadata = {}
+        for key, value in data.iteritems():
+            new_key = SnakeCase.to_snake_case(key)
+            if new_key in FIELD_NAMES:
+                if new_key == 'symbol':
+                    value = value.upper()
+                metadata[new_key] = value
+
+        del metadata['data']
+
+        indicators = request_metadata['indicators']
+        for d in data['data']:
+            if d['datetime'].date() not in days.keys():
+                new_document = deepcopy(metadata)
+                new_data = {}
+                for k, v in d.iteritems():
+                    new_key = indicators.get_indicator_parameter(k)
+                    new_data[new_key] = v
+
+                date = new_data['datetime'].date()
+                new_document['trading_date'] = datetime.combine(date, datetime.min.time())
+                if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
+                    new_data.update(existing_dict[date][new_data['datetime']])
+                new_document['data'] = [new_data]
+                days[date] = new_document
+            else:
+                date = d['datetime'].date()
+                new_data = {}
+                for k, v in d.iteritems():
+                    new_key = indicators.get_indicator_parameter(k)
+                    new_data[new_key] = v
+                if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
+                    new_data.update(existing_dict[date][new_data['datetime']])
+                days[date]['data'].append(new_data)
+
+        for document in days.itervalues():
+            # reversed so order of documents matches order of data in documents
+            document['data'] = list(reversed(document['data']))
+            self.db.replace_one(collection,
+                                {'symbol': document['symbol'], 'exchange': document['exchange'], 'time_interval': document['time_interval'], 'trading_date': document['trading_date']},
+                                document,
+                                upsert=True)
 
     def request_quote(self, instrument_type, exchange, symbol):
         self.log('Requested quote: {}/{}/{}'.format(instrument_type, exchange, symbol))
@@ -110,7 +148,7 @@ class QuoteRepository(StockDbBase):
         new_data = []
         meta_data = {}
 
-        time_interval = None;
+        time_interval = None
         for d in data:
             if not meta_data:
                 meta_data = deepcopy(d)
@@ -119,6 +157,7 @@ class QuoteRepository(StockDbBase):
                 del meta_data['trading_date']
             for temp in reversed(d['data']):
                 temp_data = {'macd': {}}
+                # macd needs to be fixed
                 for k, v in temp.iteritems():
                     if k.lower() == 'datetime':
                         temp_data['date'] = v.strftime('%Y-%m-%d %H:%M:%S')

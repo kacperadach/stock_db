@@ -1,10 +1,12 @@
 import json
+import uuid
 from copy import deepcopy
 from datetime import datetime
 from pytz import timezone
 from urllib import quote_plus
 
 from MarketWatchRequestConstants import *
+from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
 TIME_AND_STEP = {
     'PT1M': 'D10',
@@ -16,15 +18,25 @@ STEP_TRANSLATION = {
     '1d': 'P1D'
 }
 
+MAX_ENCODED_JSON_LENGTH = 2016
+# 3258 too long
+# 1268 good
+# 2016 good
+
 class MarketWatchRequestException(Exception):
    pass
 
 class MarketWatchRequest():
-    def __init__(self, symbol, instrument_type, step_interval):
+    def __init__(self, symbol, instrument_type, step_interval, indicators=None):
         if instrument_type not in INSTRUMENT_TYPES:
             raise MarketWatchRequestException('invalid instrument_type')
         if step_interval not in STEP_TRANSLATION.keys():
             raise MarketWatchRequestException('Invalid step interval supplied: {}'.format(step_interval))
+
+        self.indicators = indicators
+        if indicators is None or not isinstance(indicators, MarketWatchRequestIndicators):
+            self.indicators = MarketWatchRequestIndicators(use_default=True)
+
         self.instrument_type = instrument_type
         self.symbol = self.get_symbol(symbol, instrument_type)
         self.step_interval = STEP_TRANSLATION[step_interval]
@@ -33,18 +45,32 @@ class MarketWatchRequest():
         return 'GET'
 
     def get_headers(self):
+        headers = deepcopy(REQUEST_HEADER)
+        headers['Dylan2010.EntitlementToken'] = self.entitlement_token
         return REQUEST_HEADER
 
     def get_url(self):
         query_params = deepcopy(QUERY_PARAMETER_JSON)
         query_params['Series'][0]['Key'] = self.symbol
+        query_params['Series'][0]['DataTypes'] = ('Open', 'High', 'Low', 'Last')
+        query_params['Series'][0]['Indicators'] = self.indicators.get_indicators()
         query_params['Step'] = self.step_interval
         query_params['TimeFrame'] = TIME_AND_STEP[self.step_interval]
-        return GRAPH_URL.format(quote_plus(str(json.dumps(query_params)).replace(' ', '')))
+        query_params['ShowPreMarket'] = True
+        query_params['ShowAfterHours'] = True
+        # fake token to be sneaky
+        self.entitlement_token = str(uuid.uuid4()).replace("-", "")
+        query_params['EntitlementToken'] = self.entitlement_token
+
+        encoded_query_params = quote_plus(str(json.dumps(query_params)).replace(' ', ''))
+        # if len(encoded_query_params) >= MAX_ENCODED_JSON_LENGTH:
+        #     raise MarketWatchRequestException('url encoded json query param too long: ' + str(query_params))
+
+        return GRAPH_URL.format(encoded_query_params)
 
     def get_symbol(self, symbol, instrument_type):
         if instrument_type.lower() == 'rates':
-            if symbol['Country'] == 'Money Rates':
+            if symbol['country'] == 'Money Rates':
                 return 'INTERSTATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
             else:
                 return 'LOANRATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
@@ -112,12 +138,14 @@ class MarketWatchRequest():
         all_data = []
         for i, tick in enumerate(ticks):
             d = {}
-            dt = datetime.fromtimestamp((tick / 1000) + (data['utc_offset'] * 60))
+            dt_utc = datetime.fromtimestamp(tick / 1000)
+            dt = datetime.fromtimestamp((tick / 1000) + (data['utc_offset'] * -60))
             for key, val in series_data.iteritems():
                 if val[i] is not None:
                     d[key] = val[i]
             if d:
                 d['datetime'] = dt
+                d['datetime_utc'] = dt_utc
                 all_data.append(d)
         data['data'] = all_data
         return data
