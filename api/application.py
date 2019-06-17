@@ -10,14 +10,14 @@ app.register_blueprint(quote_view, url_prefix="/quote")
 app.register_blueprint(symbols_view, url_prefix="/symbols")
 
 # Serve React App
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
-# def serve(path):
-#     print path
-#     if path != "" and os.path.exists("react_app/build/" + path):
-#         return send_from_directory('react_app/build', path)
-#     else:
-#         return send_from_directory('react_app/build', 'index.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    print path
+    if path != "" and os.path.exists("react_app/build/" + path):
+        return send_from_directory('react_app/build', path)
+    else:
+        return send_from_directory('react_app/build', 'index.html')
 
 
 if __name__ == '__main__':
