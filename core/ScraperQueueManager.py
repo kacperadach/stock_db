@@ -2,6 +2,7 @@ from time import sleep
 from Queue import Queue
 from threading import Thread, Event
 
+from acquisition.scrapers.IndexLiveScraper import IndexLiveScraper
 from acquisition.scrapers.MarketWatchRequestLiveScraper import MarketWatchRequestLiveScraper
 from acquisition.scrapers.Stocks import StockScraper
 from acquisition.scrapers.Symbols import SymbolScraper
@@ -38,8 +39,8 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(),)
-        self.scrapers = (MarketWatchSymbolsV2(), )
+        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper())
+        self.scrapers = (MarketWatchSymbolsV2(), MarketWatchHistoricalScraper())
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()

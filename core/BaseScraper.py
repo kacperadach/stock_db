@@ -6,8 +6,12 @@ from core.StockDbBase import StockDbBase
 class BaseScraper(StockDbBase):
 
     @abstractmethod
+    def get_symbols(self):
+        raise NotImplementedError('get_symbols')
+
+    @abstractmethod
     def get_next_input(self):
-        pass
+        raise NotImplementedError('get_next_input')
 
     @abstractmethod
     def process_data(self, queue_item):

@@ -10,7 +10,6 @@ from request.MarketWatchRequest import MarketWatchRequest
 from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
 SYMBOL_COLLECTION = 'market_watch_symbols'
-LIVE_SCRAPE_PERIOD_SEC = 900
 
 class MarketWatchHistoricalScraper(BaseScraper):
 
@@ -20,15 +19,14 @@ class MarketWatchHistoricalScraper(BaseScraper):
         self.db = Finance_DB
         self.scrape_dict = {}
         self.symbols = []
-        self.get_symbols()
+        self.symbols_cursor = self.get_symbols()
         self.quote_repository = Quote_Repository
         if indicators is None:
             indicators = MarketWatchRequestIndicators(use_default=True)
         self.indicators = indicators
 
     def get_symbols(self):
-        self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {'symbol': 'AAPL',  'country_code': 'US'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
-        # self.symbols_cursor = self.db.find(SYMBOL_COLLECTION, {}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
+        return self.db.find(SYMBOL_COLLECTION, {}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -36,7 +34,7 @@ class MarketWatchHistoricalScraper(BaseScraper):
         if now.date() != self.today:
             self.today = now.date()
             self.scrape_dict = {}
-            self.get_symbols()
+            self.symbols_cursor = self.get_symbols()
 
         for symbol in self.symbols_cursor:
             unique_id = self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['exchange'])

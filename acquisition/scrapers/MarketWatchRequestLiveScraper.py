@@ -23,15 +23,19 @@ LIVE_SCRAPE_PERIOD_SEC = 60
 """ Looks at REQUEST_COLLECTION and scrapes those symbols """
 class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
     def get_symbols(self):
-        time.sleep(1)
         requests = self.db.find(REQUEST_COLLECTION, {}, REQUEST_FIELDS).sort('timestamp', -1).limit(LIMIT)
         requests = {request['instrument_type'] + request['exchange'] + request['symbol']: request for request in requests}
-        self.symbols_cursor = []
+        cursor = []
         if requests.values():
-            self.symbols_cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'$or': requests.values()}, FIELDS)
+            cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'$or': requests.values()}, FIELDS)
+        return cursor
 
     def get_next_input(self):
         now = datetime.now()
+
+        if self.symbols_cursor is None:
+            self.symbols_cursor = list(self.get_symbols())
+
         symbols = list(self.symbols_cursor)
 
         for symbol in symbols:
@@ -52,7 +56,7 @@ class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
                 self.scrape_dict[unique_id]['historical'] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'])
                 return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1d'})
-        self.get_symbols()
+        self.symbols_cursor = self.get_symbols()
 
     def process_data(self, queue_item):
         meta = queue_item.get_metadata()
