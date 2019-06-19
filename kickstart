@@ -1,0 +1,12 @@
+- install python 2.7
+- install pip
+    sudo apt update
+    (sudo apt install python-pip)
+- install python packages (requirements.txt)
+- install mongodb
+    - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+    -sudo systemctl enable mongod
+        ^ didnt work
+
+    - sudo apt-get install -y mongodb
+
