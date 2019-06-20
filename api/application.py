@@ -20,7 +20,7 @@ def serve(path):
         return send_from_directory('react_app/build', 'index.html')
 
 def run():
-    app.run(host='0.0.0.0', use_reloader=True, port=5000, threaded=False)
+    app.run(use_reloader=True, port=5000, threaded=False)
 
 if __name__ == '__main__':
     run()
