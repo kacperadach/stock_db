@@ -27,7 +27,10 @@ class FinanceDB(StockDbBase):
 		self.host = environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
 		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
 		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
-		self.mongo_client = MongoClient('mongodb://' + self.user + ':' + self.password + '@' + self.host, self.port)[self.db_name]
+		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host), self.port
+		connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host) + ':' + str(self.port)
+		self.log(connection_string)
+		self.mongo_client = MongoClient(connection_string)[self.db_name]
 
 	def get_db_params(self):
 		self.host = environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
