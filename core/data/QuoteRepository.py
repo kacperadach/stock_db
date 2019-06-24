@@ -87,6 +87,7 @@ class QuoteRepository(StockDbBase):
 
         del metadata['data']
 
+
         indicators = request_metadata['indicators']
         for d in data['data']:
             if d['datetime'].date() not in days.keys():

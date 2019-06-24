@@ -41,6 +41,9 @@ class MarketWatchRequest():
         self.symbol = self.get_symbol(symbol, instrument_type)
         self.step_interval = STEP_TRANSLATION[step_interval]
 
+    def get_indicators(self):
+        return self.indicators
+
     def get_http_method(self):
         return 'GET'
 

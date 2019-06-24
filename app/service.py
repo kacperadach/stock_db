@@ -53,4 +53,5 @@ class MainService():
 		environment_vars = PROD_ENV_VARS if self.env.lower() == 'prod' else DEV_ENV_VARS
 		environ['env'] = self.env
 		for key, val in environment_vars.items():
+			Logger.log(str(key) + " " + str(val))
 			environ[key] = val
