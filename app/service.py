@@ -1,17 +1,16 @@
-from os import environ
-from datetime import datetime
 import sys
+from datetime import datetime
+from os import environ
 
-from constants import DEV_ENV_VARS, PROD_ENV_VARS
-
-from logger import Logger
-from discord.webhook import DiscordWebhook
-from db.MongoIndexer import MongoIndexer
-from db.Finance import Finance_DB
+from DatabaseTest import database_test
 from config import App_Config
+from constants import DEV_ENV_VARS, PROD_ENV_VARS
 from core.ScraperQueueManager import ScraperQueueManager
+from db.Finance import Finance_DB
+from db.MongoIndexer import MongoIndexer
+from logger import Logger
 from request.base.TorManager import Tor_Manager
-from db.DatabaseTest import database_test
+
 
 class MainService():
 

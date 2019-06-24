@@ -4,7 +4,7 @@ def database_test(env='prod'):
     if env not in ENVIRONMENTS:
         raise AssertionError('dev or prod asshole')
     import time
-    from Finance import Finance_DB
+    from db.Finance import Finance_DB
 
     test_collection= 'test'
 
