@@ -3,14 +3,16 @@ COMMAND_LINE_ARGUMENTS = {
 	'use_tor': False
 }
 
-
 class Config():
 
     def __init__(self):
+        self.config_set = False
         for key, value in COMMAND_LINE_ARGUMENTS.iteritems():
             setattr(self, key, value)
 
     def set_config(self, configuration):
+        if self.config_set is True:
+            return
         if len(configuration) <= 1:
             pass
         else:
@@ -30,6 +32,7 @@ class Config():
                     setattr(self, key, bool(value))
                 else:
                     setattr(self, key, value)
+        self.config_set = True
 
 App_Config = Config()
 

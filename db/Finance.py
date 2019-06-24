@@ -7,10 +7,11 @@ from datetime import datetime
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
 
-from app.constants import DEV_ENV_VARS
+from app.constants import DEV_ENV_VARS, PROD_ENV_VARS
 from utils.credentials import Credentials
 from core.StockDbBase import StockDbBase
 from utils.batch import batch
+from app.config import App_Config
 
 INSERT_BATCH_SIZE = 100
 
@@ -21,21 +22,22 @@ class FinanceDB(StockDbBase):
 
 	def __init__(self):
 		super(FinanceDB, self).__init__()
+		App_Config.set_config(sys.argv)
 		self.credentials = Credentials()
 		self.user = self.credentials.get_user()
 		self.password = self.credentials.get_password()
-		self.host = environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
-		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
-		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
+
+		env_vars =  DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
+
+		self.host = env_vars['FINANCE_DB_HOST']
+		self.port = int(env_vars['FINANCE_DB_PORT'])
+		self.db_name = env_vars['FINANCE_DB_NAME']
 		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host), self.port
 		connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host) + ':' + str(self.port)
-		self.log(connection_string)
+		self.log(connection_string + "-" + self.db_name)
 		self.mongo_client = MongoClient(connection_string)[self.db_name]
 
 	def get_db_params(self):
-		self.host = environ.get('FINANCE_DB_HOST', DEV_ENV_VARS['FINANCE_DB_HOST'])
-		self.port = int(environ.get('FINANCE_DB_PORT', DEV_ENV_VARS['FINANCE_DB_PORT']))
-		self.db_name = environ.get('FINANCE_DB_NAME', DEV_ENV_VARS['FINANCE_DB_NAME'])
 		self.log("using db: {}".format(self.db_name))
 
 	@contextmanager
