@@ -11,6 +11,7 @@ from db.Finance import Finance_DB
 from config import App_Config
 from core.ScraperQueueManager import ScraperQueueManager
 from request.base.TorManager import Tor_Manager
+from db.DatabaseTest import database_test
 
 class MainService():
 
@@ -33,8 +34,8 @@ class MainService():
 		Logger.log('                                             ')
 		Logger.log('+---------------------------------------------+')
 		self.main_service()
-		if self.env == 'prod':
-			DiscordWebhook().alert_start()
+		# if self.env == 'prod':
+		# 	DiscordWebhook().alert_start()
 		Logger.log('Service finished, total time running: {}'.format(datetime.now()-self.start))
 
 	def _log(self, msg, level='info'):
@@ -47,6 +48,8 @@ class MainService():
 			self._log('Running Tor Test')
 			Tor_Manager.test()
 		MongoIndexer().create_indices()
+		self._log('Running database test: {}'.format(self.env))
+		database_test(self.env)
 		ScraperQueueManager(use_tor=self.use_tor).start()
 
 	def initialize_env_vars(self):
