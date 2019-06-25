@@ -58,7 +58,7 @@ class MarketWatchSymbolsV2(StockDbBase):
             for d in data:
                 d['country'] = country
                 d['instrument_type'] = instrument_type
-                cursor = Symbol_Repository.find(symbol=d['symbol'], exchange=d['exchange'])
+                cursor = Symbol_Repository.find(symbol=d['symbol'], exchange=d['Exchange'])
                 if cursor.count() == 0:
                     documents.append(d)
 
