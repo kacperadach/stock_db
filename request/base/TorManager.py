@@ -30,20 +30,23 @@ class TorManager(StockDbBase):
         start_socks_port = SOCKS_PORT
         start_control_port = CONTROL_PORT
 
-        def start_tor(x):
-            tor_client = TorClient(start_socks_port + (2 * x), start_control_port + (2 * x), self.get_data_directory(x))
-            tor_client.start_tor()
-            self.tor_instances.append(tor_client)
+        # def start_tor(x):
+        #     tor_client = TorClient(start_socks_port + (2 * x), start_control_port + (2 * x), self.get_data_directory(x))
+        #     tor_client.start_tor()
+        #     self.tor_instances.append(tor_client)
 
         threads = []
         for x in range(self.num_tor_instances):
-            threads.append(Thread(target=start_tor, args=(x,)))
+            tor_client = TorClient(start_socks_port + (2 * x), start_control_port + (2 * x), self.get_data_directory(x))
+            tor_client.start_tor()
+            self.tor_instances.append(tor_client)
+            # threads.append(Thread(target=start_tor, args=(x,)))
 
-        for t in threads:
-            t.start()
-
-        for t in threads:
-            t.join()
+        # for t in threads:
+        #     t.start()
+        #
+        # for t in threads:
+        #     t.join()
 
         self.log('Successfully launched {} tor instances'.format(self.num_tor_instances))
 
