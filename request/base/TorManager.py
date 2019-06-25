@@ -47,7 +47,6 @@ class TorManager(StockDbBase):
 
         self.log('Successfully launched {} tor instances'.format(self.num_tor_instances))
 
-
     def test(self):
         tc = self.tor_instances[0]
         self.log('Running Tor Test for SocksPort={}, ControlPort={}'.format(tc.SocksPort, tc.ControlPort))

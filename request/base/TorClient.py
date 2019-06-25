@@ -51,7 +51,6 @@ class TorClient(StockDbBase):
         return False
 
     def test(self):
-        return
         try:
             self.log('Connecting to Tor')
             self.connect()
