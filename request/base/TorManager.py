@@ -1,8 +1,10 @@
 from os import path
+from threading import Thread
 
 from core.StockDbBase import StockDbBase
 from TorClient import TorClient
 from utils.credentials import Credentials
+
 
 DEFAULT_NUM_TOR_INSTANCES = 5
 SOCKS_PORT = 9050
@@ -27,11 +29,24 @@ class TorManager(StockDbBase):
 
         start_socks_port = SOCKS_PORT
         start_control_port = CONTROL_PORT
-        for x in range(self.num_tor_instances):
+
+        def start_tor(x):
             tor_client = TorClient(start_socks_port + (2 * x), start_control_port + (2 * x), self.get_data_directory(x))
             tor_client.start_tor()
             self.tor_instances.append(tor_client)
+
+        threads = []
+        for x in range(self.num_tor_instances):
+            threads.append(Thread(target=start_tor, args=(x,)))
+
+        for t in threads:
+            t.start()
+
+        for t in threads:
+            t.join()
+
         self.log('Successfully launched {} tor instances'.format(self.num_tor_instances))
+
 
     def test(self):
         tc = self.tor_instances[0]
