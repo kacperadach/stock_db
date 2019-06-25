@@ -75,5 +75,4 @@ class MarketWatchLiveScraper(BaseScraper):
         if 'time_interval' not in metadata.keys():
             raise RuntimeError('need time_interval in meta')
 
-        data['exchange'] = metadata['symbol']['exchange']
         self.quote_repository.insert(data, metadata)

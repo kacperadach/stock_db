@@ -62,5 +62,4 @@ class MarketWatchHistoricalScraper(BaseScraper):
             self.log('symbol from request does not match response', level='warn')
             return
 
-        data['exchange'] = metadata['symbol']['exchange']
         self.quote_repository.insert(data, metadata)

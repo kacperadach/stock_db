@@ -4,8 +4,10 @@ from core.StockDbBase import StockDbBase
 from Finance import Finance_DB
 from MongoIndex import MongoIndex
 
+SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL = MongoIndex(name='symbol_exchange_country_code_date_interval', index={'symbol': 1, 'exchange': 1, 'country_code': 1, 'trading_date': -1, 'time_interval': 1}, unique=True)
+
 COLLECTION_INDICES = {
-    'stocks': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True),
+    'stocks': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL,
                 MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
                 MongoIndex(name='symbol', index={'symbol': 1}, unique=False)),
     'symbols': (MongoIndex(name='symbol', index={'symbol': 1, 'region': 1}, unique=True),
@@ -17,21 +19,21 @@ COLLECTION_INDICES = {
                 MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
                 MongoIndex(name='symbol', index={'symbol': 1}, unique=False)),
     'futures_symbols': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True), ),
-    'market_watch_symbols': (MongoIndex(name='symbol', index={'symbol': 1, 'instrument_type': 1, 'exchange': 1}, unique=False),
+    'market_watch_symbols': (MongoIndex(name='symbol', index={'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country_code': 1}, unique=False),
                             MongoIndex(name='instrument_type', index={'instrument_type': 1}, unique=False),
                              MongoIndex(name='instrument_type_country', index={'instrument_type': 1, 'country': 1}, unique=False)),
-    'market_watch_stocks': (MongoIndex(name='symbol_date_interval_exchange', index={'symbol': 1, 'exchange': 1, 'trading_date': -1, 'time_interval': 1}, unique=True),
+    'market_watch_stocks': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL,
                             MongoIndex(name='symbol_exchange', index={'symbol': 1, 'exchange': 1}, unique=False)),
-    'market_watch_american-depository-receipt-stocks': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_bonds': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_currencies': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_exchange-traded-funds': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_exchange-traded-notes': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_funds': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_indexes': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_rates': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_real-estate-investment-trusts': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
-    'market_watch_warrants': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True), ),
+    'market_watch_american-depository-receipt-stocks': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_bonds': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_currencies': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_exchange-traded-funds': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_exchange-traded-notes': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_funds': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_indexes': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_rates': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_real-estate-investment-trusts': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_warrants': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_request': (MongoIndex(name='instrument_type_exchange_symbol_timestamp', index={'instrument_type': 1, 'exchange': 1, 'symbol': 1, 'timestamp': 1}, unique=False), ),
 }
 

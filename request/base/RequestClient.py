@@ -84,7 +84,7 @@ class RequestClient(StockDbBase):
             if self.use_tor:
                 self.tor_client.new_nym()
         self.request_counter += retries
-        if self.request_counter >= REQUESTS_PER_NYM:
+        if self.use_tor and self.request_counter >= REQUESTS_PER_NYM:
             self.tor_client.new_nym()
             self.request_counter = 0
         return ResponseWrapper(response)

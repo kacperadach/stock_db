@@ -19,7 +19,9 @@ FIELD_NAMES = (
     'time_zone',
     'common_name',
     'data',
-    'trading_date'
+    'trading_date',
+    'country',
+    'country_code'
 )
 
 ALL_FIELDS = {x: 1 for x in FIELD_NAMES}
@@ -36,6 +38,7 @@ class QuoteRepository(StockDbBase):
 
     def __init__(self):
         self.db = Finance_DB
+        self.locks = {}
 
     def _get_all_fields(self):
         all_fields = deepcopy(ALL_FIELDS)
@@ -64,17 +67,12 @@ class QuoteRepository(StockDbBase):
         return self.db.find(collection, query, fields)
 
     def insert(self, data, request_metadata):
+        request_key = request_metadata['symbol']
+
         instrument_type = request_metadata['symbol']['instrument_type']
         if instrument_type not in INSTRUMENT_TYPES:
             raise QuoteRepositoryException('invalid instrument_type')
         collection = COLLECTION_NAME + instrument_type
-
-        trading_dates = list({datetime.combine(x['datetime'].date(), datetime.min.time()) for x in data['data']})
-        existing_cursor = self.find_all(data['symbol'], data['exchange'], instrument_type, data['time_interval'], trading_dates)
-
-        existing_dict = {}
-        for existing_document in existing_cursor:
-            existing_dict[existing_document['trading_date'].date()] = {d['datetime']: d for d in existing_document['data']}
 
         days = {}
         metadata = {}
@@ -84,9 +82,18 @@ class QuoteRepository(StockDbBase):
                 if new_key == 'symbol':
                     value = value.upper()
                 metadata[new_key] = value
+        metadata['exchange'] = request_metadata['symbol']['exchange']
+        metadata['country'] = request_metadata['symbol']['country']
+        metadata['country_code'] = request_metadata['symbol']['country_code']
 
         del metadata['data']
 
+        trading_dates = list({datetime.combine(x['datetime'].date(), datetime.min.time()) for x in data['data']})
+        existing_cursor = self.find_all(data['symbol'], metadata['exchange'], instrument_type, data['time_interval'], trading_dates)
+
+        existing_dict = {}
+        for existing_document in existing_cursor:
+            existing_dict[existing_document['trading_date'].date()] = {d['datetime']: d for d in existing_document['data']}
 
         indicators = request_metadata['indicators']
         for d in data['data']:
