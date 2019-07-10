@@ -107,7 +107,7 @@ class QuoteRepository(StockDbBase):
                 date = new_data['datetime'].date()
                 new_document['trading_date'] = datetime.combine(date, datetime.min.time())
                 if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
-                    new_data.update(existing_dict[date][new_data['datetime']])
+                    existing_dict[date][new_data['datetime']].update(new_data)
                 new_document['data'] = [new_data]
                 days[date] = new_document
             else:
@@ -117,7 +117,7 @@ class QuoteRepository(StockDbBase):
                     new_key = indicators.get_indicator_parameter(k)
                     new_data[new_key] = v
                 if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
-                    new_data.update(existing_dict[date][new_data['datetime']])
+                    existing_dict[date][new_data['datetime']].update(new_data)
                 days[date]['data'].append(new_data)
 
         for document in days.itervalues():

@@ -1,3 +1,8 @@
-from request.base.TorManager import Tor_Manager
 
-Tor_Manager.start_instances()
+
+original = {'test': 1}
+new = {'test2': 1, 'test': 2}
+
+new.update(original)
+
+print new
