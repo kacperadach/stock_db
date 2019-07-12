@@ -6,6 +6,7 @@ from dateutil import tz
 from pymongo import ASCENDING
 
 from core.StockDbBase import StockDbBase
+from core.data.uid import encrypt_unique_id
 from db.Finance import Finance_DB
 from request.MarketWatchRequestConstants import INSTRUMENT_TYPES
 from SnakeCase import SnakeCase
@@ -150,9 +151,9 @@ class QuoteRepository(StockDbBase):
             collection,
             {'symbol': symbol, 'exchange': exchange, 'time_interval': time_interval, 'trading_date': {'$lte': end, '$gte': start}},
             self._get_all_fields()
-        ).sort('trading_date', -1)))
+        ).sort('trading_date', -1)), instrument_type)
 
-    def _convert_for_chart(self, data):
+    def _convert_for_chart(self, data, instrument_type):
         new_data = []
         meta_data = {}
 
@@ -181,6 +182,9 @@ class QuoteRepository(StockDbBase):
                         temp_data[k.lower()] = v
                 new_data.append(temp_data)
         new_data.reverse()
+
+        uid = encrypt_unique_id({'symbol': meta_data['symbol'], 'exchange': meta_data['exchange'], 'country_code': meta_data['country_code'], 'instrument_type': instrument_type})
+        meta_data['uid'] = uid
         return {'meta_data': meta_data, 'data': new_data}
 
 

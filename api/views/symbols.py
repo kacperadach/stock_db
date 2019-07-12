@@ -14,7 +14,8 @@ symbols_view = flask.Blueprint('symbols', __name__)
 
 @symbols_view.route('search/<symbol>', methods=['GET'])
 def search_symbols(symbol):
-    return Response.ok(Symbol_Repository.search(symbol))
+    search_results = Symbol_Repository.search(symbol)
+    return Response.ok(search_results)
 
 @symbols_view.route('/<instrument_type>/<exchange>/<symbol>', methods=['GET'])
 def get_symbol(instrument_type, exchange, symbol):

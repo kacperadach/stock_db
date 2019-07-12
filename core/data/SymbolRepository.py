@@ -1,9 +1,13 @@
 from datetime import datetime
 from copy import deepcopy
 import re
+import base64
 
+from core.data.uid import encrypt_unique_id
 from db.Finance import Finance_DB
 from SnakeCase import SnakeCase
+
+
 
 # normalize field names
 FIELD_NAMES = (
@@ -62,9 +66,17 @@ class SymbolRepository():
 
     def search(self, symbol_search):
         regex = re.compile('^'+ symbol_search.upper(), re.IGNORECASE)
-        return list(self.db.find(COLLECTION_NAME, {'symbol': regex}, self._get_all_fields()).sort((['symbol', 1], ['country', -1])).limit(5))
+        search_results = list(self.db.find(COLLECTION_NAME, {'symbol': regex}, self._get_all_fields()).sort((['symbol', 1], ['country', -1])).limit(5))
+        for search_result in search_results:
+            search_result['uid'] = encrypt_unique_id(search_result)
+
+        return search_results
 
 class SymbolRepositoryException(Exception):
     pass
 
 Symbol_Repository = SymbolRepository()
+
+if __name__ == '__main__':
+    uid = Symbol_Repository.search('gdx')[0]['uid']
+    print Symbol_Repository.decrypt_unique_id('QSAgICAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')
