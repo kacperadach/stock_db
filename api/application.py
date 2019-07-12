@@ -51,14 +51,14 @@ def handle_message(message):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Serve React App
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
-# def serve(path):
-#     print path
-#     if path != "" and os.path.exists(os.path.join(dir_path,'react_app/build', path)):
-#         return send_from_directory('react_app/build', path)
-#     else:
-#         return send_from_directory('react_app/build', 'index.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    print path
+    if path != "" and os.path.exists(os.path.join(dir_path,'react_app/build', path)):
+        return send_from_directory('react_app/build', path)
+    else:
+        return send_from_directory('react_app/build', 'index.html')
 
 def ack():
     print 'message was received!'
