@@ -54,16 +54,16 @@ def get_metadata(chart):
     if len(prev_days['data']) == 2:
         previous = prev_days['data'][0]
         most_recent = prev_days['data'][1]
-        if datetime.strptime(most_recent['date'].split()[0], '%Y-%m-%d').date() == datetime.today().date():
-            point_diff = most_recent['close'] - previous['close']
-            percentage_diff = point_diff / previous['close'] * 100
+        # if datetime.strptime(most_recent['date'].split()[0], '%Y-%m-%d').date() == datetime.today().date():
+        point_diff = most_recent['close'] - previous['close']
+        percentage_diff = point_diff / previous['close'] * 100
 
-            point_diff = '{:.2f}'.format(point_diff)
-            percentage_diff = '{:.2f}'.format(percentage_diff)
+        point_diff = '{:.2f}'.format(point_diff)
+        percentage_diff = '{:.2f}'.format(percentage_diff)
 
-            data['point_diff'] = point_diff
-            data['percentage_diff'] = percentage_diff
-            data['close'] = most_recent['close']
+        data['point_diff'] = point_diff
+        data['percentage_diff'] = percentage_diff
+        data['close'] = most_recent['close']
 
     print data
     emit('metadata', data)
