@@ -25,12 +25,13 @@ def encrypt_unique_id(symbol):
 
 
 def decrypt_unique_id(uid):
-    print uid
     parts = base64.urlsafe_b64decode(str(uid)).split('/')
-    instrument_type = parts[3].strip();
+    instrument_type = parts[3].strip()
 
     for key, value in INSTRUMENT_TYPE_MAP.iteritems():
         if value == instrument_type:
             instrument_type = key
             break
-    return {'symbol': parts[0].strip(), 'exchange': parts[1].strip(), 'country_code': parts[2].strip(), 'instrument_type': instrument_type, }
+
+    symbol = {'symbol': parts[0].strip(), 'exchange': parts[1].strip(), 'country_code': parts[2].strip(), 'instrument_type': instrument_type}
+    return symbol

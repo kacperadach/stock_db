@@ -1,12 +1,2 @@
-TODO:
 
-	- fix data update; append new values dont overwrite
-	- fix symbol fetch from wsj
-	- fix direction of values in data; api reverses them
-	-setup scrapers and deploy
-
-	- make home page
-		- group symbols; indexes, bonds, commodities, etc.
-	
-	- analyze sector winners of the day
-	-
+https://www.iotafinance.com/en/ISO-10383-Market-Identification-Codes-MIC.html

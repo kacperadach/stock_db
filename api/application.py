@@ -1,6 +1,7 @@
 import os
 import json
 from bson import json_util
+from datetime import datetime, timedelta
 
 # for socketio
 from gevent import monkey
@@ -31,25 +32,45 @@ def search_symbols(searchTerm):
 
 @socketio.on('chart')
 def get_chart(chart):
-    print chart
     symbol = decrypt_unique_id(chart['uid'])
     start = None if 'start' not in chart.keys() else chart['start']
     end = None if 'start' not in chart.keys() else chart['end']
-    print start
     emit('chart', json.dumps(get_quote(symbol['instrument_type'], symbol['exchange'], symbol['symbol'], start=start, end=end), default=json_util.default))
 
-@socketio.on('message')
-def handle_message(message):
-    print('received message: ' + message)
-    send({'data': 'test'}, json=True, callback=ack, broadcast=False)
-    emit('event', {'data': 'test'})
-    #emit for named messages
+@socketio.on('metadata')
+def get_metadata(chart):
+    chart = {'uid': 'U1BYICAvICAgICAvVVMgIC9pbmRleGVzICAg'}
+    symbol = decrypt_unique_id(chart['uid'])
+    print symbol
 
-# app.register_blueprint(quote_view, url_prefix="/quote")
-# app.register_blueprint(symbols_view, url_prefix="/symbols")
+    instrument_type = symbol['instrument_type']
+    exchange = symbol['exchange']
+    sym = symbol['symbol']
+
+    data = Symbol_Repository.get(sym, exchange, instrument_type)
+
+    today = datetime.now().date()
+
+    prev_days = get_quote(instrument_type, exchange, sym, time_interval='1d', start=today - timedelta(days=6), end=today + timedelta(days=1), limit=2)
+    if len(prev_days['data']) == 2:
+        previous = prev_days['data'][0]
+        most_recent = prev_days['data'][1]
+        if datetime.strptime(most_recent['date'].split()[0], '%Y-%m-%d').date() == datetime.today().date():
+            point_diff = most_recent['close'] - previous['close']
+            percentage_diff = point_diff / previous['close'] * 100
+
+            point_diff = '{:.2f}'.format(point_diff)
+            percentage_diff = '{:.2f}'.format(percentage_diff)
+
+            data['point_diff'] = point_diff
+            data['percentage_diff'] = percentage_diff
+            data['close'] = most_recent['close']
+
+    print data
+    emit('metadata', data)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-
+#
 # Serve React App
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -60,12 +81,13 @@ def serve(path):
     else:
         return send_from_directory('react_app/build', 'index.html')
 
-def ack():
-    print 'message was received!'
-
+# def ack():
+#     print 'message was received!'
+#
 def run():
     socketio.run(app, debug=True)
     # app.run(use_reloader=True, port=5000, threaded=False)
 
 if __name__ == '__main__':
+    # get_metadata({'uid': 'SFVCICAvWFdBUiAvUEwgIC9zdG9ja3MgICAg'})
     run()

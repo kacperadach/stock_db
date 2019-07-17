@@ -139,7 +139,7 @@ class QuoteRepository(StockDbBase):
     def delete_request_quote(self, instrument_type, exchange, symbol):
         self.db.delete_many(REQUEST_COLLECTION, {'instrument_type': instrument_type, 'exchange': exchange, 'symbol': symbol})
 
-    def get_interval(self, instrument_type, exchange, symbol, start, end, time_interval):
+    def get_interval(self, instrument_type, exchange, symbol, start, end, time_interval, limit=None):
         if instrument_type not in INSTRUMENT_TYPES:
             raise QuoteRepositoryException('invalid instrument_type')
         if  not isinstance(start, datetime):
@@ -147,11 +147,12 @@ class QuoteRepository(StockDbBase):
         if  not isinstance(end, datetime):
             raise QuoteRepositoryException('end must be datetime')
         collection = COLLECTION_NAME + instrument_type
-        return self._convert_for_chart(list(self.db.find(
-            collection,
-            {'symbol': symbol, 'exchange': exchange, 'time_interval': time_interval, 'trading_date': {'$lte': end, '$gte': start}},
-            self._get_all_fields()
-        ).sort('trading_date', -1)), instrument_type)
+
+        data = self.db.find(collection, {'symbol': symbol, 'exchange': exchange, 'time_interval': time_interval, 'trading_date': {'$lte': end, '$gte': start}}, self._get_all_fields()).sort('trading_date', -1)
+        if limit is not None:
+            data.limit(limit)
+
+        return self._convert_for_chart(list(data), instrument_type)
 
     def _convert_for_chart(self, data, instrument_type):
         new_data = []
@@ -183,10 +184,10 @@ class QuoteRepository(StockDbBase):
                 new_data.append(temp_data)
         new_data.reverse()
 
-        uid = encrypt_unique_id({'symbol': meta_data['symbol'], 'exchange': meta_data['exchange'], 'country_code': meta_data['country_code'], 'instrument_type': instrument_type})
-        meta_data['uid'] = uid
+        if meta_data:
+            uid = encrypt_unique_id({'symbol': meta_data['symbol'], 'exchange': meta_data['exchange'], 'country_code': meta_data['country_code'], 'instrument_type': instrument_type})
+            meta_data['uid'] = uid
         return {'meta_data': meta_data, 'data': new_data}
-
 
 
 class QuoteRepositoryException(Exception):
