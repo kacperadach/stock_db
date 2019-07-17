@@ -39,7 +39,6 @@ def get_chart(chart):
 
 @socketio.on('metadata')
 def get_metadata(chart):
-    chart = {'uid': 'U1BYICAvICAgICAvVVMgIC9pbmRleGVzICAg'}
     symbol = decrypt_unique_id(chart['uid'])
     print symbol
 
