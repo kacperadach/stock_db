@@ -61,6 +61,7 @@ def get_metadata(chart):
         point_diff = '{:.2f}'.format(point_diff)
         percentage_diff = '{:.2f}'.format(percentage_diff)
 
+        data['most_recent_day'] = most_recent['date']
         data['point_diff'] = point_diff
         data['percentage_diff'] = percentage_diff
         data['close'] = most_recent['close']
