@@ -15,7 +15,6 @@ SYMBOLS_COLLECTION = 'symbols'
 LIVE_SCRAPE_PERIOD_SEC = 900
 
 class MarketWatchLiveScraper(BaseScraper):
-    MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
 
     def __init__(self, indicators=None):
         super(MarketWatchLiveScraper, self).__init__()
@@ -28,9 +27,6 @@ class MarketWatchLiveScraper(BaseScraper):
             indicators = MarketWatchRequestIndicators(use_default=True)
         self.indicators = indicators
         self.symbols_cursor = self.get_symbols()
-
-    # def get_symbols(self):
-    #     return self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'symbol': 'AAPL', 'country': 'united-states'}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))
@@ -51,8 +47,8 @@ class MarketWatchLiveScraper(BaseScraper):
                 return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
             elif (now - self.scrape_dict[unique_id]).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
                 self.scrape_dict[unique_id] = now
-                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m'})
+                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
 
         self.get_symbols()
 

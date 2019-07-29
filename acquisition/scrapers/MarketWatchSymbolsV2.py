@@ -31,6 +31,8 @@ class MarketWatchSymbolsV2(StockDbBase):
             self.build_scrape_dict()
 
         for instrument_type in INSTRUMENT_TYPES:
+            if instrument_type.lower() == 'futures':
+                continue
             for country in COUNTRIES:
                 if self.scrape_dict[instrument_type][country][0] == 0 or self.scrape_dict[instrument_type][country][1] is True:
                     next_page = self.scrape_dict[instrument_type][country][0] + 1

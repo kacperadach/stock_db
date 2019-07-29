@@ -14,20 +14,24 @@ monkey.patch_all()
 from flask import Flask, send_from_directory, render_template
 from flask_socketio import SocketIO, send, emit
 
-from views.quote import get_quote
-from views.symbols import symbols_view
+from views.quote import get_quote, get_live_futures_quotes
 
 from core.data.SymbolRepository import Symbol_Repository
-from views.Response import Response
 
 app = Flask(__name__, static_folder='react_app/build')
 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode='gevent')
 
+@socketio.on('live_futures')
+def get_live_futures(meta):
+    print meta
+    # emit('live_futures', get_live_futures_quotes(meta['offset'], meta['limit']))
+    emit('live_futures', json.dumps(get_live_futures_quotes(), default=json_util.default))
+
+
 @socketio.on('symbols')
 def search_symbols(searchTerm):
-    print searchTerm
     emit('symbols', {'term': searchTerm, 'results': Symbol_Repository.search(searchTerm)})
 
 @socketio.on('chart')
@@ -36,6 +40,9 @@ def get_chart(chart):
     start = None if 'start' not in chart.keys() else chart['start']
     end = None if 'start' not in chart.keys() else chart['end']
     emit('chart', json.dumps(get_quote(symbol['instrument_type'], symbol['exchange'], symbol['symbol'], start=start, end=end), default=json_util.default))
+
+
+
 
 @socketio.on('metadata')
 def get_metadata(chart):

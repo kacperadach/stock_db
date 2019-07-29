@@ -30,6 +30,7 @@ COLLECTION_INDICES = {
     'market_watch_exchange-traded-funds': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_exchange-traded-notes': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_funds': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
+    'market_watch_futures': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_indexes': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_rates': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_real-estate-investment-trusts': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),

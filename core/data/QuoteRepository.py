@@ -1,6 +1,11 @@
 import time
-from datetime import datetime
+import datetime
+from pytz import timezone
+import arrow
+from dateutil import tz
 from copy import deepcopy
+
+import pymongo
 from dateutil import tz
 
 from pymongo import ASCENDING
@@ -55,6 +60,46 @@ class QuoteRepository(StockDbBase):
         query = {'symbol': symbol, 'exchange': exchange, 'time_interval': time_interval, 'trading_date': trading_date}
         return self.db.find(collection, query, {})
 
+    @staticmethod
+    def populate_change(data):
+        if len(data['data']) == 2:
+            previous = data['data'][0]
+            most_recent = data['data'][1]
+            point_diff = most_recent['close'] - previous['close']
+            percentage_diff = point_diff / previous['close'] * 100
+
+            point_diff = '{:.2f}'.format(point_diff)
+            percentage_diff = '{:.2f}'.format(percentage_diff)
+
+            data['most_recent_day'] = most_recent['date']
+            data['point_diff'] = point_diff
+            data['percentage_diff'] = percentage_diff
+            data['close'] = most_recent['close']
+
+        return data
+
+    # meant for 1d time interval
+    def get_live_quotes(self, collection_name, symbols, time_interval):
+        cursor = self.db.find(collection_name, {'symbol': {'$in': symbols}, 'time_interval': time_interval}, ALL_FIELDS).sort((('trading_date', -1), ('symbol', 1))).limit(len(symbols) * 4)
+
+        response = dict([(s, None) for s in symbols])
+
+        utc_time = datetime.datetime.utcnow()
+        est_time = timezone('EST').localize(utc_time)
+
+        for data in cursor:
+            if response[data['symbol']] is None:
+                response[data['symbol']] = [data]
+            elif len(response[data['symbol']]) < 2:
+                response[data['symbol']].append(data)
+
+        for k, v in response.iteritems():
+            data = self._convert_for_chart(v, 'futures')
+            data = self.populate_change(data)
+            response[k] = data
+
+        return response
+
     def find_all(self, symbol, exchange, instrument_type, time_interval, trading_dates, fields={}):
         if instrument_type not in INSTRUMENT_TYPES:
             raise QuoteRepositoryException('invalid instrument_type')
@@ -89,7 +134,7 @@ class QuoteRepository(StockDbBase):
 
         del metadata['data']
 
-        trading_dates = list({datetime.combine(x['datetime'].date(), datetime.min.time()) for x in data['data']})
+        trading_dates = list({datetime.datetime.combine(x['datetime'].date(), datetime.datetime.min.time()) for x in data['data']})
         existing_cursor = self.find_all(data['symbol'], metadata['exchange'], instrument_type, data['time_interval'], trading_dates)
 
         existing_dict = {}
@@ -106,7 +151,7 @@ class QuoteRepository(StockDbBase):
                     new_data[new_key] = v
 
                 date = new_data['datetime'].date()
-                new_document['trading_date'] = datetime.combine(date, datetime.min.time())
+                new_document['trading_date'] = datetime.datetime.combine(date, datetime.datetime.min.time())
                 if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
                     existing_dict[date][new_data['datetime']].update(new_data)
                 new_document['data'] = [new_data]
@@ -142,9 +187,9 @@ class QuoteRepository(StockDbBase):
     def get_interval(self, instrument_type, exchange, symbol, start, end, time_interval, limit=None):
         if instrument_type not in INSTRUMENT_TYPES:
             raise QuoteRepositoryException('invalid instrument_type')
-        if  not isinstance(start, datetime):
+        if  not isinstance(start, datetime.datetime):
             raise QuoteRepositoryException('start must be datetime')
-        if  not isinstance(end, datetime):
+        if  not isinstance(end, datetime.datetime):
             raise QuoteRepositoryException('end must be datetime')
         collection = COLLECTION_NAME + instrument_type
 
