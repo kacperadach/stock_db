@@ -4,6 +4,7 @@ from core.QueueItem import QueueItem
 from core.StockDbBase import StockDbBase
 
 class BaseScraper(StockDbBase):
+    MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
 
     @abstractmethod
     def get_symbols(self):

@@ -30,6 +30,7 @@ class MarketWatchRequestIndicators():
     def __init__(self, use_default=False):
         self.series_id = 2
         self.indicators = []
+        self.use_default = use_default
         if use_default:
             self.volume()
             self.simple_moving_average(periods=[50, 100, 200])
@@ -44,6 +45,9 @@ class MarketWatchRequestIndicators():
             # self.dividends()
             # self.earnings()
             # self.price_to_earnings_ratio()
+
+    def __repr__(self):
+        return '<DEFAULT>' if self.use_default else '<NON-DEFAULT>'
 
     def get_indicator_parameter(self, original_key):
         key = original_key.lower()

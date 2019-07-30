@@ -66,6 +66,10 @@ class FinanceDB(StockDbBase):
 			self.log_exception(e)
 			raise e
 
+	def aggregate(self, collection_name):
+		collection = self.mongo_client.get_collection(collection_name)
+		return collection.aggregate()
+
 	def find(self, collection_name, query, fields):
 		fields['_id'] = False
 		try:

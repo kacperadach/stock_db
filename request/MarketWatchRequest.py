@@ -101,6 +101,8 @@ class MarketWatchRequest():
             return 'CRYPTOCURRENCY/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
         elif instrument_type.lower() == 'real-estate-investment-trusts':
             return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+        elif instrument_type.lower() == 'futures':
+            return 'FUTURE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
         else:
             raise MarketWatchRequestException('Invalid instrument type')
 
