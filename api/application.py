@@ -41,9 +41,6 @@ def get_chart(chart):
     end = None if 'start' not in chart.keys() else chart['end']
     emit('chart', json.dumps(get_quote(symbol['instrument_type'], symbol['exchange'], symbol['symbol'], start=start, end=end), default=json_util.default))
 
-
-
-
 @socketio.on('metadata')
 def get_metadata(chart):
     symbol = decrypt_unique_id(chart['uid'])
@@ -88,9 +85,6 @@ def serve(path):
     else:
         return send_from_directory('react_app/build', 'index.html')
 
-# def ack():
-#     print 'message was received!'
-#
 def run():
     socketio.run(app, debug=True)
     # app.run(use_reloader=True, port=5000, threaded=False)
