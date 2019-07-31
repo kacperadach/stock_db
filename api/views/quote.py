@@ -6,6 +6,7 @@ from time import sleep
 from pytz import timezone
 
 from acquisition.symbol.futures import FUTURES
+from core.data.FuturesRepository import FuturesRepository
 from core.data.QuoteRepository import Quote_Repository
 
 from cachetools import cached, TTLCache
@@ -22,7 +23,7 @@ cache = TTLCache(maxsize=1000, ttl=15)
 @cached(cache)
 def fetch_live_futures_quotes():
     print 'fuck off'
-    symbols = map(lambda x: x['symbol'], FUTURES)
+    symbols = map(lambda x: x['symbol'], FuturesRepository.get_all_futures())
     return Quote_Repository.get_live_quotes('market_watch_futures', symbols, '1d')
 
 def get_live_futures_quotes():

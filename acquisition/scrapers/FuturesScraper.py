@@ -5,13 +5,13 @@ from pytz import timezone
 from acquisition.symbol.futures import FUTURES
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
+from core.data.FuturesRepository import FuturesRepository
 from core.data.QuoteRepository import Quote_Repository
 from db.Finance import Finance_DB
 from request.MarketWatchRequest import MarketWatchRequest
 from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
 # https://www.marketwatch.com/investing/future/{} could  scrape all 1-3 letter + 00
-
 
 
 # {"Step":"PT1M","TimeFrame":"D1","EntitlementToken":"cecc4267a0194af89ca343805a3e57af","IncludeMockTick":true,"FilterNullSlots":false,"FilterClosedPoints":true,"IncludeClosedSlots":false,"IncludeOfficialClose":true,"InjectOpen":false,"ShowPreMarket":false,"ShowAfterHours":false,"UseExtendedTimeFrame":false,"WantPriorClose":true,"IncludeCurrentQuotes":false,"ResetTodaysAfterHoursPercentChange":false,"Series":[{"Key":"FUTURE/UK/IFEU/BRN00","Dialect":"Charting","Kind":"Ticker","SeriesId":"s1","DataTypes":["Last"],"Indicators":[{"Parameters":[{"Name":"ShowOpen"},{"Name":"ShowHigh"},{"Name":"ShowLow"},{"Name":"ShowPriorClose","Value":true},{"Name":"Show52WeekHigh"},{"Name":"Show52WeekLow"}],"Kind":"OpenHighLowLines","SeriesId":"i2"}]}]}
@@ -31,7 +31,7 @@ class FuturesScraper(BaseScraper):
         self.last_scrape = timezone('EST').localize(datetime.min)
 
     def get_symbols(self):
-        return iter([symbol for _, symbols in FUTURES.iteritems() for symbol in symbols])
+        return iter(FuturesRepository.get_all_futures())
 
     def get_queue_item(self, symbol):
         mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'], indicators=self.indicators)
@@ -49,7 +49,6 @@ class FuturesScraper(BaseScraper):
 
         if self.symbols_cursor is not None:
             for symbol in self.symbols_cursor:
-                self.log('PAULY D')
                 return self.get_queue_item(symbol)
 
             self.last_scrape = now
@@ -70,4 +69,10 @@ class FuturesScraper(BaseScraper):
     def get_unique_id(self, symbol, instrument_type, exchange):
         return str(symbol) + str(instrument_type) + str(exchange)
 
+
+class Futures1mScraper(FuturesScraper):
+
+    def get_queue_item(self, symbol):
+        mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
+        return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'indicators': self.indicators})
 
