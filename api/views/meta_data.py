@@ -24,7 +24,7 @@ def fetch_metadata(uid):
 
     prev_days = get_quote(instrument_type, exchange, sym, time_interval='1d', start=today - datetime.timedelta(days=6), end=today + datetime.timedelta(days=1), limit=2)
     if len(prev_days['data']) == 2:
-        data['data'] = prev_days['data']
+        # data['data'] = prev_days['data']
         if instrument_type == 'futures':
             data.update(prev_days['meta_data'])
 
