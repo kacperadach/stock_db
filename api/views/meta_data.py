@@ -46,4 +46,5 @@ def fetch_metadata(uid):
 
 
 if __name__ == '__main__':
+    fetch_metadata('SFVCUyAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')
     fetch_metadata('U0kwMCAvWE5ZTSAvVVMgIC9mdXR1cmVzICAg')
