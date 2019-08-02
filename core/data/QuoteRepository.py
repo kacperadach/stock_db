@@ -97,6 +97,7 @@ class QuoteRepository(StockDbBase):
             data = self._convert_for_chart(v, 'futures')
             data = self.populate_change(data)
             response[k] = data
+            data['meta_data']['common_name'] = data['meta_data']['common_name'].replace('Continuous Contract', '').strip()
 
         return response
 
