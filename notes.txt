@@ -31,3 +31,5 @@ https://www.bls.gov/developers/api_signature_v2.htm
 http://www.multpl.com/sitemap
 
 https://ts-api.cnbc.com/harmony/app/bars/US3M/1D/20171004000000/20190821000000/adjusted/EST5EDT.json - cnbc chart
+
+https://www.marketwatch.com/investing/stock/lyft/financials/cash-flow

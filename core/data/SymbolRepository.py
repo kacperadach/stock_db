@@ -50,8 +50,12 @@ class SymbolRepository():
             return {}
 
     def insert(self, documents):
+
         new_documents = []
         for d in documents:
+            if 'country_code' not in d.iterkeys():
+                self.db.find({'country': d['country']})
+
             new_document = {}
             for k, v in d.iteritems():
                 new_key = SnakeCase.to_snake_case(k)

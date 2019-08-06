@@ -51,7 +51,6 @@ class MarketWatchHistoricalScraper(BaseScraper):
         return 'market_watch_' + str(instrument_type)
 
     def process_data(self, queue_item):
-        super(MarketWatchHistoricalScraper, self).process_data(queue_item)
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
 
         if not data:

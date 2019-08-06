@@ -71,7 +71,8 @@ class MarketWatchRequest():
 
         return GRAPH_URL.format(encoded_query_params)
 
-    def get_symbol(self, symbol, instrument_type):
+    @staticmethod
+    def get_symbol(symbol, instrument_type):
         if instrument_type.lower() == 'rates':
             if symbol['country'] == 'Money Rates':
                 return 'INTERSTATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
@@ -105,6 +106,16 @@ class MarketWatchRequest():
             return 'FUTURE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
         else:
             raise MarketWatchRequestException('Invalid instrument type')
+
+    # @staticmethod
+    # def get_instrument_type(charting_code):
+    #     if charting_code == 'INTERSTATE' or charting_code == 'LOANRATE':
+    #         return 'rates'
+    #     elif charting_code == 'FUND':
+    #         return 'funds'
+    #     elif charting_code == 'BOND':
+    #         return 'bonds'
+    #     elif charting_code == ''
 
     @staticmethod
     def parse_response(response):

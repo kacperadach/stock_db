@@ -5,6 +5,7 @@ from threading import Thread, Event
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
 from acquisition.scrapers.IndexLiveScraper import IndexLiveScraper
 from acquisition.scrapers.MarketWatchRequestLiveScraper import MarketWatchRequestLiveScraper
+from acquisition.scrapers.RandomMarketWatchSymbols import RandomMarketWatchSymbols
 from acquisition.scrapers.Stocks import StockScraper
 from acquisition.scrapers.Symbols import SymbolScraper
 from acquisition.scrapers.ETFSymbols import ETFSymbolScraper
@@ -16,6 +17,7 @@ from acquisition.scrapers.MarketWatchHistoricalScraper import MarketWatchHistori
 from acquisition.scrapers.MarketWatchLiveScraper import MarketWatchLiveScraper
 from acquisition.scrapers.USTreasuryScraper import USTreasuryScraper
 from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
+from core.QueueItem import QueueItem
 from core.ScraperQueue import ScraperQueue
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
@@ -40,8 +42,9 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
+
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
-        self.scrapers = (MarketWatchSymbolsV2(), MarketWatchHistoricalScraper())
+        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper())
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()
@@ -68,6 +71,7 @@ class ScraperQueueManager(StockDbBase):
         self.launch_queue_logger()
         try:
             while not self.event.is_set():
+                # make priority always finish before going on to regular scrapers
                 for scraper in (self.priority_scrapers, self.scrapers):
                     for task in scraper:
                         request_queue_input = task.get_next_input()
@@ -119,6 +123,8 @@ class ScraperQueueManager(StockDbBase):
         try:
             while 1:
                 queue_item = self.output_queue.get(block=True)
+                if not isinstance(queue_item, QueueItem):
+                    raise AssertionError('need queue_item in process_data')
                 queue_item.callback(queue_item)
         except Exception as e:
             self.log_exception(e)
