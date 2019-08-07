@@ -3,6 +3,9 @@ from copy import deepcopy
 import re
 import base64
 
+from pymongo.errors import BulkWriteError
+
+from core.StockDbBase import StockDbBase
 from core.data.uid import encrypt_unique_id
 from db.Finance import Finance_DB
 from SnakeCase import SnakeCase
@@ -24,9 +27,10 @@ ALL_FIELDS = {x: 1 for x in FIELD_NAMES}
 
 COLLECTION_NAME = 'market_watch_symbols'
 
-class SymbolRepository():
+class SymbolRepository(StockDbBase):
 
     def __init__(self):
+        super(SymbolRepository, self).__init__()
         self.db = Finance_DB
 
     def _get_all_fields(self):
@@ -50,11 +54,10 @@ class SymbolRepository():
             return {}
 
     def insert(self, documents):
-
         new_documents = []
         for d in documents:
             if 'country_code' not in d.iterkeys():
-                self.db.find({'country': d['country']})
+                self.db.find(COLLECTION_NAME, {'country': d['country']}, self._get_all_fields())
 
             new_document = {}
             for k, v in d.iteritems():
@@ -66,15 +69,20 @@ class SymbolRepository():
                     new_document[new_key] = v
             new_documents.append(new_document)
 
-        self.db.insert(COLLECTION_NAME, new_documents)
+        for document in new_documents:
+            self.db.insert_one(COLLECTION_NAME, document)
 
     def search(self, symbol_search):
         regex = re.compile('^'+ symbol_search.upper(), re.IGNORECASE)
         search_results = list(self.db.find(COLLECTION_NAME, {'symbol': regex}, self._get_all_fields()).sort((['symbol', 1], ['country', -1])).limit(5))
         for search_result in search_results:
             search_result['uid'] = encrypt_unique_id(search_result)
-
         return search_results
+
+    def delete_many(self, query):
+        self.db.delete_many(COLLECTION_NAME, query)
+
+
 
 class SymbolRepositoryException(Exception):
     pass

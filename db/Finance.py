@@ -5,7 +5,7 @@ from cPickle import dumps
 from datetime import datetime
 
 from pymongo import MongoClient
-from pymongo.errors import BulkWriteError
+from pymongo.errors import BulkWriteError, DuplicateKeyError
 
 from app.constants import DEV_ENV_VARS, PROD_ENV_VARS
 from utils.credentials import Credentials
@@ -50,6 +50,14 @@ class FinanceDB(StockDbBase):
 		finally:
 			self.client.close()
 
+	def insert_one(self, collection_name, document):
+		try:
+			collection = self.mongo_client.get_collection(collection_name)
+			collection.insert_one(document)
+		except DuplicateKeyError:
+			pass
+
+
 	def insert(self, collection_name, documents):
 		try:
 			if isinstance(documents, dict):
@@ -89,6 +97,10 @@ class FinanceDB(StockDbBase):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.create_index(keys, name=index_name, unique=unique)
 
+	def drop_indexes(self, collection_name):
+		collection = self.mongo_client.get_collection(collection_name)
+		collection.drop_indexes()
+
 	def distinct(self, collection_name, field, query):
 		collection = self.mongo_client.get_collection(collection_name)
 		return collection.distinct(field, query)
@@ -96,5 +108,7 @@ class FinanceDB(StockDbBase):
 	def delete_many(self, collection_name, query):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.delete_many(query)
+
+
 
 Finance_DB = FinanceDB()

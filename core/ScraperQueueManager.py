@@ -71,10 +71,18 @@ class ScraperQueueManager(StockDbBase):
         self.launch_queue_logger()
         try:
             while not self.event.is_set():
-                # make priority always finish before going on to regular scrapers
-                for scraper in (self.priority_scrapers, self.scrapers):
-                    for task in scraper:
-                        request_queue_input = task.get_next_input()
+                allNone = True
+                for scraper in self.priority_scrapers:
+                    request_queue_input = scraper.get_next_input()
+                    if request_queue_input:
+                        allNone = False
+                        self.request_queue.put(request_queue_input)
+                        sleep(INPUT_REQUEST_DELAY)
+
+                # only move on to other scrapers if all priority scraper outputs are None
+                if allNone is True:
+                    for scraper in self.scrapers:
+                        request_queue_input = scraper.get_next_input()
                         if request_queue_input:
                             self.request_queue.put(request_queue_input)
                             sleep(INPUT_REQUEST_DELAY)
