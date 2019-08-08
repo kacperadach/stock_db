@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from time import sleep
 
 import requests
 from requests.exceptions import ChunkedEncodingError
@@ -63,7 +64,7 @@ class RequestClient(StockDbBase):
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.get(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), timeout=TIMEOUT)
+                response = requests.get(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), timeout=(TIMEOUT, TIMEOUT))
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None

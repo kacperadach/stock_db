@@ -6,11 +6,13 @@ from stem.process import launch_tor_with_config
 
 from utils.credentials import Credentials
 from core.StockDbBase import StockDbBase
+from request.base.RequestClient import RequestClient
+from core.QueueItem import QueueItem
 
 IP_ADDRESS_API = 'http://bot.whatismyipaddress.com/'
 
-class TorClient(StockDbBase):
 
+class TorClient(StockDbBase):
     def __init__(self, SocksPort, ControlPort, DataDirectory):
         super(TorClient, self).__init__()
         self.SocksPort = SocksPort
@@ -23,13 +25,8 @@ class TorClient(StockDbBase):
         self.controller = None
 
     def start_tor(self):
-        config = {
-            'SocksPort': str(self.SocksPort),
-            'ControlPort': str(self.ControlPort),
-            'DataDirectory': str(self.DataDirectory),
-            'CookieAuthentication': '1',
-            'HashedControlPassword': self.tor_pw_hash
-        }
+        config = {'SocksPort': str(self.SocksPort), 'ControlPort': str(self.ControlPort), 'DataDirectory': str(self.DataDirectory), 'CookieAuthentication': '1',
+            'HashedControlPassword': self.tor_pw_hash}
         launch_tor_with_config(tor_cmd=self.tor_path, config=config, take_ownership=True)
         self.log('Successfully launched tor, SocksPort={}, ControlPort={}, DataDirectory={}'.format(self.SocksPort, self.ControlPort, self.DataDirectory))
 
@@ -54,8 +51,7 @@ class TorClient(StockDbBase):
         try:
             self.log('Connecting to Tor')
             self.connect()
-            from request.base.RequestClient import RequestClient
-            from core.QueueItem import QueueItem
+
             rc = RequestClient(use_tor=True, tor_client=self)
             response = rc.get(IP_ADDRESS_API)
             if response.status_code != 200:
