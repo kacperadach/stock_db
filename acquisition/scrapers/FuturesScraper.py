@@ -41,6 +41,7 @@ class FuturesScraper(BaseScraper):
         if data:
             self.log('inserting data')
             self.quote_repository.insert(data, queue_item.get_metadata())
+            self.log('data inserted')
 
 
 class Futures1mScraper(FuturesScraper):

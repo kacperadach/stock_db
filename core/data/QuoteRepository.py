@@ -170,6 +170,7 @@ class QuoteRepository(StockDbBase):
         for document in days.itervalues():
             # reversed so order of documents matches order of data in documents
             document['data'] = list(reversed(document['data']))
+            self.log('replacing one')
             self.db.replace_one(collection,
                                 {'symbol': document['symbol'], 'exchange': document['exchange'], 'time_interval': document['time_interval'], 'trading_date': document['trading_date']},
                                 document,
