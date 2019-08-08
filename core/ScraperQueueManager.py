@@ -114,7 +114,7 @@ class ScraperQueueManager(StockDbBase):
                     'failed_requests': self.failed_request_counter.get(),
                     'requests_per_second': rps
                 }
-                Scraper_Repository.save_request_interval(data)
+                # Scraper_Repository.save_request_interval(data)
                 self.log('Request Queue Size: {}'.format(data['request_queue_size']))
                 self.log('Output Queue Size: {}'.format(data['output_queue_size']))
                 self.log('Requests/sec: {}'.format(rps))
