@@ -35,6 +35,7 @@ class FuturesScraper(BaseScraper):
         self.log('processing data')
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
         self.log('parsed response')
+        self.log(data)
         if not data:
             self.log('Future not found: {}'.format(queue_item.get_metadata()))
 
