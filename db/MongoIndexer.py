@@ -37,6 +37,7 @@ COLLECTION_INDICES = {
     'market_watch_real-estate-investment-trusts': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_warrants': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_request': (MongoIndex(name='instrument_type_exchange_symbol_timestamp', index={'instrument_type': 1, 'exchange': 1, 'symbol': 1, 'timestamp': 1}, unique=False), ),
+    'scraper_stats': (MongoIndex(name='datetime_utc', index={'datetime_utc': -1}, unique=True, expire_after_seconds=600), ) #604800
 }
 
 class MongoIndexer(StockDbBase):
@@ -51,7 +52,7 @@ class MongoIndexer(StockDbBase):
             for collection, indices in COLLECTION_INDICES.iteritems():
                 for index in indices:
                     keys = map(lambda (k,v): (k, ASCENDING if v == 1 else DESCENDING), index.get_index().iteritems())
-                    self.finance_db.create_index(collection, index.get_name(), keys, unique=index.get_unique())
+                    self.finance_db.create_index(collection, index.get_name(), keys, unique=index.get_unique(), expireAfterSeconds=index.get_expire_after_seconds())
         except Exception as e:
             self.log_exception(e)
 

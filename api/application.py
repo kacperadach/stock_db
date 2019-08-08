@@ -17,6 +17,7 @@ from flask import Flask, send_from_directory, render_template
 from flask_socketio import SocketIO, send, emit
 
 from views.quote import get_quote, get_live_futures_quotes
+from views.scraper import get_stats
 
 from core.data.SymbolRepository import Symbol_Repository
 
@@ -24,6 +25,10 @@ app = Flask(__name__, static_folder='react_app/build')
 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode='gevent')
+
+@socketio.on('scraper_stats')
+def get_scraper_stats(d):
+    emit('scraper_stats', json.dumps(get_stats(), default=json_util.default))
 
 @socketio.on('live_futures')
 def get_live_futures(meta):

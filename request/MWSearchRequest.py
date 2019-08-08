@@ -13,7 +13,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, 
 
 TYPE_TO_INSTRUMENT = {
     'Stock': 'stocks',
-    'Currency': 'currency',
+    'Currency': 'currencies',
     'Bond': 'bonds',
     'Future': 'futures',
     'Rate': 'rates',
@@ -25,7 +25,8 @@ TYPE_TO_INSTRUMENT = {
     'AmericanDepositoryReceiptStock': 'american-depository-receipt-stocks',
     'ExchangeTradedNote': 'exchange-traded-notes',
     'ExchangeTradedFund': 'exchange-traded-funds',
-    'RealEstateInvestmentTrust': 'real-estate-investment-trusts'
+    'RealEstateInvestmentTrust': 'real-estate-investment-trusts',
+    'InterestRate': 'rates'
 }
 
 class MWSearchRequest():

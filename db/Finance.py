@@ -93,9 +93,12 @@ class FinanceDB(StockDbBase):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.replace_one(filter, document, upsert=upsert)
 
-	def create_index(self, collection_name, index_name, keys, unique=False):
+	def create_index(self, collection_name, index_name, keys, unique=False, expireAfterSeconds=None):
 		collection = self.mongo_client.get_collection(collection_name)
-		collection.create_index(keys, name=index_name, unique=unique)
+		if expireAfterSeconds is not None:
+			collection.create_index(keys, name=index_name, unique=unique, expireAfterSeconds=expireAfterSeconds)
+		else:
+			collection.create_index(keys, name=index_name, unique=unique)
 
 	def drop_indexes(self, collection_name):
 		collection = self.mongo_client.get_collection(collection_name)

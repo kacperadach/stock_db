@@ -1,6 +1,9 @@
 from time import sleep
 from Queue import Queue
 from threading import Thread, Event
+from datetime import datetime, timedelta
+
+from pytz import timezone
 
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
 from acquisition.scrapers.IndexLiveScraper import IndexLiveScraper
@@ -19,6 +22,7 @@ from acquisition.scrapers.USTreasuryScraper import USTreasuryScraper
 from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
 from core.QueueItem import QueueItem
 from core.ScraperQueue import ScraperQueue
+from core.data.ScraperRepository import Scraper_Repository
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 from core.Counter import Counter
@@ -95,15 +99,31 @@ class ScraperQueueManager(StockDbBase):
         self.queue_logger.start()
 
     def log_queue_stats(self):
+        now = datetime.utcnow()
         while 1:
-            self.log('Request Queue Size: {}'.format(self.request_queue.get_size()))
-            self.log('Output Queue Size: {}'.format(self.output_queue.qsize()))
-            self.log('Requests/sec: {}'.format(float(self.request_counter.get())/QUEUE_LOG_FREQ_SEC))
-            self.log('Successful/Failed requests {}/{}'.format(self.successful_request_counter.get(), self.failed_request_counter.get()))
-            self.request_counter.reset()
-            self.successful_request_counter.reset()
-            self.failed_request_counter.reset()
-            sleep(QUEUE_LOG_FREQ_SEC)
+            if datetime.utcnow() - timedelta(seconds=QUEUE_LOG_FREQ_SEC) > now:
+                new_now = datetime.utcnow()
+                rps = float(self.request_counter.get()) / (new_now - now).total_seconds()
+                rps = round(rps, 4)
+                data = {
+                    'datetime_utc': new_now,
+                    'request_queue_size': self.request_queue.get_size(),
+                    'output_queue_size': self.output_queue.qsize(),
+                    'requests': self.request_counter.get(),
+                    'successful_requests': self.successful_request_counter.get(),
+                    'failed_requests': self.failed_request_counter.get(),
+                    'requests_per_second': rps
+                }
+                Scraper_Repository.save_request_interval(data)
+                self.log('Request Queue Size: {}'.format(data['request_queue_size']))
+                self.log('Output Queue Size: {}'.format(data['output_queue_size']))
+                self.log('Requests/sec: {}'.format(rps))
+                self.log('Successful/Failed requests {}/{}'.format(self.successful_request_counter.get(), self.failed_request_counter.get()))
+                self.request_counter.reset()
+                self.successful_request_counter.reset()
+                self.failed_request_counter.reset()
+                now = new_now
+
 
     def request_thread_worker(self, tor_client=None):
         request_client = RequestClient(use_tor=bool(tor_client), tor_client=tor_client)
