@@ -49,13 +49,16 @@ class MWSearchRequest():
 
         symbols = []
         for symbol in response['symbols']:
+            instrument = 'unknown'
+            if symbol['type'] in TYPE_TO_INSTRUMENT.iterkeys():
+                instrument =  TYPE_TO_INSTRUMENT[symbol['type']]
             data = {
                 'exchange': symbol['exchangeIsoCode'],
                 'symbol': symbol['ticker'],
                 'long_name': symbol['company'],
                 'country': symbol['country'],
                 'country_code': symbol['country'],
-                'instrument_type': TYPE_TO_INSTRUMENT[symbol['type']],
+                'instrument_type': instrument,
                 'from_search': True
             }
             symbols.append(data)
