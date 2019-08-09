@@ -107,7 +107,7 @@ class QuoteRepository(StockDbBase):
         collection = COLLECTION_NAME + instrument_type
         query = {
             'symbol': symbol,
-            'trading_date': {'$in': trading_dates},
+            'trading_date': {'$gte': trading_dates[0], '$lte': trading_dates[1]},
             'exchange': exchange,
             'time_interval': time_interval
         }
@@ -119,6 +119,7 @@ class QuoteRepository(StockDbBase):
             raise QuoteRepositoryException('invalid instrument_type')
         collection = COLLECTION_NAME + instrument_type
 
+        # quick only ~8 fields
         days = {}
         metadata = {}
         for key, value in data.iteritems():
@@ -126,14 +127,22 @@ class QuoteRepository(StockDbBase):
             if new_key in FIELD_NAMES:
                 if new_key == 'symbol':
                     value = value.upper()
+                elif new_key == 'data':
+                    metadata['data'] = []
+                    continue
                 metadata[new_key] = value
         metadata['exchange'] = request_metadata['symbol']['exchange']
         metadata['country'] = request_metadata['symbol']['country']
         metadata['country_code'] = request_metadata['symbol']['country_code']
 
-        del metadata['data']
+        if len(data['data']) == 0:
+            return metadata
 
-        trading_dates = list({datetime.datetime.combine(x['datetime'].date(), datetime.datetime.min.time()) for x in data['data']})
+        trading_dates = [
+            datetime.datetime.combine(data['data'][0]['datetime'].date(), datetime.datetime.min.time()),
+            datetime.datetime.combine(data['data'][len(data['data']) - 1]['datetime'].date(), datetime.datetime.min.time())
+        ]
+
         existing_cursor = self.find_all(data['symbol'], metadata['exchange'], instrument_type, data['time_interval'], trading_dates)
 
         existing_dict = {}
