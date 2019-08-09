@@ -138,6 +138,11 @@ class QuoteRepository(StockDbBase):
         if len(data['data']) == 0:
             return metadata
 
+        # temporary, find better way to process data or request less data
+        max_len = 31 if metadata['time_interval'] == '1d' else 1441
+
+        data['data'] = data['data'][len(data['data']) - max_len:len(data['data']) - 1]
+
         trading_dates = [
             datetime.datetime.combine(data['data'][0]['datetime'].date(), datetime.datetime.min.time()),
             datetime.datetime.combine(data['data'][len(data['data']) - 1]['datetime'].date(), datetime.datetime.min.time())
