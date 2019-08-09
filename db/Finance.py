@@ -58,13 +58,13 @@ class FinanceDB(StockDbBase):
 			pass
 
 
-	def insert(self, collection_name, documents):
+	def insert(self, collection_name, documents, bypass_document_validation=False):
 		try:
 			if isinstance(documents, dict):
 				documents = (documents,)
 			collection = self.mongo_client.get_collection(collection_name)
 			for document_batch in batch(documents, INSERT_BATCH_SIZE):
-				collection.insert_many(document_batch)
+				collection.insert_many(document_batch, bypass_document_validation=bypass_document_validation)
 		except BulkWriteError as e:
 			self.log('Documents: {}'.format(documents))
 			self.log_exception(e)

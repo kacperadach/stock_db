@@ -114,8 +114,6 @@ class QuoteRepository(StockDbBase):
         return self.db.find(collection, query, fields)
 
     def insert(self, data, request_metadata):
-        request_key = request_metadata['symbol']
-
         instrument_type = request_metadata['symbol']['instrument_type']
         if instrument_type not in INSTRUMENT_TYPES:
             raise QuoteRepositoryException('invalid instrument_type')
@@ -139,7 +137,9 @@ class QuoteRepository(StockDbBase):
         existing_cursor = self.find_all(data['symbol'], metadata['exchange'], instrument_type, data['time_interval'], trading_dates)
 
         existing_dict = {}
+        existing = {}
         for existing_document in existing_cursor:
+            existing[existing_document['trading_date']] = existing_document
             existing_dict[existing_document['trading_date'].date()] = {d['datetime']: d for d in existing_document['data']}
 
         indicators = request_metadata['indicators']
@@ -154,6 +154,8 @@ class QuoteRepository(StockDbBase):
                 date = new_data['datetime'].date()
                 new_document['trading_date'] = datetime.datetime.combine(date, datetime.datetime.min.time())
                 if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
+                    # if existing_dict[date][new_data['datetime']] == new_data:
+                    #     continue
                     existing_dict[date][new_data['datetime']].update(new_data)
                 new_document['data'] = [new_data]
                 days[date] = new_document
@@ -170,7 +172,9 @@ class QuoteRepository(StockDbBase):
         for document in days.itervalues():
             # reversed so order of documents matches order of data in documents
             document['data'] = list(reversed(document['data']))
-            self.log('replacing one')
+            if document['trading_date'] in existing.iterkeys() and document == existing[document['trading_date']]:
+                continue
+
             self.db.replace_one(collection,
                                 {'symbol': document['symbol'], 'exchange': document['exchange'], 'time_interval': document['time_interval'], 'trading_date': document['trading_date']},
                                 document,

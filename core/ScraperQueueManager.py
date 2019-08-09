@@ -114,7 +114,7 @@ class ScraperQueueManager(StockDbBase):
                     'failed_requests': self.failed_request_counter.get(),
                     'requests_per_second': rps
                 }
-                # Scraper_Repository.save_request_interval(data)
+                Scraper_Repository.save_request_interval(data)
                 self.log('Request Queue Size: {}'.format(data['request_queue_size']))
                 self.log('Output Queue Size: {}'.format(data['output_queue_size']))
                 self.log('Requests/sec: {}'.format(rps))
@@ -153,7 +153,11 @@ class ScraperQueueManager(StockDbBase):
                 queue_item = self.output_queue.get(block=True)
                 if not isinstance(queue_item, QueueItem):
                     raise AssertionError('need queue_item in process_data')
+                start = datetime.utcnow()
                 queue_item.callback(queue_item)
+                seconds_took = (datetime.utcnow() - start).total_seconds()
+                if seconds_took > 5:
+                    self.log('Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took), level='warn')
         except Exception as e:
             self.log_exception(e)
             self.event.set()

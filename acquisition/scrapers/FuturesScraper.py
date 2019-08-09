@@ -32,17 +32,12 @@ class FuturesScraper(BaseScraper):
         return timedelta(minutes=4)
 
     def process_data(self, queue_item):
-        self.log('processing data')
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
-        self.log('parsed response')
-        self.log(data)
         if not data:
             self.log('Future not found: {}'.format(queue_item.get_metadata()))
 
         if data:
-            self.log('inserting data')
             self.quote_repository.insert(data, queue_item.get_metadata())
-            self.log('data inserted')
 
 
 class Futures1mScraper(FuturesScraper):

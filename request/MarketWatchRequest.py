@@ -107,16 +107,6 @@ class MarketWatchRequest():
         else:
             raise MarketWatchRequestException('Invalid instrument type')
 
-    # @staticmethod
-    # def get_instrument_type(charting_code):
-    #     if charting_code == 'INTERSTATE' or charting_code == 'LOANRATE':
-    #         return 'rates'
-    #     elif charting_code == 'FUND':
-    #         return 'funds'
-    #     elif charting_code == 'BOND':
-    #         return 'bonds'
-    #     elif charting_code == ''
-
     @staticmethod
     def parse_response(response):
         data = {}
