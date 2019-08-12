@@ -6,8 +6,8 @@ from logger import AppLogger
 
 from acquisition.scrapers import ALL_SCRAPERS
 
-def output_worker_process(process_queue):
-    logger = AppLogger(output_process=True)
+def output_worker_process(process_queue, log_file_name):
+    logger = AppLogger(output_process=True, file_name=log_file_name)
     logger.log('Started Output Process, pid: {}'.format(os.getpid()))
     try :
         while 1:

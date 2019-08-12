@@ -4,7 +4,7 @@ from logger import Logger
 
 class StockDbBase(object):
     def __init__(self):
-        pass
+        self.logger = Logger
 
     def log(self, msg, level='info'):
         Logger.log(msg, level=level, threadname=self.__class__.__name__)
