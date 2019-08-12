@@ -25,9 +25,10 @@ def output_worker_process(process_queue):
             logger.log('processing')
             scraper.process_data(queue_item)
             seconds_took = (datetime.utcnow() - start).total_seconds()
+            logger.log('Output processing: - took {} seconds'.format(seconds_took))
 
-            if seconds_took > 5:
-                logger.log('Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
+            # if seconds_took > 5:
+            # logger.log('Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
     except Exception as e:
         logger.log('ERROR ERROR ERROR: {}'.format(e), level='ERROR')
         logger.log(traceback.format_exc(e))
