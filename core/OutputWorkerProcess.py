@@ -22,6 +22,7 @@ def output_worker_process(process_queue):
             if scraper is None:
                 raise RuntimeError('could not find scraper: {}'.format(callback_scraper))
 
+            logger.log('processing')
             scraper.process_data(queue_item)
             seconds_took = (datetime.utcnow() - start).total_seconds()
 
