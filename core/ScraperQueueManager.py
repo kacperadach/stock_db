@@ -2,7 +2,6 @@ from time import sleep
 from Queue import Queue, Empty
 from threading import Thread, Event
 from datetime import datetime, timedelta
-import concurrent.futures
 import multiprocessing
 
 from pytz import timezone
