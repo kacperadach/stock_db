@@ -11,12 +11,18 @@ THREAD_LEN = 20
 
 class AppLogger():
 
-	def __init__(self):
+	def __init__(self, output_process=False):
 		self.logger = None
 		self.env = App_Config.env
 		self.log_path = path.join(BASE_PATH, 'logs', self.env)
 		self._create_log_folders()
 		file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
+
+		# doesnt work
+		if output_process is True:
+			file_name = "output_" + file_name
+			print file_name
+
 		logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, file_name), level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 		ch = logging.StreamHandler(stdout)
 		self.logger = logging.getLogger(self.env)
@@ -28,13 +34,13 @@ class AppLogger():
 
 	# def set_env(self, env):
 	# 	self.env = env
-		# self.log_path = path.join(BASE_PATH, 'logs', self.env)
-		# self._create_log_folders()
-		# file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
-		# logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, file_name), level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
-		# ch = logging.StreamHandler(stdout)
-		# self.logger = logging.getLogger(self.env)
-		# self.logger.addHandler(ch)
+	# 	self.log_path = path.join(BASE_PATH, 'logs', self.env)
+	# 	self._create_log_folders()
+	# 	file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
+	# 	logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, file_name), level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
+	# 	ch = logging.StreamHandler(stdout)
+	# 	self.logger = logging.getLogger(self.env)
+	# 	self.logger.addHandler(ch)
 
 	def log(self, msg, level='info', threadname=None):
 		if threadname:
