@@ -1,7 +1,9 @@
 from time import sleep
-from Queue import Queue
+from Queue import Queue, Empty
 from threading import Thread, Event
 from datetime import datetime, timedelta
+import concurrent.futures
+import multiprocessing
 
 from pytz import timezone
 
@@ -20,6 +22,7 @@ from acquisition.scrapers.MarketWatchHistoricalScraper import MarketWatchHistori
 from acquisition.scrapers.MarketWatchLiveScraper import MarketWatchLiveScraper
 from acquisition.scrapers.USTreasuryScraper import USTreasuryScraper
 from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
+from core.OutputWorkerProcess import output_worker_process
 from core.QueueItem import QueueItem
 from core.ScraperQueue import ScraperQueue
 from core.data.ScraperRepository import Scraper_Repository
@@ -29,11 +32,11 @@ from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
 URL_THREADS = 10
-OUTPUT_THREADS = 3
+OUTPUT_PROCESSES = 4
 REQUEST_QUEUE_SIZE = 20
 OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
-INPUT_REQUEST_DELAY = 0.01
+INPUT_REQUEST_DELAY = 0.1
 
 """
 This class is in charge of:
@@ -46,6 +49,10 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
+
+        # self.priority_scrapers = (FuturesScraper(), )
+        # self.scrapers = ()
+
 
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper() )
         self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper())
@@ -66,11 +73,13 @@ class ScraperQueueManager(StockDbBase):
             t.start()
         self.log("Created {} request threads".format(URL_THREADS))
 
-        for _ in range(OUTPUT_THREADS):
-            t = Thread(target=self.output_thread_worker)
-            t.setDaemon(True)
-            t.start()
-        self.log("Created {} output threads".format(OUTPUT_THREADS))
+        pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
+        m = multiprocessing.Manager()
+        process_queue = m.Queue()
+        self.process_queue = process_queue
+        for x in range(OUTPUT_PROCESSES):
+            pool.apply_async(output_worker_process, (process_queue, ))
+        self.log("Created {} output processes".format(OUTPUT_PROCESSES))
 
         self.launch_queue_logger()
         try:
@@ -80,16 +89,25 @@ class ScraperQueueManager(StockDbBase):
                     request_queue_input = scraper.get_next_input()
                     if request_queue_input:
                         allNone = False
+                        request_queue_input.callback = scraper.__class__.__name__
                         self.request_queue.put(request_queue_input)
-                        sleep(INPUT_REQUEST_DELAY)
 
                 # only move on to other scrapers if all priority scraper outputs are None
                 if allNone is True:
                     for scraper in self.scrapers:
                         request_queue_input = scraper.get_next_input()
                         if request_queue_input:
+                            request_queue_input.callback = scraper.__class__.__name__
                             self.request_queue.put(request_queue_input)
-                            sleep(INPUT_REQUEST_DELAY)
+
+                # takes item out of thread queue puts it into process queue
+                try:
+                    while 1:
+                        queue_item = self.output_queue.get(block=False)
+                        process_queue.put(queue_item)
+                except Empty:
+                    pass
+                sleep(INPUT_REQUEST_DELAY)
         except Exception as e:
             self.log_exception(e)
 
@@ -103,12 +121,12 @@ class ScraperQueueManager(StockDbBase):
         while 1:
             if datetime.utcnow() - timedelta(seconds=QUEUE_LOG_FREQ_SEC) > now:
                 new_now = datetime.utcnow()
-                rps = float(self.request_counter.get()) / (new_now - now).total_seconds()
-                rps = round(rps, 4)
+                rps = round(float(self.request_counter.get()) / (new_now - now).total_seconds(), 4)
                 data = {
                     'datetime_utc': new_now,
                     'request_queue_size': self.request_queue.get_size(),
                     'output_queue_size': self.output_queue.qsize(),
+                    'process_queue_size': self.process_queue.qsize(),
                     'requests': self.request_counter.get(),
                     'successful_requests': self.successful_request_counter.get(),
                     'failed_requests': self.failed_request_counter.get(),
@@ -117,6 +135,7 @@ class ScraperQueueManager(StockDbBase):
                 Scraper_Repository.save_request_interval(data)
                 self.log('Request Queue Size: {}'.format(data['request_queue_size']))
                 self.log('Output Queue Size: {}'.format(data['output_queue_size']))
+                self.log('Process Queue Size: {}'.format(data['process_queue_size']))
                 self.log('Requests/sec: {}'.format(rps))
                 self.log('Successful/Failed requests {}/{}'.format(self.successful_request_counter.get(), self.failed_request_counter.get()))
                 self.request_counter.reset()
@@ -127,6 +146,7 @@ class ScraperQueueManager(StockDbBase):
 
     def request_thread_worker(self, tor_client=None):
         request_client = RequestClient(use_tor=bool(tor_client), tor_client=tor_client)
+        queue_item = None
         try:
             while 1:
                 queue_item = self.request_queue.get()
@@ -144,20 +164,5 @@ class ScraperQueueManager(StockDbBase):
                 self.output_queue.put(queue_item)
         except Exception as e:
             self.log_queue_item(queue_item)
-            self.log_exception(e)
-            self.event.set()
-
-    def output_thread_worker(self):
-        try:
-            while 1:
-                queue_item = self.output_queue.get(block=True)
-                if not isinstance(queue_item, QueueItem):
-                    raise AssertionError('need queue_item in process_data')
-                start = datetime.utcnow()
-                queue_item.callback(queue_item)
-                seconds_took = (datetime.utcnow() - start).total_seconds()
-                if seconds_took > 5:
-                    self.log('Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took), level='warn')
-        except Exception as e:
             self.log_exception(e)
             self.event.set()

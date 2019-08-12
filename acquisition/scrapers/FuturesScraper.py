@@ -26,7 +26,7 @@ class FuturesScraper(BaseScraper):
 
     def get_queue_item(self, symbol):
         mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'], indicators=self.indicators)
-        return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'historical', 'indicators': self.indicators})
+        return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'type': 'historical', 'indicators': self.indicators})
 
     def get_time_delta(self):
         return timedelta(minutes=4)

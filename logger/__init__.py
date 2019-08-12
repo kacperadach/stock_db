@@ -3,6 +3,8 @@ from datetime import datetime
 import logging
 from sys import stdout
 
+from app.config import App_Config
+
 BASE_PATH = path.dirname(path.abspath(__file__))
 
 THREAD_LEN = 20
@@ -11,15 +13,7 @@ class AppLogger():
 
 	def __init__(self):
 		self.logger = None
-		self.env = 'dev'
-		pass
-
-	def _create_log_folders(self):
-		if not path.exists(self.log_path):
-			mkdir(self.log_path)
-
-	def set_env(self, env):
-		self.env = env
+		self.env = App_Config.env
 		self.log_path = path.join(BASE_PATH, 'logs', self.env)
 		self._create_log_folders()
 		file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
@@ -27,6 +21,20 @@ class AppLogger():
 		ch = logging.StreamHandler(stdout)
 		self.logger = logging.getLogger(self.env)
 		self.logger.addHandler(ch)
+
+	def _create_log_folders(self):
+		if not path.exists(self.log_path):
+			mkdir(self.log_path)
+
+	# def set_env(self, env):
+	# 	self.env = env
+		# self.log_path = path.join(BASE_PATH, 'logs', self.env)
+		# self._create_log_folders()
+		# file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
+		# logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, file_name), level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
+		# ch = logging.StreamHandler(stdout)
+		# self.logger = logging.getLogger(self.env)
+		# self.logger.addHandler(ch)
 
 	def log(self, msg, level='info', threadname=None):
 		if threadname:

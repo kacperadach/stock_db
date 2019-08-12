@@ -12,8 +12,6 @@ class QueueItem:
         headers = {} if headers is None else headers
         metadata = {} if metadata is None else metadata
 
-        if not callable(callback):
-            raise QueueItemException("callback supplied was not a function")
         if http_method.upper() not in HTTP_METHODS:
             raise QueueItemException('invalid http method: {}'.format(http_method))
         self.symbol = symbol

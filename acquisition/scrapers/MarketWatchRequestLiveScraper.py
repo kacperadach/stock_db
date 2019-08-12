@@ -43,19 +43,19 @@ class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
             if unique_id not in self.scrape_dict.keys():
                 self.scrape_dict[unique_id] = {'live': now, 'historical': None}
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': mwr.get_indicators()})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': mwr.get_indicators()})
             elif self.scrape_dict[unique_id]['historical'] is None:
                 self.scrape_dict[unique_id]['historical'] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1d', 'indicators': mwr.get_indicators()})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1d', 'indicators': mwr.get_indicators()})
             elif (now - self.scrape_dict[unique_id]['live']).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
                 self.scrape_dict[unique_id]['live'] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': mwr.get_indicators()})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': mwr.get_indicators()})
             elif (now - self.scrape_dict[unique_id]['historical']).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
                 self.scrape_dict[unique_id]['historical'] = now
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'])
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'time_interval': '1d', 'indicators': mwr.get_indicators()})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1d', 'indicators': mwr.get_indicators()})
         self.symbols_cursor = self.get_symbols()
 
     def process_data(self, queue_item):

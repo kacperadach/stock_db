@@ -20,7 +20,7 @@ class MainService():
 		App_Config.set_config(sys.argv)
 		self.env = App_Config.env
 		self.use_tor = App_Config.use_tor
-		Logger.set_env(self.env)
+		# Logger.set_env(self.env)
 		self._log(sys.argv)
 		self._log('Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()

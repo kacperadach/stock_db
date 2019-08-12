@@ -41,7 +41,7 @@ class MarketWatchHistoricalScraper(BaseScraper):
             if unique_id not in self.scrape_dict.keys():
                 self.scrape_dict[unique_id] = True
                 mwr = MarketWatchRequest(symbol=symbol, step_interval='1d', instrument_type=symbol['instrument_type'], indicators=self.indicators)
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=self.process_data, metadata={'symbol': symbol, 'type': 'historical', 'indicators': self.indicators})
+                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'type': 'historical', 'indicators': self.indicators})
 
     # for the purpose of storing in scrape_dict
     def get_unique_id(self, symbol, instrument_type, exchange):
