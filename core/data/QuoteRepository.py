@@ -136,12 +136,13 @@ class QuoteRepository(StockDbBase):
         metadata['country_code'] = request_metadata['symbol']['country_code']
 
         # temporary, find better way to process data or request less data
-        max_len = 31 if metadata['time_interval'] == '1d' else 1441
+        # max_len = 31 if metadata['time_interval'] == '1d' else 1441
 
         if len(data['data']) == 0:
             return metadata
-        elif len(data['data']) > max_len:
-            data['data'] = data['data'][len(data['data']) - max_len:len(data['data']) - 1]
+        # elif len(data['data']) > max_len:
+        #     self.log('trimming data, len: {}'.format(len(data['data'])))
+        #     data['data'] = data['data'][len(data['data']) - max_len:len(data['data']) - 1]
 
         trading_dates = [
             datetime.datetime.combine(data['data'][0]['datetime'].date(), datetime.datetime.min.time()),
