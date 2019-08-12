@@ -1,6 +1,8 @@
 import traceback
+from Queue import Empty
 from datetime import datetime
 import os
+from time import sleep
 
 from logger import AppLogger
 
@@ -9,9 +11,13 @@ from acquisition.scrapers import ALL_SCRAPERS
 def output_worker_process(process_queue, log_file_name):
     logger = AppLogger(output_process=True, file_name=log_file_name)
     logger.log('Started Output Process, pid: {}'.format(os.getpid()))
-    try :
+    try:
         while 1:
-            queue_item = process_queue.get(block=True)
+            try:
+                queue_item = process_queue.get(block=False)
+            except Empty:
+                sleep(0.1)
+                continue
             start = datetime.utcnow()
 
             callback_scraper = queue_item.callback.split(".")[-1]
@@ -20,7 +26,9 @@ def output_worker_process(process_queue, log_file_name):
                 if s.__name__ == callback_scraper:
                     scraper = s()
             if scraper is None:
-                raise RuntimeError('could not find scraper: {}'.format(callback_scraper))
+                e = RuntimeError('could not find scraper: {}'.format(callback_scraper))
+                logger.log(traceback.format_exc(e))
+                raise e
 
             logger.log('processing')
             scraper.process_data(queue_item)
