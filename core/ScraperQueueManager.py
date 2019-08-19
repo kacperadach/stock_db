@@ -63,6 +63,7 @@ class ScraperQueueManager(StockDbBase):
         self.event = Event()
         self.use_tor = use_tor
         self.tor_manager = Tor_Manager if use_tor else None
+        self.process_pool = None
 
     def start(self):
         for x in range(URL_THREADS):
@@ -76,10 +77,14 @@ class ScraperQueueManager(StockDbBase):
         m = multiprocessing.Manager()
         process_queue = m.Queue()
         self.process_queue = process_queue
+        self.process_pool = []
         for x in range(OUTPUT_PROCESSES):
-            pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
+            self.process_pool.append(pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name())))
+            a = pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
+            a.ready()
         self.log("Created {} output processes".format(OUTPUT_PROCESSES))
 
+        self.last_process_check = datetime.min
         self.launch_queue_logger()
         try:
             while not self.event.is_set():
@@ -98,6 +103,21 @@ class ScraperQueueManager(StockDbBase):
                         if request_queue_input:
                             request_queue_input.callback = scraper.__class__.__name__
                             self.request_queue.put(request_queue_input)
+
+                if datetime.now() - timedelta(seconds=10) > self.last_process_check:
+                    self.log('Checking processes')
+                    for process in self.process_pool:
+                        try:
+                            process.get(timeout=0.01)
+                        except multiprocessing.TimeoutError:
+                            self.log('Process running')
+                            pass
+                        except Exception as e:
+                            self.log('Error in process', level='error')
+                            self.log_exception(e)
+                            exit(1)
+                    self.last_process_check = datetime.now()
+
 
                 # takes item out of thread queue puts it into process queue
                 try:
@@ -141,7 +161,6 @@ class ScraperQueueManager(StockDbBase):
                 self.successful_request_counter.reset()
                 self.failed_request_counter.reset()
                 now = new_now
-
 
     def request_thread_worker(self, tor_client=None):
         request_client = RequestClient(use_tor=bool(tor_client), tor_client=tor_client)

@@ -34,7 +34,7 @@ class FinanceDB(StockDbBase):
 		self.db_name = env_vars['FINANCE_DB_NAME']
 		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host), self.port
 		connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host) + ':' + str(self.port)
-		self.log(connection_string + "-" + self.db_name)
+		self.log('mongodb://' + str(self.user) + ':' + '*****' + '@' + str(self.host) + ':' + str(self.port) + "-" + self.db_name)
 		self.mongo_client = MongoClient(connection_string)[self.db_name]
 
 	def get_db_params(self):
