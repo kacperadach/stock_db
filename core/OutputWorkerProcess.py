@@ -40,7 +40,7 @@ def output_worker_process(process_queue, log_file_name):
     except Exception as e:
         logger.log('ERROR ERROR ERROR: {}'.format(e), level='ERROR')
         logger.log(traceback.format_exc(e))
-
+        raise e
 
 if __name__ == "__main__":
     from acquisition.scrapers import ALL_SCRAPERS
