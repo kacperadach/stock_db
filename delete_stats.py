@@ -3,5 +3,6 @@ from db.Finance import Finance_DB
 
 if __name__ == "__main__":
     print 'dropping indexes'
+    Finance_DB.delete_many("scraper_stats", {})
     Finance_DB.drop_indexes("scraper_stats")
     print 'dropped indexes'
