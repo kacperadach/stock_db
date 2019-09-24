@@ -6,7 +6,7 @@ from TorClient import TorClient
 from utils.credentials import Credentials
 
 
-DEFAULT_NUM_TOR_INSTANCES = 5
+DEFAULT_NUM_TOR_INSTANCES = 3
 SOCKS_PORT = 9050
 CONTROL_PORT = 9051
 
