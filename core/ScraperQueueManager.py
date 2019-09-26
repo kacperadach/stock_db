@@ -44,16 +44,11 @@ This class is in charge of:
  - populating the request_queue
 """
 
-class ScraperQueueManager(StockDbBase):
 
+class ScraperQueueManager(StockDbBase):
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
-
-        # self.priority_scrapers = (FuturesScraper(), )
-        # self.scrapers = ()
-
-
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper() )
+        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
         self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper())
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
@@ -73,14 +68,14 @@ class ScraperQueueManager(StockDbBase):
             t.start()
         self.log("Created {} request threads".format(URL_THREADS))
 
-        pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
+        self.pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
         m = multiprocessing.Manager()
         process_queue = m.Queue()
         self.process_queue = process_queue
         self.process_pool = []
         for x in range(OUTPUT_PROCESSES):
-            self.process_pool.append(pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name())))
-            a = pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
+            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, 'output.log')))
+            a = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
             a.ready()
         self.log("Created {} output processes".format(OUTPUT_PROCESSES))
 
@@ -106,20 +101,23 @@ class ScraperQueueManager(StockDbBase):
 
                 if datetime.now() - timedelta(seconds=10) > self.last_process_check:
                     self.log('Checking processes')
-                    for process in self.process_pool:
+                    for i, process in enumerate(self.process_pool):
                         try:
-                            process.get(timeout=0.01)
+                            p = process.get(timeout=0.01)
+                            i = 0
                         except multiprocessing.TimeoutError:
-                            self.log('Process running')
+                            self.log('Process {} running'.format(i))
                             pass
                         except Exception as e:
                             self.log('Error in process', level='error')
                             self.log_exception(e)
-                            exit(1)
+                            self.process_pool[i] = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
+                            self.log('Restarting Service {}'.format(i))
+
                     self.last_process_check = datetime.now()
 
 
-                # takes item out of thread queue puts it into process queue
+                            # takes item out of thread queue puts it into process queue
                 try:
                     while 1:
                         queue_item = self.output_queue.get(block=False)
@@ -141,16 +139,9 @@ class ScraperQueueManager(StockDbBase):
             if datetime.utcnow() - timedelta(seconds=QUEUE_LOG_FREQ_SEC) > now:
                 new_now = datetime.utcnow()
                 rps = round(float(self.request_counter.get()) / (new_now - now).total_seconds(), 4)
-                data = {
-                    'datetime_utc': new_now,
-                    'request_queue_size': self.request_queue.get_size(),
-                    'output_queue_size': self.output_queue.qsize(),
-                    'process_queue_size': self.process_queue.qsize(),
-                    'requests': self.request_counter.get(),
-                    'successful_requests': self.successful_request_counter.get(),
-                    'failed_requests': self.failed_request_counter.get(),
-                    'requests_per_second': rps
-                }
+                data = {'datetime_utc': new_now, 'request_queue_size': self.request_queue.get_size(), 'output_queue_size': self.output_queue.qsize(), 'process_queue_size': self.process_queue.qsize(),
+                    'requests': self.request_counter.get(), 'successful_requests': self.successful_request_counter.get(), 'failed_requests': self.failed_request_counter.get(),
+                    'requests_per_second': rps}
                 Scraper_Repository.save_request_interval(data)
                 self.log('Request Queue Size: {}'.format(data['request_queue_size']))
                 self.log('Output Queue Size: {}'.format(data['output_queue_size']))
@@ -173,7 +164,7 @@ class ScraperQueueManager(StockDbBase):
                 else:
                     response = request_client.post(queue_item.get_url(), queue_item.get_body(), headers=queue_item.get_headers())
                 self.request_counter.increment()
-                self.log(queue_item.get_metadata())
+                # self.log(queue_item.get_metadata())
                 if response.status_code == 200:
                     self.successful_request_counter.increment()
                 else:

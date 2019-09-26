@@ -1,3 +1,4 @@
+import logging
 import traceback
 from Queue import Empty
 from datetime import datetime
@@ -11,6 +12,7 @@ from acquisition.scrapers import ALL_SCRAPERS
 def output_worker_process(process_queue, log_file_name):
     logger = AppLogger(output_process=True, file_name=log_file_name)
     logger.log('Started Output Process, pid: {}'.format(os.getpid()))
+    logger.log(log_file_name)
     try:
         while 1:
             try:
@@ -29,19 +31,21 @@ def output_worker_process(process_queue, log_file_name):
                 e = RuntimeError('could not find scraper: {}'.format(callback_scraper))
                 logger.log(traceback.format_exc(e))
                 raise e
+            try:
+                scraper.process_data(queue_item)
+            except Exception as e:
+                logger.log('PROCESSING ERROR FATAL: {} - {}'.format(scraper.__name__, e))
 
-            logger.log('processing')
-            scraper.process_data(queue_item)
             seconds_took = (datetime.utcnow() - start).total_seconds()
-            logger.log('Output processing: - took {} seconds'.format(seconds_took))
+            logger.log('Output processing: - took {} seconds: {}'.format(seconds_took, queue_item.get_metadata()))
 
             # if seconds_took > 5:
             # logger.log('Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
     except Exception as e:
-        logger.log('ERROR ERROR ERROR: {}'.format(e), level='ERROR')
+        logger.log('ERROR ERROR ERROR: {}'.format(e), level='error')
         logger.log(traceback.format_exc(e))
         raise e
 
 if __name__ == "__main__":
     from acquisition.scrapers import ALL_SCRAPERS
-    i = 0
+    output_worker_process(None, 'test')

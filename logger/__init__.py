@@ -11,7 +11,7 @@ THREAD_LEN = 20
 
 class AppLogger():
 
-	def __init__(self, output_process=False, file_name=None):
+	def __init__(self, output_process=False, file_name='scraper.log'):
 		self.logger = None
 		self.env = App_Config.env
 		self.log_path = path.join(BASE_PATH, 'logs', self.env)
@@ -20,19 +20,20 @@ class AppLogger():
 		# 	self.file_name = file_name
 		# else:
 		# 	self.file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
-
-		self.file_name = 'scraper.log'
+		self.file_name = file_name
 
 		# doesnt work
 		# if output_process is True:
 		# 	file_name = "output_" + file_name
 		# 	print file_name
+		log_file_path = path.join(BASE_PATH, 'logs', self.env, self.file_name)
+		logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
-		logging.basicConfig(filename=path.join(BASE_PATH, 'logs', self.env, self.file_name), level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
 		ch = logging.StreamHandler(stdout)
-		self.logger = logging.getLogger(self.env)
+		self.logger = logging.getLogger(self.file_name)
 		self.logger.addHandler(ch)
+		self.log('init logger {}'.format(log_file_path))
 
 	def _create_log_folders(self):
 		if not path.exists(self.log_path):

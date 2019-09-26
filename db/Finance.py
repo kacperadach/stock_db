@@ -112,6 +112,4 @@ class FinanceDB(StockDbBase):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.delete_many(query)
 
-
-
 Finance_DB = FinanceDB()
