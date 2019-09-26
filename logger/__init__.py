@@ -31,7 +31,7 @@ class AppLogger():
 
 
 		ch = logging.StreamHandler(stdout)
-		self.logger = logging.getLogger(self.file_name)
+		self.logger = logging.getLogger(self.env)
 		self.logger.addHandler(ch)
 		self.log('init logger {}'.format(log_file_path))
 
