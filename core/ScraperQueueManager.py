@@ -74,7 +74,7 @@ class ScraperQueueManager(StockDbBase):
         self.process_queue = process_queue
         self.process_pool = []
         for x in range(OUTPUT_PROCESSES):
-            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, 'output.log')))
+            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, 'scraper.log')))
             a = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
             a.ready()
         self.log("Created {} output processes".format(OUTPUT_PROCESSES))
