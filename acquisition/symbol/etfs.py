@@ -1,7 +1,6 @@
 import requests
 
 from discord.webhook import DiscordWebhook
-from logger import Logger
 from request.base.ResponseWrapper import ResponseWrapper
 
 URL = "https://query1.finance.yahoo.com/v1/finance/screener"
@@ -29,7 +28,7 @@ class ETF():
         self.discord = DiscordWebhook()
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level, self.task_name)
+        pass
 
     def _get_request_body(self, offset):
         body = BODY
@@ -51,8 +50,6 @@ class ETF():
                         found += data['finance']['result'][0]['count']
                     except (TypeError, KeyError, IndexError) as e:
                         self._log('Error in acquiring ETF symbols: {}'.format(e))
-                        if Logger.env.lower() == 'prod':
-                            self.discord.alert_error(self.task_name, str(e))
                         break
             else:
                 break

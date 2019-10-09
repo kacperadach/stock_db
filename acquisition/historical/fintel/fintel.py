@@ -5,8 +5,6 @@ from threading import Thread
 from bs4 import BeautifulSoup, SoupStrainer
 
 from db.Finance import Finance_DB
-from logger import Logger
-from request.request_queue import RequestQueue
 
 CURRENT_OWNERSHIP = "https://fintel.io/so/us/{}?page={}"
 INSIDER_TRANSACTIONS = "https://fintel.io/n/us/{}?page={}"
@@ -34,7 +32,7 @@ class FintelAcquisition():
         self.documents = []
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        pass
 
     def _insider_worker(self, data):
         response = data['data']

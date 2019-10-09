@@ -4,7 +4,6 @@ from acquisition.symbol.commodities import Commodities_Symbols
 from db.Finance import Finance_DB
 from request.quote import Quote, QuoteResponse
 from request.networking import Networking
-from logger import Logger
 
 DAYS_PER_CALL = 50
 LOG_PERCENT = 5
@@ -23,7 +22,7 @@ class HistoricalCommoditiesAcquisition():
         self.last_benchmark = 0
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        pass
 
     def _log_process(self):
         if len(self.symbols) > 0:

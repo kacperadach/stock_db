@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from acquisition.symbol.financial_symbols import Financial_Symbols
 from db.Finance import Finance_DB
 from request.quote_networking import QuoteNetworking
-from logger import Logger
 from discord.webhook import DiscordWebhook
 
 DAYS_PER_CALL = 50
@@ -24,7 +23,7 @@ class HistoricalStockAcquisition():
         self.last_benchmark = 0
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        pass
 
     def _log_process(self):
         if len(self.symbols) > 0:
@@ -103,8 +102,6 @@ class HistoricalStockAcquisition():
                 documents.append(data)
             except Exception as e:
                 self._log("Unexpected Error occurred: {}".format(str(e)))
-                if Logger.env.lower() == 'prod':
-                    self.discord.alert_error(self.task_name, str(e))
 
         if documents:
             self.finance_db.insert_many(documents, STOCK_COLLECTION)

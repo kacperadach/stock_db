@@ -5,7 +5,6 @@ import urllib2
 from bs4 import BeautifulSoup
 
 from db.Finance import Finance_DB
-from logger import Logger
 from discord.webhook import DiscordWebhook
 
 FDA_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
@@ -27,7 +26,7 @@ class BioPharmCatalyst():
         self.last_checked = None
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        pass
 
     def start(self):
         if self.last_checked is None or (datetime.now() - self.last_checked).total_seconds() > 14400:

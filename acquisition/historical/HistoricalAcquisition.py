@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import traceback
 import time
 
-from logger import Logger
 from acquisition.historical.stocks import HistoricalStockAcquisition
 from acquisition.historical.commodities import HistoricalCommoditiesAcquisition
 from acquisition.historical.currencies import HistoricalCurrenciesAcquisition
@@ -23,7 +22,7 @@ class HistoricalAcquisition(threading.Thread):
         self.finished = False
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.thread_name)
+        pass
 
     def run(self):
         try:
@@ -42,8 +41,6 @@ class HistoricalAcquisition(threading.Thread):
         except Exception as e:
             self._log('unexpected error occured: {}'.format(e))
             self._log(traceback.format_exc(), level='error')
-            if Logger.env == 'prod':
-                DiscordWebhook().alert_error(self.thread_name, traceback.format_exc())
 
     def _sleep(self):
         if self.finished:

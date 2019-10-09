@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 
 from db.Finance import Finance_DB
-from logger import Logger
 from discord.webhook import DiscordWebhook
 from acquisition.symbol.financial_symbols import Financial_Symbols
 from utils.webdriver import Selenium
@@ -35,7 +34,7 @@ class Financials():
         self.not_found = 0
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        pass
 
     def _log_process(self):
         if len(self.symbols) > 0:
@@ -130,8 +129,7 @@ class Financials():
                 self.data.clear()
         except Exception, e:
             self._log("Unexpected error occurred during execution: {}".format(str(e)))
-            if Logger.env.lower() == 'prod':
-                self.discord.alert_error(self.task_name, str(e))
+
         finally:
             self.counter += 1
 
