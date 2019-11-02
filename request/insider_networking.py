@@ -1,5 +1,5 @@
 from networking import Networking
-from logger import Logger
+
 
 BASE_URL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{}?formatted=true&crumb=cdjFLauo4.a&lang=en-US&region=US&modules=institutionOwnership%2CfundOwnership%2CmajorDirectHolders%2CmajorHoldersBreakdown%2CinsiderTransactions%2CinsiderHolders%2CnetSharePurchaseActivity&corsDomain=finance.yahoo.com"
 
@@ -20,7 +20,6 @@ class InsiderTransactions():
     def _log_process(self, batch):
         if batch/float(len(self.symbols)) * 100 > self.last_benchmark:
             self.last_benchmark += self.update_percent
-            Logger.log(str(round((float(batch) / len(self.symbols)) * 100, 2)) + '%', threadname=self.task_name)
 
     def generate(self):
         for x in range(0, len(self.symbols), BATCH_SIZE):

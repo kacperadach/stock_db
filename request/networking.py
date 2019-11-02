@@ -3,16 +3,12 @@ from urllib2 import HTTPError
 import threading
 from os import environ
 import json
-import logging
 import sys
 
 import requests
 from stem import Signal
 from stem.control import Controller
 
-from logger import Logger
-
-logging.getLogger('stem').setLevel(logging.WARNING)
 
 TOR_PROXIES = {
     'http': 'socks5://localhost:9050',
@@ -60,14 +56,13 @@ class Networking():
             print "Unexpected error occurred while trying to disconnect from tor: {}".format(e)
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname='Networking')
+        pass
 
     def _log_process(self):
         if self.log_process:
             self.progress += 1
             if self.progress/float(self.num_urls) * 100 > self.last_benchmark:
                 self.last_benchmark += self.update_percent
-                Logger.log(str(round((float(self.progress) / self.num_urls) * 100, 2)) + '%', threadname=self.threadname)
 
     def _request(self, url):
         if self.controller is None:

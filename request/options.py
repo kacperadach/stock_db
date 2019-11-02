@@ -3,8 +3,6 @@ import logging
 
 import requests
 
-logging.getLogger("requests").setLevel(logging.WARNING)
-
 OPTIONS_URL = "https://query1.finance.yahoo.com/v7/finance/options/{}?lang=en-US&region=US&corsDomain=finance.yahoo.com"
 
 OPTIONS_DATE_URL = "https://query2.finance.yahoo.com/v7/finance/options/{}?lang=en-US&region=US&date={}&corsDomain=finance.yahoo.com"

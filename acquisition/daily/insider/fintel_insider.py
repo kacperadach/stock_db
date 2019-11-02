@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from request.insider_networking import InsiderTransactions
 from db import FinanceDB
-from logger import Logger
 from acquisition.symbol.financial_symbols import Financial_Symbols
 
 
@@ -21,7 +20,7 @@ class FintelInsiderAcquisition():
         self.symbols = Financial_Symbols.get_all()
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        pass
 
     def get_incomplete_insider_tasks(self):
         if not self.finance_db or not self.trading_date:

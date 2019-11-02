@@ -2,8 +2,6 @@ import json
 
 import requests
 
-from logger import Logger
-
 PROD_ERROR = 'https://discordapp.com/api/webhooks/329754263024697354/yO-H4bhqhhzEsP0sUYH7UytGPOX0jmu73MHm8JM7vpKBs8CKiDCu5q5mKCXRnUhUSHNm'
 BIO_PHARM_CATALYST = 'https://discordapp.com/api/webhooks/330197086622449666/JRicV2KReEZoBZ_7nXUCCrCguQVouuRMgEGgzz4aPUM4olmZec1h50fQCAlSVP4Coqgj'
 MAIN_SERVICE = 'https://discordapp.com/api/webhooks/341063657171451915/Onio3ZnH7cT8bc5eC6VIeMtW3umAnbvIXnROStYf8PSPL507iJLWnA85F_IaqaG4KS46'
@@ -36,7 +34,7 @@ class DiscordWebhook():
         try:
             requests.post(messenger, {'content': msg})
         except:
-            Logger.log('Discord Message Error')
+            pass
 
 
     def alert_BioPharmCatalyst_fda(self, event):
@@ -53,7 +51,7 @@ class DiscordWebhook():
         try:
             requests.post(BIO_PHARM_CATALYST, json.dumps(body), headers={"Content-Type": "application/json"})
         except:
-            Logger.log('Discord Message Error')
+            pass
 
 
     def alert_BioPharmCatalyst_catalyst(self, event):
@@ -70,4 +68,4 @@ class DiscordWebhook():
         try:
             requests.post(BIO_PHARM_CATALYST, json.dumps(body), headers={"Content-Type": "application/json"})
         except:
-            Logger.log('Discord Message Error')
+            pass

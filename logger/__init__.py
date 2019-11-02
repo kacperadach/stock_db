@@ -29,11 +29,9 @@ class AppLogger():
 		log_file_path = path.join(BASE_PATH, 'logs', self.env, self.file_name)
 		logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
-
 		ch = logging.StreamHandler(stdout)
 		self.logger = logging.getLogger(self.env)
 		self.logger.addHandler(ch)
-		self.log('init logger {}'.format(log_file_path))
 
 	def _create_log_folders(self):
 		if not path.exists(self.log_path):
@@ -72,5 +70,3 @@ class AppLogger():
 				self.log(msg)
 				last_benchmark += update_percent
 			yield i
-
-Logger = AppLogger()

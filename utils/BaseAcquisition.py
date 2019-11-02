@@ -1,4 +1,4 @@
-from logger import Logger
+from logger import AppLogger
 
 LOG_PERCENT = 5
 
@@ -6,9 +6,10 @@ class BaseAcquisition():
 
     def __init__(self, task_name):
         self.task_name = task_name
+        self.logger = AppLogger()
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.task_name)
+        self.logger.log(msg, level=level, threadname=self.task_name)
 
     def _log_process(self):
         if len(self.symbols) > 0:

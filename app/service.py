@@ -8,7 +8,7 @@ from constants import DEV_ENV_VARS, PROD_ENV_VARS
 from core.ScraperQueueManager import ScraperQueueManager
 from db.Finance import Finance_DB
 from db.MongoIndexer import MongoIndexer
-from logger import Logger
+from logger import AppLogger
 from request.base.TorManager import Tor_Manager
 
 
@@ -16,6 +16,7 @@ class MainService():
 
 	def __init__(self):
 		self.start = datetime.now()
+		self.logger = AppLogger()
 		self.thread_name = 'MainService'
 		App_Config.set_config(sys.argv)
 		self.env = App_Config.env
@@ -25,20 +26,20 @@ class MainService():
 		self._log('Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()
 		Finance_DB.get_db_params()
-		Logger.log('+---------------------------------------------+')
-		Logger.log('                                             ')
-		Logger.log('    Service Started at {}      '.format(datetime.now().strftime('%H:%M %Y-%m-%d')))
-		Logger.log('          Environment: {}                   '.format(self.env))
-		Logger.log('          use_tor: {}                      '.format(self.use_tor))
-		Logger.log('                                             ')
-		Logger.log('+---------------------------------------------+')
+		self.logger.log('+---------------------------------------------+')
+		self.logger.log('                                             ')
+		self.logger.log('    Service Started at {}      '.format(datetime.now().strftime('%H:%M %Y-%m-%d')))
+		self.logger.log('          Environment: {}                   '.format(self.env))
+		self.logger.log('          use_tor: {}                      '.format(self.use_tor))
+		self.logger.log('                                             ')
+		self.logger.log('+---------------------------------------------+')
 		self.main_service()
 		# if self.env == 'prod':
 		# 	DiscordWebhook().alert_start()
-		Logger.log('Service finished, total time running: {}'.format(datetime.now()-self.start))
+		self.logger.log('Service finished, total time running: {}'.format(datetime.now()-self.start))
 
 	def _log(self, msg, level='info'):
-		Logger.log(msg, level=level, threadname=self.thread_name)
+		self.logger.log(msg, level=level, threadname=self.thread_name)
 
 	def main_service(self):
 		if self.use_tor:
@@ -55,5 +56,5 @@ class MainService():
 		environment_vars = PROD_ENV_VARS if self.env.lower() == 'prod' else DEV_ENV_VARS
 		environ['env'] = self.env
 		for key, val in environment_vars.items():
-			Logger.log(str(key) + " " + str(val))
+			self.logger.log(str(key) + " " + str(val))
 			environ[key] = val

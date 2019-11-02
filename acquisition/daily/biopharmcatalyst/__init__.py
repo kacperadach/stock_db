@@ -71,15 +71,11 @@ class BioPharmCatalyst():
                 })
             except Exception as e:
                 self._log('Error in FDA calendar parsing: {}'.format(e))
-                if Logger.env == 'prod':
-                    self.discord.alert_error(self.task_name, 'Error in FDA calendar parsing: {}'.format(e))
 
         for event in fda_events:
             if len(list(self.finance_db.find(event, FDA_COLLECTION))) == 0:
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
-                if Logger.env == 'prod':
-                    self.discord.alert_BioPharmCatalyst_fda(event)
                 self.finance_db.insert_one(event, FDA_COLLECTION)
 
     def get_historical_catalyst_calendar(self):
@@ -114,16 +110,12 @@ class BioPharmCatalyst():
                 })
             except Exception as e:
                 self._log('Error in Historical Catalyst Calendar parsing: {}'.format(e))
-                if Logger.env == 'prod':
-                    self.discord.alert_error(self.task_name, 'Error in BioPharmCatalyst Historical Catalyst Calendar parsing: {}'.format(e))
 
         documents = []
         for event in fda_events:
             if len(list(self.finance_db.find(event, HISTORICAL_COLLECTION))) == 0:
                 event['created_on'] = str(datetime.now().date())
                 self.found += 1
-                if Logger.env == 'prod':
-                    self.discord.alert_BioPharmCatalyst_catalyst(event)
                 documents.append(event)
         if documents:
             self.finance_db.insert_many(documents, HISTORICAL_COLLECTION)

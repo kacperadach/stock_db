@@ -1,7 +1,7 @@
 from threading import Thread
 import time
 
-from logger import Logger
+from logger import AppLogger
 
 class QueueLoggerError(Exception):
     pass
@@ -13,9 +13,10 @@ class QueueLogger():
         self.running = False
         self.log_time_interval = log_time_interval
         self.log_thread = None
+        self.logger = AppLogger()
 
     def _log(self, msg, level='info'):
-        Logger.log(msg, level=level, threadname=self.name)
+        self.logger.log(msg, level=level, threadname=self.name)
 
     def start_logging(self, queues):
         for _, queue in queues.iteritems():
