@@ -3,6 +3,7 @@ import traceback
 from logger import AppLogger
 
 class StockDbBase(object):
+
     def __init__(self):
         self.logger = AppLogger()
 

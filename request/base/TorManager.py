@@ -1,10 +1,8 @@
 from os import path
-from threading import Thread
 
 from core.StockDbBase import StockDbBase
 from TorClient import TorClient
 from utils.credentials import Credentials
-
 
 DEFAULT_NUM_TOR_INSTANCES = 3
 SOCKS_PORT = 9050
@@ -13,7 +11,7 @@ CONTROL_PORT = 9051
 class TorManager(StockDbBase):
 
     def __init__(self, num_tor_instances=DEFAULT_NUM_TOR_INSTANCES):
-        super(StockDbBase, self).__init__()
+        super(TorManager, self).__init__()
         self.num_tor_instances = num_tor_instances
         self.tor_instances = []
         self.tor_path = Credentials().get_tor_path()
@@ -30,23 +28,10 @@ class TorManager(StockDbBase):
         start_socks_port = SOCKS_PORT
         start_control_port = CONTROL_PORT
 
-        # def start_tor(x):
-        #     tor_client = TorClient(start_socks_port + (2 * x), start_control_port + (2 * x), self.get_data_directory(x))
-        #     tor_client.start_tor()
-        #     self.tor_instances.append(tor_client)
-
-        threads = []
         for x in range(self.num_tor_instances):
             tor_client = TorClient(start_socks_port + (2 * x), start_control_port + (2 * x), self.get_data_directory(x))
             tor_client.start_tor()
             self.tor_instances.append(tor_client)
-            # threads.append(Thread(target=start_tor, args=(x,)))
-
-        # for t in threads:
-        #     t.start()
-        #
-        # for t in threads:
-        #     t.join()
 
         self.log('Successfully launched {} tor instances'.format(self.num_tor_instances))
 

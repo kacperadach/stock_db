@@ -46,6 +46,7 @@ This class is in charge of:
 
 
 class ScraperQueueManager(StockDbBase):
+
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
