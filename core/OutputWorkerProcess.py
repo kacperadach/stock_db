@@ -7,10 +7,10 @@ from time import sleep
 
 from acquisition.scrapers import ALL_SCRAPERS
 
-def output_worker_process(process_queue, processing_file_path):
+def output_worker_process(process_queue, processing_file_path, process_number):
     sys.stdout = open(processing_file_path, "a", buffering=0)
 
-    print 'Started worker process'
+    print '{} - Started worker process'.format(process_number)
     try:
         while 1:
             try:
@@ -26,7 +26,7 @@ def output_worker_process(process_queue, processing_file_path):
                 if s.__name__ == callback_scraper:
                     scraper = s()
             if scraper is None:
-                error = 'could not find scraper: {}'.format(callback_scraper)
+                error = 'Could not find scraper: {}'.format(callback_scraper)
                 print error
                 raise RuntimeError(error)
             try:
@@ -35,12 +35,13 @@ def output_worker_process(process_queue, processing_file_path):
                 print 'Error occurred while processing data for scraper {}: {}'.format(callback_scraper, str(e))
 
             seconds_took = (datetime.utcnow() - start).total_seconds()
-            print '{} - processing took {}s: {}'.format(callback_scraper, seconds_took, queue_item.get_metadata())
+            print '{}|{} - processing took {}s: {}'.format(process_number, callback_scraper, seconds_took, queue_item.get_metadata())
 
             if seconds_took > 5:
                 print 'Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took)
     except Exception as e:
         error = 'Unexpected error occurred: {}'.format(traceback.format_exc(e))
+        print error
         raise RuntimeError(error)
 
 if __name__ == "__main__":
