@@ -1,6 +1,7 @@
 from FuturesScraper import FuturesScraper, Futures1mScraper
 from IndexLiveScraper import IndexLiveScraper
 from MarketWatchHistoricalScraper import MarketWatchHistoricalScraper
+from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
 from acquisition.scrapers.MarketWatchLiveScraper import MarketWatchLiveScraper
 from acquisition.scrapers.MarketWatchRequestLiveScraper import MarketWatchRequestLiveScraper
@@ -14,5 +15,6 @@ ALL_SCRAPERS = (
     MarketWatchLiveScraper,
     MarketWatchRequestLiveScraper,
     MarketWatchSymbolsV2,
-    RandomMarketWatchSymbols
+    RandomMarketWatchSymbols,
+    FinvizScraper
 )

@@ -3,9 +3,11 @@ from Queue import Queue, Empty
 from threading import Thread, Event
 from datetime import datetime, timedelta
 import multiprocessing
-
+import os
+from os import path
 from pytz import timezone
 
+from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
 from acquisition.scrapers.IndexLiveScraper import IndexLiveScraper
 from acquisition.scrapers.MarketWatchRequestLiveScraper import MarketWatchRequestLiveScraper
@@ -44,13 +46,15 @@ This class is in charge of:
  - populating the request_queue
 """
 
+BASE_PATH = path.dirname(path.abspath(__file__))
 
 class ScraperQueueManager(StockDbBase):
 
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
-        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper())
+        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper())
+
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()
@@ -69,13 +73,17 @@ class ScraperQueueManager(StockDbBase):
             t.start()
         self.log("Created {} request threads".format(URL_THREADS))
 
+        self.prcessing_file_path = path.join(BASE_PATH, 'processing.out')
+        os.remove(self.prcessing_file_path)
+        open(self.prcessing_file_path, 'w+')
+
         self.pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
         m = multiprocessing.Manager()
         process_queue = m.Queue()
         self.process_queue = process_queue
         self.process_pool = []
         for x in range(OUTPUT_PROCESSES):
-            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, 'scraper.log')))
+            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, self.prcessing_file_path)))
             a = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
             a.ready()
         self.log("Created {} output processes".format(OUTPUT_PROCESSES))
@@ -104,8 +112,7 @@ class ScraperQueueManager(StockDbBase):
                     self.log('Checking processes')
                     for i, process in enumerate(self.process_pool):
                         try:
-                            p = process.get(timeout=0.01)
-                            i = 0
+                            process.get(timeout=0.01)
                         except multiprocessing.TimeoutError:
                             self.log('Process {} running'.format(i))
                             pass
@@ -118,7 +125,7 @@ class ScraperQueueManager(StockDbBase):
                     self.last_process_check = datetime.now()
 
 
-                            # takes item out of thread queue puts it into process queue
+                # takes item out of thread queue puts it into process queue
                 try:
                     while 1:
                         queue_item = self.output_queue.get(block=False)
@@ -165,12 +172,12 @@ class ScraperQueueManager(StockDbBase):
                 else:
                     response = request_client.post(queue_item.get_url(), queue_item.get_body(), headers=queue_item.get_headers())
                 self.request_counter.increment()
-                # self.log(queue_item.get_metadata())
                 if response.status_code == 200:
                     self.successful_request_counter.increment()
                 else:
                     self.failed_request_counter.increment()
                 queue_item.add_response(response)
+                queue_item.add_time()
                 self.output_queue.put(queue_item)
         except Exception as e:
             self.log_queue_item(queue_item)

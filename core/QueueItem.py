@@ -1,4 +1,5 @@
 from request.base.ResponseWrapper import ResponseWrapper
+import time
 
 HTTP_METHODS = ('GET', 'POST')
 
@@ -22,6 +23,7 @@ class QueueItem:
         self.headers = headers
         self.metadata = metadata
         self.response = None
+        self.response_time = None
 
     def __repr__(self):
         return self.symbol + ': ' + str(self.metadata)
@@ -49,6 +51,12 @@ class QueueItem:
         if not isinstance(response, ResponseWrapper):
             raise QueueItemException('response was not a ResponseWrapper instance')
         self.response = response
+
+    def add_time(self):
+        self.response_time = int(time.time())
+
+    def get_utc_time(self):
+        return self.response_time
 
     def get_metadata(self):
         return self.metadata

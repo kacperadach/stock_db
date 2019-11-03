@@ -2,7 +2,6 @@ import json
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from pytz import timezone
 from urllib import quote_plus
 
 from MarketWatchRequestConstants import *

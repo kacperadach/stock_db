@@ -37,7 +37,8 @@ COLLECTION_INDICES = {
     'market_watch_real-estate-investment-trusts': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_warrants': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL, ),
     'market_watch_request': (MongoIndex(name='instrument_type_exchange_symbol_timestamp', index={'instrument_type': 1, 'exchange': 1, 'symbol': 1, 'timestamp': 1}, unique=False), ),
-    'scraper_stats': (MongoIndex(name='datetime_utc', index={'datetime_utc': -1}, unique=True, expire_after_seconds=1204800), )
+    'scraper_stats': (MongoIndex(name='datetime_utc', index={'datetime_utc': -1}, unique=True, expire_after_seconds=1204800), ),
+    'finviz': (MongoIndex(name='symbol_exchange_datetime', index={'symbol': 1, 'exchange': 1, 'datetime_utc': -1}, unique=False), )
 }
 
 class MongoIndexer(StockDbBase):

@@ -1,0 +1,58 @@
+Started worker process
+Started worker process
+FuturesScraper - processing took 1.904s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'JY00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCME'}, 'type': 'historical'}
+FuturesScraper - processing took 2.062s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'EC00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCME'}, 'type': 'historical'}
+IndexLiveScraper - processing took 0.001s: {'time_interval': '1m', 'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'indexes', u'symbol': u'DJIA', u'country': u'US', u'country_code': u'US', u'exchange': u'DOW JONES GLOBAL'}}
+FuturesScraper - processing took 1.576s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'AD00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCME'}, 'type': 'historical'}
+Futures1mScraper - processing took 0.589s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'CD00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCME'}}
+Futures1mScraper - processing took 0.641s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'AD00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCME'}}
+FuturesScraper - processing took 1.86s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'TY00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}, 'type': 'historical'}
+Futures1mScraper - processing took 0.552s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'TU00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+FuturesScraper - processing took 1.714s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'FV00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}, 'type': 'historical'}
+FuturesScraper - processing took 1.678s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'US00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}, 'type': 'historical'}
+Futures1mScraper - processing took 0.534s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'TY00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+Futures1mScraper - processing took 0.608s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'FV00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+Futures1mScraper - processing took 0.588s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'CL00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}}
+Futures1mScraper - processing took 0.501s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'US00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+Futures1mScraper - processing took 0.558s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'NG00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}}
+FuturesScraper - processing took 1.578s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'BRN00', 'country': 'united-kingdom', 'country_code': 'UK', 'exchange': 'IFEU'}, 'type': 'historical'}
+FuturesScraper - processing took 1.837s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'HO00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}, 'type': 'historical'}
+FuturesScraper - processing took 1.847s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'SI00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}, 'type': 'historical'}
+Futures1mScraper - processing took 0.684s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'GC00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}}
+FuturesScraper - processing took 1.773s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'HG00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}, 'type': 'historical'}
+FuturesScraper - processing took 1.915s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'PL00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}, 'type': 'historical'}
+FuturesScraper - processing took 1.978s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'YM00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}, 'type': 'historical'}
+Futures1mScraper - processing took 0.362s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'C00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+Futures1mScraper - processing took 0.582s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'SI00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}}
+Futures1mScraper - processing took 0.372s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'W00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+Futures1mScraper - processing took 0.477s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'PL00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XNYM'}}
+FuturesScraper - processing took 1.666s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'W00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}, 'type': 'historical'}
+Futures1mScraper - processing took 0.353s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'S00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+FuturesScraper - processing took 1.706s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'BO00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}, 'type': 'historical'}
+FuturesScraper - processing took 1.826s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'LC00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCME'}, 'type': 'historical'}
+MarketWatchHistoricalScraper - processing took 2.376s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'stocks', u'symbol': u'A', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}, 'type': 'historical'}
+RandomMarketWatchSymbols - processing took 0.004s: {'symbol': 'b'}
+MarketWatchSymbolsV2 - processing took 0.022s: {'country': 'argentina', 'page': 1, 'instrument_type': 'rates'}
+Futures1mScraper - processing took 0.322s: {'indicators': <DEFAULT>, 'symbol': {'instrument_type': 'futures', 'symbol': 'SM00', 'country': 'united-states', 'country_code': 'US', 'exchange': 'XCBT'}}
+RandomMarketWatchSymbols - processing took 0.014s: {'symbol': 'c'}
+FinvizScraper - processing took 0.281s: {u'instrument_type': u'stocks', u'symbol': u'AAL', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+RandomMarketWatchSymbols - processing took 0.004s: {'symbol': 'd'}
+MarketWatchSymbolsV2 - processing took 0.017s: {'country': 'bahamas', 'page': 1, 'instrument_type': 'rates'}
+MarketWatchHistoricalScraper - processing took 0.0s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'stocks', u'symbol': u'TH:A', u'country': u'TH', u'country_code': u'TH', u'exchange': u'XBKK'}, 'type': 'historical'}
+RandomMarketWatchSymbols - processing took 0.003s: {'symbol': 'e'}
+FinvizScraper - processing took 0.258s: {u'instrument_type': u'stocks', u'symbol': u'AAON', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+FinvizScraper - processing took 0.296s: {u'instrument_type': u'stocks', u'symbol': u'AAN', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+MarketWatchSymbolsV2 - processing took 0.016s: {'country': 'bahrain', 'page': 1, 'instrument_type': 'rates'}
+MarketWatchHistoricalScraper - processing took 0.0s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'currencies', u'symbol': u'ARSUSD', u'country': u'US', u'country_code': u'US', u'exchange': None}, 'type': 'historical'}
+MarketWatchSymbolsV2 - processing took 0.016s: {'country': 'belgium', 'page': 1, 'instrument_type': 'rates'}
+MarketWatchSymbolsV2 - processing took 0.017s: {'country': 'botswana', 'page': 1, 'instrument_type': 'rates'}
+FinvizScraper - processing took 0.261s: {u'instrument_type': u'stocks', u'symbol': u'AAP', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+MarketWatchHistoricalScraper - processing took 0.0s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'currencies', u'symbol': u'USDAED', u'country': u'US', u'country_code': u'US', u'exchange': None}, 'type': 'historical'}
+MarketWatchHistoricalScraper - processing took 0.0s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'currencies', u'symbol': u'AUDUSD', u'country': u'US', u'country_code': u'US', u'exchange': None}, 'type': 'historical'}
+MarketWatchSymbolsV2 - processing took 0.016s: {'country': 'british-virgin-islands', 'page': 1, 'instrument_type': 'rates'}
+MarketWatchHistoricalScraper - processing took 0.0s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'currencies', u'symbol': u'USDAUD', u'country': u'US', u'country_code': u'US', u'exchange': None}, 'type': 'historical'}
+RandomMarketWatchSymbols - processing took 0.003s: {'symbol': 'k'}
+FinvizScraper - processing took 0.254s: {u'instrument_type': u'stocks', u'symbol': u'AAXN', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+RandomMarketWatchSymbols - processing took 0.004s: {'symbol': 'j'}
+MarketWatchHistoricalScraper - processing took 0.0s: {'indicators': <DEFAULT>, 'symbol': {u'instrument_type': u'bonds', u'symbol': u'BX:AMBMKRM-02Y', u'country': u'BX', u'country_code': u'BX', u'exchange': u'XTUP'}, 'type': 'historical'}
+RandomMarketWatchSymbols - processing took 0.005s: {'symbol': 'l'}
