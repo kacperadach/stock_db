@@ -6,3 +6,4 @@ __pycache__
 db_cred.txt
 temp.py
 credentials.txt
+*.out
