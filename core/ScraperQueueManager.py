@@ -32,9 +32,9 @@ from StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
-URL_THREADS = 1
-OUTPUT_PROCESSES = 1
-REQUEST_QUEUE_SIZE = 1
+URL_THREADS = 10
+OUTPUT_PROCESSES = 4
+REQUEST_QUEUE_SIZE = 20
 OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
 INPUT_REQUEST_DELAY = 0.1
