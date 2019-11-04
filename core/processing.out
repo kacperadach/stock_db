@@ -1,4 +1,51 @@
 0 - Started worker process
-1 - Started worker process
-2 - Started worker process
-3 - Started worker process
+0|FinvizScraper - processing took 1.295s: {u'instrument_type': u'stocks', u'symbol': u'SNAP', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.762s: {u'instrument_type': u'stocks', u'symbol': u'SPGI', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.562s: {u'instrument_type': u'stocks', u'symbol': u'SPOT', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.595s: {u'instrument_type': u'stocks', u'symbol': u'SSB', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.553s: {u'instrument_type': u'stocks', u'symbol': u'SSW', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.601s: {u'instrument_type': u'stocks', u'symbol': u'STLD', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.493s: {u'instrument_type': u'stocks', u'symbol': u'STNE', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.559s: {u'instrument_type': u'stocks', u'symbol': u'STNG', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.573s: {u'instrument_type': u'stocks', u'symbol': u'STOR', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.618s: {u'instrument_type': u'stocks', u'symbol': u'T', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.478s: {u'instrument_type': u'stocks', u'symbol': u'TAK', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.559s: {u'instrument_type': u'stocks', u'symbol': u'TAL', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.559s: {u'instrument_type': u'stocks', u'symbol': u'TEAM', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.594s: {u'instrument_type': u'stocks', u'symbol': u'TGP', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.21s: {u'instrument_type': u'stocks', u'symbol': u'THBRU', u'country': u'US', u'country_code': u'US', u'exchange': u'IPO'}
+0|FinvizScraper - processing took 0.515s: {u'instrument_type': u'stocks', u'symbol': u'TME', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.554s: {u'instrument_type': u'stocks', u'symbol': u'TRI', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.546s: {u'instrument_type': u'stocks', u'symbol': u'TRP', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.557s: {u'instrument_type': u'stocks', u'symbol': u'TSM', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 1.052s: {u'instrument_type': u'stocks', u'symbol': u'TWTR', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.551s: {u'instrument_type': u'stocks', u'symbol': u'UBER', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.652s: {u'instrument_type': u'stocks', u'symbol': u'V', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 1.09s: {u'instrument_type': u'stocks', u'symbol': u'VEEV', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.883s: {u'instrument_type': u'stocks', u'symbol': u'VSLR', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 1.055s: {u'instrument_type': u'stocks', u'symbol': u'W', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.63s: {u'instrument_type': u'stocks', u'symbol': u'WAAS', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.59s: {u'instrument_type': u'stocks', u'symbol': u'WBA', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.566s: {u'instrument_type': u'stocks', u'symbol': u'WBK', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.676s: {u'instrument_type': u'stocks', u'symbol': u'WD', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.978s: {u'instrument_type': u'stocks', u'symbol': u'WDAY', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.894s: {u'instrument_type': u'stocks', u'symbol': u'WEC', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.499s: {u'instrument_type': u'stocks', u'symbol': u'WELL', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.649s: {u'instrument_type': u'stocks', u'symbol': u'WFC', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.589s: {u'instrument_type': u'stocks', u'symbol': u'WLH', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.698s: {u'instrument_type': u'stocks', u'symbol': u'WM', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.65s: {u'instrument_type': u'stocks', u'symbol': u'WMB', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 1.048s: {u'instrument_type': u'stocks', u'symbol': u'WMT', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.602s: {u'instrument_type': u'stocks', u'symbol': u'WTR', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.602s: {u'instrument_type': u'stocks', u'symbol': u'X', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.553s: {u'instrument_type': u'stocks', u'symbol': u'Y', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.692s: {u'instrument_type': u'stocks', u'symbol': u'YELP', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.536s: {u'instrument_type': u'stocks', u'symbol': u'YETI', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.514s: {u'instrument_type': u'stocks', u'symbol': u'YEXT', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.553s: {u'instrument_type': u'stocks', u'symbol': u'YNDX', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.513s: {u'instrument_type': u'stocks', u'symbol': u'YPF', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.92s: {u'instrument_type': u'stocks', u'symbol': u'YUM', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.82s: {u'instrument_type': u'stocks', u'symbol': u'YUMC', u'country': u'US', u'country_code': u'US', u'exchange': u'XNYS'}
+0|FinvizScraper - processing took 0.555s: {u'instrument_type': u'stocks', u'symbol': u'YY', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.934s: {u'instrument_type': u'stocks', u'symbol': u'Z', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}
+0|FinvizScraper - processing took 0.565s: {u'instrument_type': u'stocks', u'symbol': u'ZG', u'country': u'US', u'country_code': u'US', u'exchange': u'XNAS'}

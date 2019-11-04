@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 # for socketio
 from gevent import monkey
 
-from api.views.meta_data import fetch_metadata
+from api.views.meta_data import fetch_metadata, fetch_fundamentals
 from core.data.FuturesRepository import FuturesRepository
 from core.data.uid import decrypt_unique_id, encrypt_unique_id
 
@@ -51,8 +51,11 @@ def get_chart(chart):
 @socketio.on('metadata')
 def get_metadata(chart):
     data = fetch_metadata(chart['uid'])
-    print data
     emit('metadata', data)
+
+@socketio.on('fundamentals')
+def get_fundamentals(chart):
+    emit('fundamentals', fetch_fundamentals(chart['uid']))
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 #
@@ -76,6 +79,6 @@ def run():
     # app.run(use_reloader=True, port=5000, threaded=False)
 
 if __name__ == '__main__':
-    get_metadata({'uid': 'U0kwMCAvWE5ZTSAvVVMgIC9mdXR1cmVzICAg'})
-    # run()
+    d = fetch_metadata('RkIgICAvWE5BUyAvVVMgIC9zdG9ja3MgICAg')
+    print d
 

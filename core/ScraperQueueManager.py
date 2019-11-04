@@ -32,9 +32,9 @@ from StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import Tor_Manager
 
-URL_THREADS = 10
-OUTPUT_PROCESSES = 4
-REQUEST_QUEUE_SIZE = 20
+URL_THREADS = 1
+OUTPUT_PROCESSES = 1
+REQUEST_QUEUE_SIZE = 1
 OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
 INPUT_REQUEST_DELAY = 0.1
@@ -52,8 +52,11 @@ class ScraperQueueManager(StockDbBase):
 
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
-        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper())
+        # self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
+        # self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper())
+
+        self.priority_scrapers = ()
+        self.scrapers = (FinvizScraper(), )
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)

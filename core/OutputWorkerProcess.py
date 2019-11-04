@@ -28,7 +28,7 @@ def output_worker_process(process_queue, processing_file_path, process_number):
             if scraper is None:
                 error = 'Could not find scraper: {}'.format(callback_scraper)
                 print error
-                raise RuntimeError(error)
+                sys.exit(1)
             try:
                 scraper.process_data(queue_item)
             except Exception as e:
@@ -42,7 +42,7 @@ def output_worker_process(process_queue, processing_file_path, process_number):
     except Exception as e:
         error = 'Unexpected error occurred: {}'.format(traceback.format_exc(e))
         print error
-        raise RuntimeError(error)
+        sys.exit(1)
 
 if __name__ == "__main__":
     from acquisition.scrapers import ALL_SCRAPERS

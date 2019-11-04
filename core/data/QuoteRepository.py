@@ -43,6 +43,7 @@ REQUEST_COLLECTION  = 'market_watch_request'
 class QuoteRepository(StockDbBase):
 
     def __init__(self):
+        super(QuoteRepository, self).__init__()
         self.db = Finance_DB
         self.locks = {}
 
