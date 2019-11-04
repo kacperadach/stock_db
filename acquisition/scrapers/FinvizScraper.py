@@ -15,7 +15,7 @@ class FinvizScraper(BaseScraper):
         self.db = Finance_DB
 
     def get_symbols(self):
-        return self.db.find(SYMBOL_COLLECTION, {'country_code': 'US', 'instrument_type': {'$in': ['stocks', 'exchange-traded-funds']}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
+        return self.db.find(SYMBOL_COLLECTION, {'country_code': 'US', 'instrument_type': {'$in': ['stocks', 'exchange-traded-funds']}}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})
 
     def get_queue_item(self, symbol):
         finviz = FinvizRequest(symbol['symbol'])
