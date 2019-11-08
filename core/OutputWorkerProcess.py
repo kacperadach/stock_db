@@ -7,10 +7,15 @@ from time import sleep
 
 from acquisition.scrapers import ALL_SCRAPERS
 
+
+def log(process_number, message):
+    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    print '{} | {} - {}'.format(process_number, now, message)
+
 def output_worker_process(process_queue, processing_file_path, process_number):
     sys.stdout = open(processing_file_path, "a", buffering=0)
 
-    print '{} - Started worker process'.format(process_number)
+    log(process_number, 'Started worker process')
     try:
         while 1:
             try:
@@ -18,6 +23,7 @@ def output_worker_process(process_queue, processing_file_path, process_number):
             except Empty:
                 sleep(0.1)
                 continue
+            log(process_number, 'Got from queue: {}'.format(queue_item.get_metadata()))
             start = datetime.utcnow()
 
             callback_scraper = queue_item.callback.split(".")[-1]
@@ -26,24 +32,24 @@ def output_worker_process(process_queue, processing_file_path, process_number):
                 if s.__name__ == callback_scraper:
                     scraper = s()
             if scraper is None:
-                error = 'Could not find scraper: {}'.format(callback_scraper)
-                print error
+                log(process_number, 'Could not find scraper: {}'.format(callback_scraper))
                 sys.exit(1)
             try:
                 scraper.process_data(queue_item)
             except Exception as e:
-                print 'Error occurred while processing data for scraper {}: {}'.format(callback_scraper, str(e))
+                log(process_number, 'ERROR')
+                log(process_number, 'Error occurred while processing data for scraper {}: {}'.format(callback_scraper, str(e)))
 
             seconds_took = (datetime.utcnow() - start).total_seconds()
-            print '{}|{} - processing took {}s: {}'.format(process_number, callback_scraper, seconds_took, queue_item.get_metadata())
 
+            log(process_number, '{} - processing took {}s: {}'.format(callback_scraper, seconds_took, queue_item.get_metadata()))
             if seconds_took > 5:
-                print 'Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took)
+                log('Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
     except Exception as e:
-        error = 'Unexpected error occurred: {}'.format(traceback.format_exc(e))
-        print error
+        log(process_number, 'ERROR')
+        log(process_number, 'Unexpected error occurred: {}'.format(traceback.format_exc(e)))
         sys.exit(1)
 
+
 if __name__ == "__main__":
-    from acquisition.scrapers import ALL_SCRAPERS
-    output_worker_process(None, 'test')
+    log(1, 'test')
