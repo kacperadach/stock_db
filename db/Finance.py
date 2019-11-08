@@ -48,6 +48,7 @@ class FinanceDB(StockDbBase):
 		except Exception as e:
 			print e
 		finally:
+			print 'Client closed'
 			self.client.close()
 
 	def insert_one(self, collection_name, document):
