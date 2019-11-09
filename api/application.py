@@ -63,16 +63,16 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    print path
-    if path == 'logs':
-        reversed(open("filename").readlines())
-        return 'test'
+#     print path
+#     if path == 'logs':
+#         reversed(open("filename").readlines())
+#         return 'test'
+#     else:
+#         return 'fuck off'
+    if path != "" and os.path.exists(os.path.join(dir_path,'react_app/build', path)):
+        return send_from_directory('react_app/build', path)
     else:
-        return 'fuck off'
-    # if path != "" and os.path.exists(os.path.join(dir_path,'react_app/build', path)):
-    #     return send_from_directory('react_app/build', path)
-    # else:
-    #     return send_from_directory('react_app/build', 'index.html')
+        return send_from_directory('react_app/build', 'index.html')
 
 def run():
     socketio.run(app, debug=True)
