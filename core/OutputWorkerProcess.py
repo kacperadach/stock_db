@@ -2,14 +2,16 @@ import sys
 import traceback
 from threading import Thread
 
+
 from Queue import Empty
 from datetime import datetime
 from time import sleep
 
 from acquisition.scrapers import ALL_SCRAPERS
 
+
 def log(log_queue, process_number, message):
-    log_queue.put('{} | {} - {}'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))
+    log_queue.put('{} | {} - {}\n'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))
 
 def process(process_number, scraper, queue_item):
     try:
@@ -19,7 +21,9 @@ def process(process_number, scraper, queue_item):
         log(process_number, 'Error occurred while processing data for scraper {}: {}'.format(scraper, str(e)))
 
 def output_worker_process(process_queue, log_queue, process_number):
-    log(process_number, 'Started worker process')
+    # sys.stdout = open(processing_file_path, "a", buffering=0)
+
+    log(log_queue, process_number, 'Started worker process')
     try:
         while 1:
             try:
@@ -65,6 +69,7 @@ def output_worker_process(process_queue, log_queue, process_number):
 
 
 if __name__ == "__main__":
+
     def test2():
         sleep(5)
         test1()
@@ -87,3 +92,5 @@ if __name__ == "__main__":
     for filename, lineno, name, line in traceback.extract_stack(frame):
         stack.append("{} - {} - {} - {}".format(filename, lineno, name, line))
     i = 0
+
+
