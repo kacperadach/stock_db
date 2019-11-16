@@ -1,14 +1,7 @@
 import time
 import datetime
 from pytz import timezone
-import arrow
-from dateutil import tz
 from copy import deepcopy
-
-import pymongo
-from dateutil import tz
-
-from pymongo import ASCENDING
 
 from core.StockDbBase import StockDbBase
 from core.data.uid import encrypt_unique_id

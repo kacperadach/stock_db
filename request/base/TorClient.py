@@ -7,7 +7,6 @@ from stem.process import launch_tor_with_config
 from utils.credentials import Credentials
 from core.StockDbBase import StockDbBase
 from request.base.RequestClient import RequestClient
-from core.QueueItem import QueueItem
 
 IP_ADDRESS_API = 'http://bot.whatismyipaddress.com/'
 

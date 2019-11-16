@@ -81,10 +81,12 @@ class ScraperQueueManager(StockDbBase):
         self.pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
         m = multiprocessing.Manager()
         process_queue = m.Queue()
+        log_queue = m.Queue()
         self.process_queue = process_queue
+        self.log_queue = log_queue
         self.process_pool = []
         for x in range(OUTPUT_PROCESSES):
-            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, self.prcessing_file_path, x)))
+            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, log_queue, x)))
             a = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
             a.ready()
         self.log("Created {} output processes".format(OUTPUT_PROCESSES))
@@ -109,21 +111,21 @@ class ScraperQueueManager(StockDbBase):
                             request_queue_input.callback = scraper.__class__.__name__
                             self.request_queue.put(request_queue_input)
 
-                if datetime.now() - timedelta(seconds=10) > self.last_process_check:
-                    self.log('Checking processes')
-                    for i, process in enumerate(self.process_pool):
-                        try:
-                            process.get(timeout=0.01)
-                        except multiprocessing.TimeoutError:
-                            self.log('Process {} running'.format(i))
-                            pass
-                        except Exception as e:
-                            self.log('Error in process', level='error')
-                            self.log_exception(e)
-                            self.process_pool[i] = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
-                            self.log('Restarting Service {}'.format(i))
-
-                    self.last_process_check = datetime.now()
+                # if datetime.now() - timedelta(seconds=10) > self.last_process_check:
+                #     self.log('Checking processes')
+                #     for i, process in enumerate(self.process_pool):
+                #         try:
+                #             process.get(timeout=0.01)
+                #         except multiprocessing.TimeoutError:
+                #             self.log('Process {} running'.format(i))
+                #             pass
+                #         except Exception as e:
+                #             self.log('Error in process', level='error')
+                #             self.log_exception(e)
+                #             self.process_pool[i] = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
+                #             self.log('Restarting Service {}'.format(i))
+                #
+                #     self.last_process_check = datetime.now()
 
 
                 # takes item out of thread queue puts it into process queue
@@ -133,6 +135,14 @@ class ScraperQueueManager(StockDbBase):
                         process_queue.put(queue_item)
                 except Empty:
                     pass
+
+                with open(self.processing_file_path, "a", buffering=0) as f:
+                    try:
+                        while 1:
+                            line = self.log_queue.get(block=False)
+                            f.write(line)
+                    except Empty:
+                        pass
                 sleep(INPUT_REQUEST_DELAY)
         except Exception as e:
             self.log_exception(e)

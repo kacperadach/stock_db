@@ -1,6 +1,4 @@
 import json
-from copy import deepcopy
-from time import sleep
 
 import requests
 from requests.exceptions import ChunkedEncodingError
