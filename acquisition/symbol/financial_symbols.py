@@ -93,7 +93,5 @@ class FinancialSymbols(StockDbBase):
 	def get_commodities(self):
 		return Commodities_Symbols
 
-Financial_Symbols = FinancialSymbols()
-
 if __name__ == "__main__":
 	print FinancialSymbols().get_all()

@@ -33,21 +33,21 @@ class FinanceDB(StockDbBase):
 		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host), self.port
 		connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host) + ':' + str(self.port)
 		self.log('mongodb://' + str(self.user) + ':' + '*****' + '@' + str(self.host) + ':' + str(self.port) + "-" + self.db_name)
-		self.mongo_client = MongoClient(connection_string)[self.db_name]
+		self.mongo_client = MongoClient(connection_string, connect=False)[self.db_name]
 
 	def get_db_params(self):
 		self.log("using db: {}".format(self.db_name))
 
-	@contextmanager
-	def mongo_client(self):
-		try:
-			self.client =  MongoClient('mongodb://' + self.user + ':' + self.password + '@' + self.host, self.port)
-			yield self.client
-		except Exception as e:
-			print e
-		finally:
-			print 'Client closed'
-			self.client.close()
+	# @contextmanager
+	# def mongo_client(self):
+	# 	try:
+	# 		self.client = MongoClient('mongodb://' + self.user + ':' + self.password + '@' + self.host, self.port, connect=False)
+	# 		yield self.client
+	# 	except Exception as e:
+	# 		print e
+	# 	finally:
+	# 		print 'Client closed'
+	# 		self.client.close()
 
 	def insert_one(self, collection_name, document):
 		try:

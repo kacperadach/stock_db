@@ -1,9 +1,8 @@
 from copy import deepcopy
-from datetime import datetime, time, timedelta
+from datetime import datetime
 from pytz import timezone
 
 from core.StockDbBase import StockDbBase
-from core.market.Market import is_market_open
 from request.YahooFinanceSymbolRequest import YahooFinanceSymbolRequest, REGIONS, SECTORS, QUOTE_TYPES
 from core.QueueItem import QueueItem
 from db.Finance import Finance_DB

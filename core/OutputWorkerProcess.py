@@ -29,7 +29,7 @@ def output_worker_process(process_queue, log_queue, process_number):
             except Empty:
                 sleep(0.1)
                 continue
-            log(log_queue, process_number, 'Got from queue: {}'.format(queue_item.get_metadata()))
+            # log(log_queue, process_number, 'Got from queue: {}'.format(queue_item.get_metadata()))
             start = datetime.utcnow()
 
             callback_scraper = queue_item.callback.split(".")[-1]

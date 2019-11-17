@@ -1,7 +1,5 @@
 from acquisition.symbol.futures import FUTURES
 
-FUTURES
-
 class FuturesRepository():
 
     @staticmethod

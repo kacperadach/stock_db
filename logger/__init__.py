@@ -1,4 +1,4 @@
-from os import path, mkdir
+from os import path, mkdir, remove
 import logging
 from sys import stdout
 
@@ -26,6 +26,12 @@ class AppLogger():
 		# 	file_name = "output_" + file_name
 		# 	print file_name
 		log_file_path = path.join(BASE_PATH, 'logs', self.env, self.file_name)
+
+		# try:
+		# 	remove(log_file_path)
+		# except OSError:
+		# 	self.log('{} did not exist'.format(log_file_path))
+
 		logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
 		ch = logging.StreamHandler(stdout)

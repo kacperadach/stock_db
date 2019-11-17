@@ -4,7 +4,6 @@ from request.insider_networking import InsiderTransactions
 from db import FinanceDB
 from acquisition.symbol.financial_symbols import Financial_Symbols
 
-
 class FintelInsiderAcquisition():
 
     def __init__(self, trading_date=None):

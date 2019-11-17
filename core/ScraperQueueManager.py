@@ -69,7 +69,10 @@ class ScraperQueueManager(StockDbBase):
         self.log("Created {} request threads".format(URL_THREADS))
 
         self.processing_file_path = path.join(BASE_PATH, 'processing.out')
-        os.remove(self.processing_file_path)
+        try:
+            os.remove(self.processing_file_path)
+        except OSError:
+            self.log('{} did not exist'.format(self.processing_file_path))
         open(self.processing_file_path, 'w+')
 
         self.pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
