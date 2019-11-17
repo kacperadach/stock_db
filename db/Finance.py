@@ -1,8 +1,6 @@
-from os import environ
 from contextlib import contextmanager
 import sys
 from cPickle import dumps
-from datetime import datetime
 
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError, DuplicateKeyError

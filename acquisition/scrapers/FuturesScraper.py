@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
-
-from pytz import timezone
+from datetime import timedelta
 
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem

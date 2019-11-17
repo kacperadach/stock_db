@@ -39,5 +39,3 @@ class TorManager(StockDbBase):
         tc = self.tor_instances[0]
         self.log('Running Tor Test for SocksPort={}, ControlPort={}'.format(tc.SocksPort, tc.ControlPort))
         tc.test()
-
-Tor_Manager = TorManager()

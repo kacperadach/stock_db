@@ -1,5 +1,7 @@
 from datetime import datetime
+import logging
 
+import stem
 from stem import Signal
 from stem.control import Controller
 from stem.process import launch_tor_with_config
@@ -9,6 +11,8 @@ from core.StockDbBase import StockDbBase
 from request.base.RequestClient import RequestClient
 
 IP_ADDRESS_API = 'http://bot.whatismyipaddress.com/'
+
+logging.getLogger(stem.__name__).setLevel('CRITICAL')
 
 
 class TorClient(StockDbBase):

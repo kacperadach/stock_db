@@ -2,13 +2,11 @@ import sys
 import traceback
 from threading import Thread
 
-
 from Queue import Empty
 from datetime import datetime
 from time import sleep
 
 from acquisition.scrapers import ALL_SCRAPERS
-
 
 def log(log_queue, process_number, message):
     log_queue.put('{} | {} - {}\n'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))

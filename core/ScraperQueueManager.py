@@ -5,32 +5,21 @@ from datetime import datetime, timedelta
 import multiprocessing
 import os
 from os import path
-from pytz import timezone
 
 from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
 from acquisition.scrapers.IndexLiveScraper import IndexLiveScraper
 from acquisition.scrapers.MarketWatchRequestLiveScraper import MarketWatchRequestLiveScraper
 from acquisition.scrapers.RandomMarketWatchSymbols import RandomMarketWatchSymbols
-from acquisition.scrapers.Stocks import StockScraper
-from acquisition.scrapers.Symbols import SymbolScraper
-from acquisition.scrapers.ETFSymbols import ETFSymbolScraper
-from acquisition.scrapers.Forex import ForexScraper
-# from acquisition.scrapers.MarketWatchFutures import MarketWatchFuturesScraper
-from acquisition.scrapers.MarketWatchSymbols import MarketWatchSymbols
-from acquisition.scrapers.MarketWatchScraper import MarketWatchScraper
 from acquisition.scrapers.MarketWatchHistoricalScraper import MarketWatchHistoricalScraper
-from acquisition.scrapers.MarketWatchLiveScraper import MarketWatchLiveScraper
-from acquisition.scrapers.USTreasuryScraper import USTreasuryScraper
 from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
 from core.OutputWorkerProcess import output_worker_process
-from core.QueueItem import QueueItem
 from core.ScraperQueue import ScraperQueue
 from core.data.ScraperRepository import Scraper_Repository
 from request.base.RequestClient import RequestClient
 from StockDbBase import StockDbBase
 from core.Counter import Counter
-from request.base.TorManager import Tor_Manager
+from request.base.TorManager import TorManager
 
 URL_THREADS = 10
 OUTPUT_PROCESSES = 4
@@ -63,8 +52,13 @@ class ScraperQueueManager(StockDbBase):
         self.failed_request_counter = Counter()
         self.event = Event()
         self.use_tor = use_tor
-        self.tor_manager = Tor_Manager if use_tor else None
+        self.tor_manager = TorManager() if use_tor else None
         self.process_pool = None
+        if self.use_tor:
+            self.log('Starting Tor instances')
+            self.tor_manager.start_instances()
+            self.log('Running Tor Test')
+            self.tor_manager.test()
 
     def start(self):
         for x in range(URL_THREADS):

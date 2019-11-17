@@ -9,7 +9,6 @@ from core.ScraperQueueManager import ScraperQueueManager
 from db.Finance import Finance_DB
 from db.MongoIndexer import MongoIndexer
 from logger import AppLogger
-from request.base.TorManager import Tor_Manager
 
 
 class MainService():
@@ -42,11 +41,6 @@ class MainService():
 		self.logger.log(msg, level=level, threadname=self.thread_name)
 
 	def main_service(self):
-		if self.use_tor:
-			self._log('Starting Tor instances')
-			Tor_Manager.start_instances()
-			self._log('Running Tor Test')
-			Tor_Manager.test()
 		MongoIndexer().create_indices()
 		self._log('Running database test: {}'.format(self.env))
 		database_test(self.env)
