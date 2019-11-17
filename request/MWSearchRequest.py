@@ -44,7 +44,6 @@ class MWSearchRequest():
     @staticmethod
     def parse_response(response):
         if 'symbols' not in response.iterkeys():
-            print response
             return []
 
         symbols = []

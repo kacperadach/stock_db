@@ -3,8 +3,8 @@ from datetime import datetime
 from os import environ
 
 from DatabaseTest import database_test
-from config import App_Config
-from constants import DEV_ENV_VARS, PROD_ENV_VARS
+from .config import App_Config
+from .constants import DEV_ENV_VARS, PROD_ENV_VARS
 from core.ScraperQueueManager import ScraperQueueManager
 from db.Finance import Finance_DB
 from db.MongoIndexer import MongoIndexer

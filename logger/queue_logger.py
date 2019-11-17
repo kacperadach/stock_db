@@ -19,7 +19,7 @@ class QueueLogger():
         self.logger.log(msg, level=level, threadname=self.name)
 
     def start_logging(self, queues):
-        for _, queue in queues.iteritems():
+        for _, queue in queues.items():
             if not hasattr(queue, 'qsize'):
                 raise QueueLoggerError('Queue supplied has no qsize method')
 
@@ -32,6 +32,6 @@ class QueueLogger():
 
     def worker(self, queues):
         while self.running:
-            for name, queue in queues.iteritems():
+            for name, queue in queues.items():
                 self._log("{} Size: {}".format(name, queue.qsize()))
             time.sleep(self.log_time_interval)

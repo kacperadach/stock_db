@@ -1,7 +1,7 @@
 from os import path
 
 from core.StockDbBase import StockDbBase
-from TorClient import TorClient
+from .TorClient import TorClient
 from utils.credentials import Credentials
 
 DEFAULT_NUM_TOR_INSTANCES = 3

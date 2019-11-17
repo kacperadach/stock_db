@@ -7,7 +7,7 @@ from core.StockDbBase import StockDbBase
 from core.data.uid import encrypt_unique_id
 from db.Finance import Finance_DB
 from request.MarketWatchRequestConstants import INSTRUMENT_TYPES
-from SnakeCase import SnakeCase
+from .SnakeCase import SnakeCase
 
 # normalize field names
 FIELD_NAMES = (
@@ -87,7 +87,7 @@ class QuoteRepository(StockDbBase):
             elif len(response[data['symbol']]) < 2:
                 response[data['symbol']].append(data)
 
-        for k, v in response.iteritems():
+        for k, v in response.items():
             data = self._convert_for_chart(v, 'futures')
             data = self.populate_change(data)
             response[k] = data
@@ -116,7 +116,7 @@ class QuoteRepository(StockDbBase):
         # quick only ~8 fields
         days = {}
         metadata = {}
-        for key, value in data.iteritems():
+        for key, value in data.items():
             new_key = SnakeCase.to_snake_case(key)
             if new_key in FIELD_NAMES:
                 if new_key == 'symbol':
@@ -156,7 +156,7 @@ class QuoteRepository(StockDbBase):
             if d['datetime'].date() not in days.keys():
                 new_document = deepcopy(metadata)
                 new_data = {}
-                for k, v in d.iteritems():
+                for k, v in d.items():
                     new_key = indicators.get_indicator_parameter(k)
                     new_data[new_key] = v
 
@@ -171,17 +171,17 @@ class QuoteRepository(StockDbBase):
             else:
                 date = d['datetime'].date()
                 new_data = {}
-                for k, v in d.iteritems():
+                for k, v in d.items():
                     new_key = indicators.get_indicator_parameter(k)
                     new_data[new_key] = v
                 if date in existing_dict.keys() and new_data['datetime'] in existing_dict[date].keys():
                     existing_dict[date][new_data['datetime']].update(new_data)
                 days[date]['data'].append(new_data)
 
-        for document in days.itervalues():
+        for document in days.values():
             # reversed so order of documents matches order of data in documents
             document['data'] = list(reversed(document['data']))
-            if document['trading_date'] in existing.iterkeys() and document == existing[document['trading_date']]:
+            if document['trading_date'] in existing.keys() and document == existing[document['trading_date']]:
                 continue
 
             self.db.replace_one(collection,
@@ -228,7 +228,7 @@ class QuoteRepository(StockDbBase):
             for temp in reversed(d['data']):
                 temp_data = {'macd': {}}
                 # macd needs to be fixed
-                for k, v in temp.iteritems():
+                for k, v in temp.items():
                     if k.lower() == 'datetime':
                         temp_data['date'] = v.strftime('%Y-%m-%d %H:%M:%S')
                     elif k.lower() == 'last':

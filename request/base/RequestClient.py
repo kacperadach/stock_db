@@ -53,7 +53,7 @@ class RequestClient(StockDbBase):
         if not self.use_tor:
             return {}
         proxies = deepcopy(TOR_PROXIES)
-        for key, value in proxies.iteritems():
+        for key, value in proxies.items():
             proxies[key] = value.format(self.tor_client.SocksPort)
         return proxies
 

@@ -69,4 +69,3 @@ class MarketWatchSymbolsV2(StockDbBase):
 
 if __name__ == '__main__':
     a = {'test': 'test'}
-    print 'test2' in a

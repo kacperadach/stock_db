@@ -36,12 +36,12 @@ class InsiderTransactions():
         return self.data
 
     def _create_urls(self, symbols):
-        self.urls = dict(map(lambda x: (x, BASE_URL.format(x)), symbols))
+        self.urls = dict(list(map(lambda x: (x, BASE_URL.format(x)), symbols)))
 
     def _make_requests(self):
         n = Networking(threadname=self.task_name, log_progress=not self.batching)
         data = n.execute(self.urls)
-        data = dict(map(lambda (k,v): (k, v['quoteSummary']['result'][0] if 'quoteSummary' in v.keys() and 'result' in v['quoteSummary'].keys() and v['quoteSummary']['result'] and len(v['quoteSummary']['result']) > 0 else {}), data.iteritems()))
+        data = dict(list(map(lambda k,v: (k, v['quoteSummary']['result'][0] if 'quoteSummary' in v.keys() and 'result' in v['quoteSummary'].keys() and v['quoteSummary']['result'] and len(v['quoteSummary']['result']) > 0 else {}), data.items())))
         self.data = data
 
 

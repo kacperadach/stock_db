@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from bs4 import BeautifulSoup, SoupStrainer
 
-from MarketWatchRequestConstants import COUNTRIES, INSTRUMENT_TYPES
+from .MarketWatchRequestConstants import COUNTRIES, INSTRUMENT_TYPES
 
 BASE_URL = 'https://www.marketwatch.com/tools/markets/{}/country/{}/{}'
 
@@ -60,4 +60,4 @@ if __name__ == '__main__':
     import requests
     request = MarketWatchSymbolsRequestV2('united-states', 1)
     req = requests.get(request.get_url())
-    print MarketWatchSymbolsRequestV2.parse_response(req.content)
+    MarketWatchSymbolsRequestV2.parse_response(req.content)

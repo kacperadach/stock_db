@@ -4,4 +4,4 @@ class FuturesRepository():
 
     @staticmethod
     def get_all_futures():
-        return [symbol for _, symbols in FUTURES.iteritems() for symbol in symbols]
+        return [symbol for _, symbols in FUTURES.items() for symbol in symbols]

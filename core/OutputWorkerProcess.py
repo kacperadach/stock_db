@@ -2,7 +2,7 @@ import sys
 import traceback
 from threading import Thread
 
-from Queue import Empty
+from queue import Empty
 from datetime import datetime
 from time import sleep
 
@@ -11,12 +11,12 @@ from acquisition.scrapers import ALL_SCRAPERS
 def log(log_queue, process_number, message):
     log_queue.put('{} | {} - {}\n'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))
 
-def process(process_number, scraper, queue_item):
+def process(log_queue, process_number, scraper, queue_item):
     try:
         scraper.process_data(queue_item)
     except Exception as e:
-        log(process_number, 'ERROR')
-        log(process_number, 'Error occurred while processing data for scraper {}: {}'.format(scraper, str(e)))
+        log(log_queue, process_number, 'ERROR')
+        log(log_queue, process_number, 'Error occurred while processing data for scraper {}: {}'.format(scraper, str(e)))
 
 def output_worker_process(process_queue, log_queue, process_number):
     # sys.stdout = open(processing_file_path, "a", buffering=0)
@@ -41,7 +41,7 @@ def output_worker_process(process_queue, log_queue, process_number):
                 log(log_queue, process_number, 'Could not find scraper: {}'.format(callback_scraper))
                 sys.exit(1)
 
-            t = Thread(target=process, args=(process_number, scraper, queue_item))
+            t = Thread(target=process, args=(log_queue, process_number, scraper, queue_item))
             t.setDaemon(True)
             t.start()
 

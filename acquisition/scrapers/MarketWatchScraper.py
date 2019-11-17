@@ -112,17 +112,17 @@ class MarketWatchScraper(StockDbBase):
         del data['data']
         collection_name = self.get_collection_name(metadata['symbol']['instrument_type'])
         documents = []
-        for day, d in days.iteritems():
+        for day, d in days.items():
             trading_date = datetime.combine(day, datetime.min.time())
             new_document = deepcopy(data)
             new_document['data'] = d
             new_document['trading_date'] = trading_date
             documents.append(new_document)
 
-        trading_days = map(lambda x: x['trading_date'], documents)
+        trading_days = list(map(lambda x: x['trading_date'], documents))
         existing_documents = list(self.db.find(collection_name, {'trading_date': {'$in': trading_days}, 'symbol': metadata['symbol']['symbol'], 'exchange': metadata['symbol']['Exchange'], 'time_interval': data['time_interval']}, {'trading_date': 1, 'data': 1}))
 
-        new_documents = filter(lambda x: x['trading_date'] not in map(lambda x: x['trading_date'], existing_documents), documents)
+        new_documents = list(filter(lambda x: x['trading_date'] not in map(lambda x: x['trading_date'], existing_documents), documents))
 
         if new_documents:
             try:

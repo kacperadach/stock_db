@@ -48,7 +48,7 @@ class InsiderAcquisition():
 
             for insider_data in insider_transactions.generate():
                 documents = []
-                for symbol, data in insider_data.iteritems():
+                for symbol, data in insider_data.items():
                     if data:
                         data['trading_date'] = str(self.trading_date.date())
                         data['symbol'] = symbol

@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 import sys
-from cPickle import dumps
+from pickle import dumps
 
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError, DuplicateKeyError

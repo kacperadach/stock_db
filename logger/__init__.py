@@ -63,7 +63,7 @@ class AppLogger():
 			func = getattr(self.logger, level)
 			func(msg)
 		else:
-			print msg
+			print(msg)
 
 	def progress(self, iter, task, update_percent=10):
 		length = len(iter)

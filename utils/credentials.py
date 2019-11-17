@@ -15,7 +15,7 @@ class Credentials():
                 key, value = line.split(':', 1)
                 self.creds[key] = value.strip('\n')
             except:
-                print 'Credentials file has an error'
+                print('Credentials file has an error')
 
     def get_user(self):
         if 'user' in self.creds.keys():

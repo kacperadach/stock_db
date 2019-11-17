@@ -2,9 +2,9 @@ import json
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
-from MarketWatchRequestConstants import *
+from .MarketWatchRequestConstants import *
 from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
 TIME_AND_STEP = {
@@ -145,7 +145,7 @@ class MarketWatchRequest():
             d = {}
             dt_utc = datetime.fromtimestamp(tick / 1000)
             dt = datetime.fromtimestamp((tick / 1000) + (data['utc_offset'] * -60))
-            for key, val in series_data.iteritems():
+            for key, val in series_data.items():
                 if val[i] is not None:
                     d[key] = val[i]
             if d:
@@ -165,10 +165,8 @@ class MarketWatchRequest():
                 req = requests.get(CURRENCY_PAIRS_URL.format(i))
                 bs = BeautifulSoup(req.content, 'html.parser')
                 html_rows = bs.find('table').find('tbody').find_all('tr')
-                pairs = map(lambda x: x.find('small').text.strip(')').strip('('), html_rows)
-
+                pairs = list(map(lambda x: x.find('small').text.strip(')').strip('('), html_rows))
                 all_pairs += pairs
-                print pairs
             except Exception:
                 pass
         return all_pairs

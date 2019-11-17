@@ -1,16 +1,10 @@
-from datetime import datetime
 from copy import deepcopy
 import re
-import base64
-
-from pymongo.errors import BulkWriteError
 
 from core.StockDbBase import StockDbBase
 from core.data.uid import encrypt_unique_id
 from db.Finance import Finance_DB
-from SnakeCase import SnakeCase
-
-
+from .SnakeCase import SnakeCase
 
 # normalize field names
 FIELD_NAMES = (
@@ -60,7 +54,7 @@ class SymbolRepository(StockDbBase):
                 self.db.find(COLLECTION_NAME, {'country': d['country']}, self._get_all_fields())
 
             new_document = {}
-            for k, v in d.iteritems():
+            for k, v in d.items():
                 new_key = SnakeCase.to_snake_case(k)
                 if new_key in FIELD_NAMES:
                     if k == 'symbol':
@@ -91,4 +85,4 @@ Symbol_Repository = SymbolRepository()
 
 if __name__ == '__main__':
     uid = Symbol_Repository.search('gdx')[0]['uid']
-    print Symbol_Repository.decrypt_unique_id('QSAgICAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')
+    Symbol_Repository.decrypt_unique_id('QSAgICAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')

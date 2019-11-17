@@ -21,7 +21,7 @@ class ForexScraper(StockDbBase):
 
     def _reset(self):
         self.counter = 0
-        self.currency_pairs = map(lambda x: x['symbol'], self.db.find(CURRENCY_PAIR_COLLECTION_NAME, {}, {'symbol': 1}))
+        self.currency_pairs = list(map(lambda x: x['symbol'], self.db.find(CURRENCY_PAIR_COLLECTION_NAME, {}, {'symbol': 1})))
         self.current_day = datetime.now(timezone('EST')).date()
         self.fetch_dict = {'attempted': 0, 'successful': 0}
         self.scrape_dict = {}
@@ -42,12 +42,12 @@ class ForexScraper(StockDbBase):
             )
 
         if len(self.currency_pairs) == 0:
-            self.currency_pairs = map(lambda x: x['symbol'], self.db.find(CURRENCY_PAIR_COLLECTION_NAME, {}, {'symbol': 1}))
+            self.currency_pairs = list(map(lambda x: x['symbol'], self.db.find(CURRENCY_PAIR_COLLECTION_NAME, {}, {'symbol': 1})))
             return
 
         if self.counter >= len(self.currency_pairs):
             self.counter = 0
-            self.currency_pairs = map(lambda x: x['symbol'], self.db.find(CURRENCY_PAIR_COLLECTION_NAME, {}, {'symbol': 1}))
+            self.currency_pairs = list(map(lambda x: x['symbol'], self.db.find(CURRENCY_PAIR_COLLECTION_NAME, {}, {'symbol': 1})))
 
         currency_pair = self.currency_pairs[self.counter]
         self.counter += 1
@@ -81,7 +81,7 @@ class ForexScraper(StockDbBase):
             try:
                 bs = BeautifulSoup(queue_item.get_response().get_data(), 'lxml', parse_only = SoupStrainer('div', {'id': 'marketsindex'}))
                 html_rows = bs.find('tbody').find_all('tr')
-                pairs = map(lambda x: x.find('a').text, html_rows)
+                pairs = list(map(lambda x: x.find('a').text, html_rows))
                 for pair in pairs:
                     base, quote = '', ''
                     symbol = pair[pair.index('(') + 1: pair.index(')')]

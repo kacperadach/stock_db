@@ -57,7 +57,7 @@ class MarketWatchHistoricalScraper(BaseScraper):
 
         metadata = queue_item.get_metadata()
         if metadata['symbol']['symbol'] != data['symbol']:
-            self.log('symbol from request does not match response', level='warn')
+            self.log('symbol from request does not match response. Requested: {}, Found: {}'.format(metadata['symbol']['symbol'], data['symbol']), level='warn')
             return
 
         self.quote_repository.insert(data, metadata)

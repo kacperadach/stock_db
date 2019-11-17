@@ -37,7 +37,7 @@ class StockScraper(StockDbBase):
 
     def _reset(self):
         self.counter = 0
-        self.stock_tickers = map(lambda x: x['symbol'], self.db.find('symbols', {}, {'symbol': 1}))
+        self.stock_tickers = list(map(lambda x: x['symbol'], self.db.find('symbols', {}, {'symbol': 1})))
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))

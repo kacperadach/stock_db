@@ -22,8 +22,7 @@ cache = TTLCache(maxsize=1000, ttl=15)
 
 @cached(cache)
 def fetch_live_futures_quotes():
-    print 'fuck off'
-    symbols = map(lambda x: x['symbol'], FuturesRepository.get_all_futures())
+    symbols = list(map(lambda x: x['symbol'], FuturesRepository.get_all_futures()))
     return Quote_Repository.get_live_quotes('market_watch_futures', symbols, '1d')
 
 def get_live_futures_quotes():

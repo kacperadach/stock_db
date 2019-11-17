@@ -2,9 +2,9 @@ import json
 from copy import deepcopy
 from datetime import datetime
 from pytz import timezone
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
-from MarketWatchRequestConstants import *
+from .MarketWatchRequestConstants import *
 
 TIME_AND_STEP = {
     'PT1M': 'D10',
@@ -83,7 +83,7 @@ class MarketWatchForexRequest():
                 time_zone = 'UTC'
             dt = datetime.fromtimestamp(tick/1000).replace(tzinfo=timezone(time_zone))
             d['datetime'] = dt
-            for key, val in series_data.iteritems():
+            for key, val in series_data.items():
                 d[key] = val[i]
             all_data.append(d)
         data['data'] = all_data
@@ -99,10 +99,8 @@ class MarketWatchForexRequest():
                 req = requests.get(CURRENCY_PAIRS_URL.format(i))
                 bs = BeautifulSoup(req.content, 'html.parser')
                 html_rows = bs.find('table').find('tbody').find_all('tr')
-                pairs = map(lambda x: x.find('small').text.strip(')').strip('('), html_rows)
-
+                pairs = list(map(lambda x: x.find('small').text.strip(')').strip('('), html_rows))
                 all_pairs += pairs
-                print pairs
             except Exception:
                 pass
         return all_pairs
@@ -115,4 +113,4 @@ if __name__ == '__main__':
     from request.base.ResponseWrapper import ResponseWrapper
     req = requests.get(a.get_url(), headers=a.get_headers())
     response = ResponseWrapper(req)
-    print MarketWatchForexRequest.parse_response(response.get_data())
+    MarketWatchForexRequest.parse_response(response.get_data())

@@ -86,9 +86,9 @@
 #
 #     def write_to_mongo(self):
 #         found_documents = []
-#         for symbol, financials in self.data.iteritems():
+#         for symbol, financials in self.data.items():
 #             for collection in FINANCIAL_DOCUMENTS:
-#                 for date, data in financials[collection].iteritems():
+#                 for date, data in financials[collection].items():
 #                     data['period_ending'] = date
 #                     data['symbol'] = symbol
 #                     data['document'] = collection

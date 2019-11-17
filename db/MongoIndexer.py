@@ -1,8 +1,8 @@
 from pymongo import ASCENDING, DESCENDING
 
 from core.StockDbBase import StockDbBase
-from Finance import Finance_DB
-from MongoIndex import MongoIndex
+from .Finance import Finance_DB
+from .MongoIndex import MongoIndex
 
 SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL = MongoIndex(name='symbol_exchange_country_code_date_interval', index={'symbol': 1, 'exchange': 1, 'country_code': 1, 'trading_date': -1, 'time_interval': 1}, unique=True)
 
@@ -50,12 +50,14 @@ class MongoIndexer(StockDbBase):
     def create_indices(self):
         try:
             self.log('Creating Indices')
-            for collection, indices in COLLECTION_INDICES.iteritems():
+            for collection, indices in COLLECTION_INDICES.items():
                 for index in indices:
-                    keys = map(lambda (k,v): (k, ASCENDING if v == 1 else DESCENDING), index.get_index().iteritems())
+                    keys = [(k, ASCENDING if v == 1 else DESCENDING) for k, v in list(index.get_index().items())]
+                    # keys = list(map(lambda k, v: (k, ASCENDING if v == 1 else DESCENDING), list(index.get_index().items())))
                     self.finance_db.create_index(collection, index.get_name(), keys, unique=index.get_unique(), expireAfterSeconds=index.get_expire_after_seconds())
         except Exception as e:
             self.log_exception(e)
+            raise RuntimeError('Error creating mongo indices')
 
 if __name__ == "__main__":
     MongoIndexer().create_indices()

@@ -92,8 +92,8 @@ class YahooFinanceSymbolRequest(StockDbBase):
 
     def get_body(self):
         body = deepcopy(BODY)
-        body['query']['operands'][0]['operands'] = map(self._get_region_operand, self.regions)
-        body['query']['operands'][1]['operands'] = map(self._get_sector_operand, self.sectors)
+        body['query']['operands'][0]['operands'] = list(map(self._get_region_operand, self.regions))
+        body['query']['operands'][1]['operands'] = list(map(self._get_sector_operand, self.sectors))
         body['offset'] = self.offset
         body['quoteType'] = self.quote_type
         body['sortField'] = SORT_FIELD[self.quote_type]

@@ -5,7 +5,6 @@ import urllib2
 from bs4 import BeautifulSoup
 
 from db.Finance import Finance_DB
-from discord.webhook import DiscordWebhook
 
 FDA_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
 HIST_CATALYST_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/historical-catalyst-calendar'
@@ -56,7 +55,7 @@ class BioPharmCatalyst():
         fda_events = []
         for row in rows:
             try:
-                table_data = map(lambda x: x.text, row.findChildren('td'))
+                table_data = list(map(lambda x: x.text, row.findChildren('td')))
                 symbol = table_data[0].strip()
                 _, drug, drug_description, _ = table_data[2].split('\n')
                 stage = table_data[3].replace('\n', '').strip()
@@ -93,7 +92,7 @@ class BioPharmCatalyst():
         fda_events = []
         for row in rows:
             try:
-                table_data = map(lambda x: x.text, row.findChildren('td'))
+                table_data = list(map(lambda x: x.text, row.findChildren('td')))
                 if not len(table_data) > 3:
                     continue
                 symbol = table_data[0].strip()

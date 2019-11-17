@@ -12,7 +12,12 @@ class StockDbBase(object):
 
     def log_exception(self, exception):
         self.logger.log("Unexpected error occurred", level='error', threadname=self.__class__.__name__)
-        self.logger.log(traceback.format_exc(exception))
+        formatted = traceback.format_exception(exception, exception, exception.__traceback__)
+        message = ''
+        for line in formatted:
+            message += line
+        self.logger.log(message)
+
 
     def log_queue_item(self, queue_item):
         self.logger.log('Queue Item causing exception: {}'.format(str(queue_item)))

@@ -1,5 +1,5 @@
 from time import sleep
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from threading import Thread, Event
 from datetime import datetime, timedelta
 import multiprocessing
@@ -17,7 +17,7 @@ from core.OutputWorkerProcess import output_worker_process
 from core.ScraperQueue import ScraperQueue
 from core.data.ScraperRepository import Scraper_Repository
 from request.base.RequestClient import RequestClient
-from StockDbBase import StockDbBase
+from .StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import TorManager
 
@@ -133,7 +133,7 @@ class ScraperQueueManager(StockDbBase):
                 except Empty:
                     pass
 
-                with open(self.processing_file_path, "a", buffering=0) as f:
+                with open(self.processing_file_path, "a") as f:
                     try:
                         while 1:
                             line = self.log_queue.get(block=False)
