@@ -4,21 +4,9 @@ from core.StockDbBase import StockDbBase
 from .Finance import Finance_DB
 from .MongoIndex import MongoIndex
 
-SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL = MongoIndex(name='symbol_exchange_country_code_date_interval', index={'symbol': 1, 'exchange': 1, 'country_code': 1, 'trading_date': -1, 'time_interval': 1}, unique=True)
+SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL = MongoIndex(name='symbol_exchange_country_code_date_interval', index={'symbol': 1, 'exchange': 1, 'country_code': 1, 'time_interval': 1, 'trading_date': -1, }, unique=True)
 
 COLLECTION_INDICES = {
-    # 'stocks': (SYMBOL_EXCHANGE_COUNTRY_CODE_DATE_INTERVAL,
-    #             MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
-    #             MongoIndex(name='symbol', index={'symbol': 1}, unique=False)),
-    # 'symbols': (MongoIndex(name='symbol', index={'symbol': 1, 'region': 1}, unique=True),
-    #             MongoIndex(name='fullExchangeName', index={'fullExchangeName': 1}, unique=False)),
-    # 'forex_pairs': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True),
-    #                 MongoIndex(name='base', index={'base': 1}, unique=False),
-    #                 MongoIndex(name='quote', index={'quote': 1}, unique=False)),
-    # 'forex': (MongoIndex(name='symbol_date_interval', index={'symbol': 1, 'trading_date': -1, 'time_interval': 1}, unique=True),
-    #             MongoIndex(name='symbol_interval', index={'symbol': 1, 'time_interval': 1}, unique=False),
-    #             MongoIndex(name='symbol', index={'symbol': 1}, unique=False)),
-    # 'futures_symbols': (MongoIndex(name='symbol', index={'symbol': 1}, unique=True), ),
     'market_watch_symbols': (MongoIndex(name='symbol', index={'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country_code': 1}, unique=True),
                             MongoIndex(name='instrument_type', index={'instrument_type': 1}),
                              MongoIndex(name='instrument_type_country', index={'instrument_type': 1, 'country': 1}),
@@ -41,6 +29,7 @@ COLLECTION_INDICES = {
     'finviz': (MongoIndex(name='symbol_exchange_datetime', index={'symbol': 1, 'exchange': 1, 'datetime_utc': -1}, unique=False), )
 }
 
+# todo fix indexes
 class MongoIndexer(StockDbBase):
 
     def __init__(self):
@@ -57,7 +46,7 @@ class MongoIndexer(StockDbBase):
                     self.finance_db.create_index(collection, index.get_name(), keys, unique=index.get_unique(), expireAfterSeconds=index.get_expire_after_seconds())
         except Exception as e:
             self.log_exception(e)
-            raise RuntimeError('Error creating mongo indices')
+            # raise RuntimeError('Error creating mongo indices')
 
 if __name__ == "__main__":
     MongoIndexer().create_indices()
