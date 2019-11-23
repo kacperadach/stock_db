@@ -123,7 +123,7 @@ class ForexScraper(StockDbBase):
                 else:
                     document = document_dict[date]
                     document['data'].append(d)
-            documents = sorted(document_dict.values(), key=lambda x: x['trading_date'])
+            documents = sorted(list(document_dict.values()), key=lambda x: x['trading_date'])
 
             min_date = min(documents, key=lambda x: x['trading_date'])['trading_date']
             max_date = max(documents, key=lambda x: x['trading_date'])['trading_date']

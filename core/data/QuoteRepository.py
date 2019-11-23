@@ -178,7 +178,7 @@ class QuoteRepository(StockDbBase):
                     existing_dict[date][new_data['datetime']].update(new_data)
                 days[date]['data'].append(new_data)
 
-        for document in days.values():
+        for document in list(days.values()):
             # reversed so order of documents matches order of data in documents
             document['data'] = list(reversed(document['data']))
             if document['trading_date'] in existing.keys() and document == existing[document['trading_date']]:
@@ -254,3 +254,6 @@ class QuoteRepositoryException(Exception):
     pass
 
 Quote_Repository = QuoteRepository()
+
+# if __name__ == '__main__':
+#     Quote_Repository.request_quote('stocks', 'XNYS', 'A')

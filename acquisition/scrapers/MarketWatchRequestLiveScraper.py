@@ -27,7 +27,7 @@ class MarketWatchRequestLiveScraper(MarketWatchLiveScraper):
         requests = {request['instrument_type'] + request['exchange'] + request['symbol']: request for request in requests}
         cursor = []
         if requests.values():
-            cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'$or': requests.values()}, FIELDS)
+            cursor = self.db.find(self.MARKET_WATCH_SYMBOL_COLLECTION, {'$or': list(requests.values())}, FIELDS)
         return cursor
 
     def get_next_input(self):

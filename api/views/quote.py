@@ -26,7 +26,7 @@ def fetch_live_futures_quotes():
     return Quote_Repository.get_live_quotes('market_watch_futures', symbols, '1d')
 
 def get_live_futures_quotes():
-    return fetch_live_futures_quotes().values()
+    return list(fetch_live_futures_quotes().values())
 
 # def get_live_futures_quotes(offset, limit):
 #     cached_data = fetch_live_futures_quotes()
@@ -60,6 +60,5 @@ def get_quote(instrument_type, exchange, symbol, time_interval='1d', start=None,
 if __name__ == '__main__':
     for i in range(100):
         for x in range(int(math.ceil(len(FUTURES) / 2))):
-            print x
             get_live_futures_quotes()
         sleep(6)

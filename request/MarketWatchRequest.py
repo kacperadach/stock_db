@@ -137,7 +137,7 @@ class MarketWatchRequest():
         except Exception:
             return {}
 
-        if not all(len(x) == len(ticks) for x in series_data.values()) or 'utc_offset' not in data.keys():
+        if not all(len(x) == len(ticks) for x in list(series_data.values())) or 'utc_offset' not in data.keys():
             return {}
 
         all_data = []
