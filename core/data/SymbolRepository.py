@@ -50,7 +50,7 @@ class SymbolRepository(StockDbBase):
     def insert(self, documents):
         new_documents = []
         for d in documents:
-            if 'country_code' not in d.iterkeys():
+            if 'country_code' not in d.keys():
                 self.db.find(COLLECTION_NAME, {'country': d['country']}, self._get_all_fields())
 
             new_document = {}

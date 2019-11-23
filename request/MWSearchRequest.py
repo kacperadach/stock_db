@@ -43,14 +43,14 @@ class MWSearchRequest():
 
     @staticmethod
     def parse_response(response):
-        if 'symbols' not in response.iterkeys():
+        if 'symbols' not in response.keys():
             return []
 
         symbols = []
         for symbol in response['symbols']:
             instrument = 'unknown'
-            if symbol['type'] in TYPE_TO_INSTRUMENT.iterkeys():
-                instrument =  TYPE_TO_INSTRUMENT[symbol['type']]
+            if symbol['type'] in TYPE_TO_INSTRUMENT.keys():
+                instrument = TYPE_TO_INSTRUMENT[symbol['type']]
             data = {
                 'exchange': symbol['exchangeIsoCode'],
                 'symbol': symbol['ticker'],
