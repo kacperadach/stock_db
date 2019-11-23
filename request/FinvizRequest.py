@@ -19,129 +19,125 @@ class FinvizRequest():
 
     @staticmethod
     def parse_response(response):
-        try:
-            parsed_data = {}
+        parsed_data = {}
 
-            stock_stats = {}
-            data_table = SoupStrainer('table', {'class': 'snapshot-table2'})
-            bs = BeautifulSoup(response, 'html.parser', parse_only=data_table)
-            rows = bs.find_all('tr')
-            for row in rows:
-                tds = row.find_all('td')
-                for index in range(len(tds) / 2):
-                    i = index * 2
-                    key = tds[i]
-                    value = tds[i + 1]
-                    if key and value:
-                        key = key.text.replace('.', '')
-                        stock_stats[key] = value.text
+        stock_stats = {}
+        data_table = SoupStrainer('table', {'class': 'snapshot-table2'})
+        bs = BeautifulSoup(response, 'html.parser', parse_only=data_table)
+        rows = bs.find_all('tr')
+        for row in rows:
+            tds = row.find_all('td')
+            for index in range(int(len(tds) / 2)):
+                i = index * 2
+                key = tds[i]
+                value = tds[i + 1]
+                if key and value:
+                    key = key.text.replace('.', '')
+                    stock_stats[key] = value.text
 
-            parsed_data['stats'] = stock_stats
+        parsed_data['stats'] = stock_stats
 
-            parsed_news = []
-            news_table = SoupStrainer('table', {'class': 'fullview-news-outer'})
-            news_bs = BeautifulSoup(response, 'html.parser', parse_only=news_table)
-            rows = news_bs.find_all('tr')
+        parsed_news = []
+        news_table = SoupStrainer('table', {'class': 'fullview-news-outer'})
+        news_bs = BeautifulSoup(response, 'html.parser', parse_only=news_table)
+        rows = news_bs.find_all('tr')
 
-            last_date = None
-            for row in rows:
-                tds = row.find_all('td')
-                time = tds[0].text.strip()
-                try:
-                    parsed_time = datetime.strptime(time, '%b-%d-%y %I:%M%p')
-                except ValueError:
-                    parsed_time = datetime.strptime(time, '%I:%M%p')
-                    parsed_time = datetime(day=last_date.day, month=last_date.month, year=last_date.year, hour=parsed_time.hour, minute=parsed_time.minute)
-                last_date = parsed_time
-                news = tds[1]
-                link = news.find('a').attrs['href']
-                source = news.find('span').text
-                parsed_news.append({
-                    'datetime': parsed_time,
-                    'link': link,
-                    'source': source
-                })
+        last_date = None
+        for row in rows:
+            tds = row.find_all('td')
+            time = tds[0].text.strip()
+            try:
+                parsed_time = datetime.strptime(time, '%b-%d-%y %I:%M%p')
+            except ValueError:
+                parsed_time = datetime.strptime(time, '%I:%M%p')
+                parsed_time = datetime(day=last_date.day, month=last_date.month, year=last_date.year, hour=parsed_time.hour, minute=parsed_time.minute)
+            last_date = parsed_time
+            news = tds[1]
+            link = news.find('a').attrs['href']
+            source = news.find('span').text
+            parsed_news.append({
+                'datetime': parsed_time,
+                'link': link,
+                'source': source
+            })
 
-            parsed_data['news'] = parsed_news
+        parsed_data['news'] = parsed_news
 
-            parsed_ratings = []
-            ratings_table = SoupStrainer('table', {'class': 'fullview-ratings-outer'})
-            ratings_bs = BeautifulSoup(response, 'html.parser', parse_only=ratings_table)
-            tables = ratings_bs.find_all('table')
+        parsed_ratings = []
+        ratings_table = SoupStrainer('table', {'class': 'fullview-ratings-outer'})
+        ratings_bs = BeautifulSoup(response, 'html.parser', parse_only=ratings_table)
+        tables = ratings_bs.find_all('table')
 
-            tables = tables[1:]
+        tables = tables[1:]
 
-            for table in tables:
-                tds = table.find_all('td')
-                date = datetime.strptime(tds[0].text, '%b-%d-%y')
-                rating = tds[1].text
-                rated_by = tds[2].text
-                from_to = tds[3].text
-                if len(from_to.split(' ')) == 3:
-                    parsed_from_to = {'from': from_to.split(' ')[0], 'to': from_to.split(' ')[2]}
-                else:
-                    parsed_from_to = {'to': from_to}
+        for table in tables:
+            tds = table.find_all('td')
+            date = datetime.strptime(tds[0].text, '%b-%d-%y')
+            rating = tds[1].text
+            rated_by = tds[2].text
+            from_to = tds[3].text
+            if len(from_to.split(' ')) == 3:
+                parsed_from_to = {'from': from_to.split(' ')[0], 'to': from_to.split(' ')[2]}
+            else:
+                parsed_from_to = {'to': from_to}
 
-                price_target = tds[4].text
-                if len(price_target.split(' ')) == 3:
-                    parsed_price_target = {'from': price_target.split(' ')[0], 'to': price_target.split(' ')[2]}
-                else:
-                    parsed_price_target = {'to': price_target}
+            price_target = tds[4].text
+            if len(price_target.split(' ')) == 3:
+                parsed_price_target = {'from': price_target.split(' ')[0], 'to': price_target.split(' ')[2]}
+            else:
+                parsed_price_target = {'to': price_target}
 
-                parsed_ratings.append({
-                    'datetime': date,
-                    'rating': rating,
-                    'rated_by': rated_by,
-                    'from_to': parsed_from_to,
-                    'price_target': parsed_price_target
-                })
+            parsed_ratings.append({
+                'datetime': date,
+                'rating': rating,
+                'rated_by': rated_by,
+                'from_to': parsed_from_to,
+                'price_target': parsed_price_target
+            })
 
-            parsed_data['ratings'] = parsed_ratings
+        parsed_data['ratings'] = parsed_ratings
 
-            description_tr = SoupStrainer('tr', {'class': 'table-light3-row'})
-            description_bs = BeautifulSoup(response, 'html.parser', parse_only=description_tr)
-            description = description_bs.find('tr')
+        description_tr = SoupStrainer('tr', {'class': 'table-light3-row'})
+        description_bs = BeautifulSoup(response, 'html.parser', parse_only=description_tr)
+        description = description_bs.find('tr')
 
-            parsed_data['description'] = ''
-            if description:
-                parsed_data['description'] = description.text
+        parsed_data['description'] = ''
+        if description:
+            parsed_data['description'] = description.text
 
-            parsed_insider = []
-            insider_table = SoupStrainer('table', {'class': 'body-table'})
-            insider_bs = BeautifulSoup(response, 'html.parser', parse_only=insider_table)
-            rows = insider_bs.find_all('tr')[1:]
+        parsed_insider = []
+        insider_table = SoupStrainer('table', {'class': 'body-table'})
+        insider_bs = BeautifulSoup(response, 'html.parser', parse_only=insider_table)
+        rows = insider_bs.find_all('tr')[1:]
 
-            for row in rows:
-                tds = row.find_all('td')
-                entity = tds[0].text
-                relationship = tds[1].text
-                # date_executed = datetime.strptime(tds[2].text, '%b %d')
-                date_executed = tds[2].text
-                transaction = tds[3].text
-                cost = tds[4].text
-                num_shares = tds[5].text
-                dollar_value = tds[6].text
-                shares_total = tds[7].text
-                sec_form = tds[8].find('a')
-                # sec_form_filed_at = datetime.strptime(sec_form.text, '%b %d %I:%M %p')
-                sec_form_filed_at = sec_form.text
-                sec_form_link = sec_form.attrs['href']
-                parsed_insider.append({
-                    'entity': entity,
-                    'relationship': relationship,
-                    'date_executed': date_executed,
-                    'transaction': transaction,
-                    'cost': cost,
-                    'num_shares': num_shares,
-                    'dollar_value': dollar_value,
-                    'shares_total': shares_total,
-                    'sec_form_filed_at': sec_form_filed_at,
-                    'sec_form_link': sec_form_link
-                })
+        for row in rows:
+            tds = row.find_all('td')
+            entity = tds[0].text
+            relationship = tds[1].text
+            # date_executed = datetime.strptime(tds[2].text, '%b %d')
+            date_executed = tds[2].text
+            transaction = tds[3].text
+            cost = tds[4].text
+            num_shares = tds[5].text
+            dollar_value = tds[6].text
+            shares_total = tds[7].text
+            sec_form = tds[8].find('a')
+            # sec_form_filed_at = datetime.strptime(sec_form.text, '%b %d %I:%M %p')
+            sec_form_filed_at = sec_form.text
+            sec_form_link = sec_form.attrs['href']
+            parsed_insider.append({
+                'entity': entity,
+                'relationship': relationship,
+                'date_executed': date_executed,
+                'transaction': transaction,
+                'cost': cost,
+                'num_shares': num_shares,
+                'dollar_value': dollar_value,
+                'shares_total': shares_total,
+                'sec_form_filed_at': sec_form_filed_at,
+                'sec_form_link': sec_form_link
+            })
 
-            parsed_data['insider'] = parsed_insider
-            return parsed_data
-        except Exception as e:
-            import traceback
-            a = traceback.format_exc(e)
-            b = 1
+        parsed_data['insider'] = parsed_insider
+        return parsed_data
+
