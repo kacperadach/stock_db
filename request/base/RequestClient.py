@@ -34,7 +34,7 @@ class RequestClient(StockDbBase):
         super(RequestClient, self).__init__()
         if use_tor and not tor_client:
             raise RequestClientException('use_tor was set to True but no tor_client was supplied')
-        self.ua = UserAgent()
+        self.ua = UserAgent(verify_ssl=False)
         self.use_tor = use_tor
         self.max_retries = MAX_RETRIES
         self.tor_client = tor_client

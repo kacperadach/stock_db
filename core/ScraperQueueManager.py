@@ -27,6 +27,7 @@ REQUEST_QUEUE_SIZE = 20
 OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
 INPUT_REQUEST_DELAY = 0.1
+PROCESS_QUEUE_SIZE = 1000
 
 """
 This class is in charge of:
@@ -77,7 +78,7 @@ class ScraperQueueManager(StockDbBase):
 
         self.pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
         m = multiprocessing.Manager()
-        process_queue = m.Queue()
+        process_queue = m.Queue(maxsize=PROCESS_QUEUE_SIZE)
         log_queue = m.Queue()
         self.process_queue = process_queue
         self.log_queue = log_queue

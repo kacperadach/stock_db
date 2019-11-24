@@ -12,42 +12,29 @@ THREAD_LEN = 20
 
 class AppLogger():
 
-	def __init__(self, output_process=False, file_name='scraper.log'):
-		self.logger = None
+	def __init__(self, file_name='scraper.log'):
 		self.env = App_Config.env
 		self.log_path = path.join(BASE_PATH, 'logs', self.env)
-		self._create_log_folders()
-		# if file_name is not None:
-		# 	self.file_name = file_name
-		# else:
-		# 	self.file_name = datetime.now().isoformat().split('.')[0].replace(':', '-') + '.log'
 		self.file_name = file_name
 
-		# doesnt work
-		# if output_process is True:
-		# 	file_name = "output_" + file_name
-		# 	print file_name
-		log_file_path = path.join(BASE_PATH, 'logs', self.env, self.file_name)
-
-		# try:
-		# 	remove(log_file_path)
-		# except OSError:
-		# 	self.log('{} did not exist'.format(log_file_path))
-
-		formatter = logging.Formatter('%(asctime)s | %(levelname)7s | %(message)s')
-
-
-		# logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
-
-		# logging.handlers.RotatingFileHandler()
-		handler = RotatingFileHandler(log_file_path, maxBytes=1024000 * 5, backupCount=2)
-
-		# ch = logging.StreamHandler(stdout)
-		handler.setFormatter(formatter)
-		handler.setLevel(logging.DEBUG)
-
 		self.logger = logging.getLogger(self.env)
-		self.logger.addHandler(handler)
+		if len(self.logger.handlers) == 0:
+			self._create_log_folders()
+			log_file_path = path.join(BASE_PATH, 'logs', self.env, self.file_name)
+
+			# logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
+
+			self.logger = logging.getLogger(self.env)
+			self.logger.setLevel(logging.DEBUG)
+			# logging.handlers.RotatingFileHandler()
+			handler = RotatingFileHandler(log_file_path, maxBytes=1024000 * 5, backupCount=2)
+			# handler = RotatingFileHandler(log_file_path, maxBytes=1024 * 10, backupCount=2)
+
+			ch = logging.StreamHandler(stdout)
+			handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)7s | %(message)s'))
+			self.logger.addHandler(handler)
+			self.logger.addHandler(ch)
+
 
 	def _create_log_folders(self):
 		if not path.exists(self.log_path):
