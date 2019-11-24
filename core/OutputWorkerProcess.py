@@ -19,8 +19,6 @@ def process(log_queue, process_number, scraper, queue_item):
         log(log_queue, process_number, 'Error occurred while processing data for scraper {}: {}'.format(scraper, str(e)))
 
 def output_worker_process(process_queue, log_queue, process_number):
-    # sys.stdout = open(processing_file_path, "a", buffering=0)
-
     log(log_queue, process_number, 'Started worker process')
     try:
         while 1:
@@ -29,7 +27,6 @@ def output_worker_process(process_queue, log_queue, process_number):
             except Empty:
                 sleep(0.1)
                 continue
-            # log(log_queue, process_number, 'Got from queue: {}'.format(queue_item.get_metadata()))
             start = datetime.utcnow()
 
             callback_scraper = queue_item.callback.split(".")[-1]
@@ -51,8 +48,10 @@ def output_worker_process(process_queue, log_queue, process_number):
             if t.isAlive():
                 frame = sys._current_frames().get(t.ident, None)
                 if frame:
-                    log(log_queue, process_number, "{}\n{}\n{}".format(frame.f_code.co_filename, frame.f_code.co_name, frame.f_code.co_firstlineno))
-                    log(log_queue, process_number, "{}".format(traceback.extract_stack(frame)))
+                    stack = ""
+                    for filename, lineno, name, line in traceback.extract_stack(frame):
+                        stack += "{} - {} - {} - {}\n".format(filename, lineno, name, line)
+                    log(log_queue, process_number, "{}".format(stack))
                 raise RuntimeError("Processing stuck")
 
             seconds_took = (datetime.utcnow() - start).total_seconds()
@@ -86,9 +85,9 @@ if __name__ == "__main__":
 
     sleep(8)
     frame = sys._current_frames().get(t.ident, None)
-    stack = []
+    stack = ""
     for filename, lineno, name, line in traceback.extract_stack(frame):
-        stack.append("{} - {} - {} - {}".format(filename, lineno, name, line))
+        stack += "{} - {} - {} - {}\n".format(filename, lineno, name, line)
     i = 0
 
 

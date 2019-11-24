@@ -1,5 +1,6 @@
 from os import path, mkdir, remove
 import logging
+import logging.handlers
 from sys import stdout
 
 from app.config import App_Config
@@ -34,6 +35,7 @@ class AppLogger():
 
 		logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
+		logging.handlers.RotatingFileHandler()
 		ch = logging.StreamHandler(stdout)
 		self.logger = logging.getLogger(self.env)
 		self.logger.addHandler(ch)

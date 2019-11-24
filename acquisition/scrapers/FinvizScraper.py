@@ -29,8 +29,5 @@ class FinvizScraper(BaseScraper):
             return
 
         data = FinvizRequest.parse_response(queue_item.get_response().get_data())
-        if not data:
-            self.log('Could not process data: {}', queue_item.get_metadata())
-
         if any(data.values()):
             Finviz_Repository.insert(data, queue_item.get_metadata(), queue_item.get_utc_time())

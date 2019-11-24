@@ -65,7 +65,6 @@ class MarketWatchLiveScraper(BaseScraper):
 
         metadata = queue_item.get_metadata()
         if metadata['symbol']['symbol'] != data['symbol']:
-            self.log('symbol from request does not match response', level='warn')
             return
 
         if 'time_interval' not in metadata.keys():

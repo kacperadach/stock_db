@@ -27,18 +27,19 @@ class FuturesScraper(BaseScraper):
         return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'type': 'historical', 'indicators': self.indicators})
 
     def get_time_delta(self):
-        return timedelta(minutes=4)
+        return timedelta(minutes=5)
 
     def process_data(self, queue_item):
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
-        if not data:
-            self.log('Future not found: {}'.format(queue_item.get_metadata()))
 
         if data:
             self.quote_repository.insert(data, queue_item.get_metadata())
 
 
 class Futures1mScraper(FuturesScraper):
+
+    def __init__(self):
+        super(Futures1mScraper, self).__init__()
 
     def get_queue_item(self, symbol):
         mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
