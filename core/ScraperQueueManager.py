@@ -31,7 +31,7 @@ INPUT_REQUEST_DELAY = 0.1
 """
 This class is in charge of:
  - creating the request_queue and output_queue
- - creating the request and output threads
+ - creating the request and output processes
  - populating the request_queue
 """
 
@@ -168,6 +168,7 @@ class ScraperQueueManager(StockDbBase):
                 self.successful_request_counter.reset()
                 self.failed_request_counter.reset()
                 now = new_now
+            sleep(0.3)
 
     def request_thread_worker(self, tor_client=None):
         request_client = RequestClient(use_tor=bool(tor_client), tor_client=tor_client)

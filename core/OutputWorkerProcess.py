@@ -8,6 +8,8 @@ from time import sleep
 
 from acquisition.scrapers import ALL_SCRAPERS
 
+PROCESSING_TIMEOUT = 60
+
 def log(log_queue, process_number, message):
     log_queue.put('{} | {} - {}\n'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))
 
@@ -42,13 +44,13 @@ def output_worker_process(process_queue, log_queue, process_number):
             t.setDaemon(True)
             t.start()
 
-            while t.isAlive() and (datetime.utcnow() - start).total_seconds() < 20:
+            while t.isAlive() and (datetime.utcnow() - start).total_seconds() < PROCESSING_TIMEOUT:
                 pass
 
             if t.isAlive():
                 frame = sys._current_frames().get(t.ident, None)
                 if frame:
-                    stack = ""
+                    stack = "Processing stuck after {} seconds:\n".format(PROCESSING_TIMEOUT)
                     for filename, lineno, name, line in traceback.extract_stack(frame):
                         stack += "{} - {} - {} - {}\n".format(filename, lineno, name, line)
                     log(log_queue, process_number, "{}".format(stack))
@@ -59,35 +61,36 @@ def output_worker_process(process_queue, log_queue, process_number):
             log(log_queue, process_number, '{} - processing took {}s: {}'.format(callback_scraper, seconds_took, queue_item.get_metadata()))
             if seconds_took > 5:
                 log(log_queue, process_number, 'Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
-    except Exception as e:
+    except Exception:
         log(log_queue, process_number, 'ERROR')
-        log(log_queue, process_number, 'Unexpected error occurred: {}'.format(traceback.format_exc(e)))
+        log(log_queue, process_number, 'Unexpected error occurred: {}'.format(traceback.format_exc()))
         sys.exit(1)
 
 
 if __name__ == "__main__":
+    pass
 
-    def test2():
-        sleep(5)
-        test1()
-
-    def test1():
-        while 1:
-            sleep(2)
-            test2()
-
-    def test():
-        test1()
-
-    t = Thread(target=test)
-    t.setDaemon(True)
-    t.start()
-
-    sleep(8)
-    frame = sys._current_frames().get(t.ident, None)
-    stack = ""
-    for filename, lineno, name, line in traceback.extract_stack(frame):
-        stack += "{} - {} - {} - {}\n".format(filename, lineno, name, line)
-    i = 0
+    # def test2():
+    #     sleep(5)
+    #     test1()
+    #
+    # def test1():
+    #     while 1:
+    #         sleep(2)
+    #         test2()
+    #
+    # def test():
+    #     test1()
+    #
+    # t = Thread(target=test)
+    # t.setDaemon(True)
+    # t.start()
+    #
+    # sleep(8)
+    # frame = sys._current_frames().get(t.ident, None)
+    # stack = ""
+    # for filename, lineno, name, line in traceback.extract_stack(frame):
+    #     stack += "{} - {} - {} - {}\n".format(filename, lineno, name, line)
+    # i = 0
 
 

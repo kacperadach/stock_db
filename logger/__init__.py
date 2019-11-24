@@ -1,6 +1,7 @@
 from os import path, mkdir, remove
 import logging
 import logging.handlers
+from logging.handlers import RotatingFileHandler
 from sys import stdout
 
 from app.config import App_Config
@@ -33,12 +34,20 @@ class AppLogger():
 		# except OSError:
 		# 	self.log('{} did not exist'.format(log_file_path))
 
-		logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
+		formatter = logging.Formatter('%(asctime)s | %(levelname)7s | %(message)s')
+
+
+		# logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
 		# logging.handlers.RotatingFileHandler()
-		ch = logging.StreamHandler(stdout)
+		handler = RotatingFileHandler(log_file_path, maxBytes=1024000 * 5, backupCount=2)
+
+		# ch = logging.StreamHandler(stdout)
+		handler.setFormatter(formatter)
+		handler.setLevel(logging.DEBUG)
+
 		self.logger = logging.getLogger(self.env)
-		self.logger.addHandler(ch)
+		self.logger.addHandler(handler)
 
 	def _create_log_folders(self):
 		if not path.exists(self.log_path):
