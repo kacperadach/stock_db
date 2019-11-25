@@ -88,8 +88,6 @@ class ScraperQueueManager(StockDbBase):
         self.process_pool = []
         for x in range(OUTPUT_PROCESSES):
             self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, log_queue, x)))
-            # a = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
-            # a.ready()
         self.log("Created {} output processes".format(OUTPUT_PROCESSES))
 
         self.last_process_check = datetime.min
@@ -112,21 +110,21 @@ class ScraperQueueManager(StockDbBase):
                             request_queue_input.callback = scraper.__class__.__name__
                             self.request_queue.put(request_queue_input)
 
-                # if datetime.now() - timedelta(seconds=10) > self.last_process_check:
-                #     self.log('Checking processes')
-                #     for i, process in enumerate(self.process_pool):
-                #         try:
-                #             process.get(timeout=0.01)
-                #         except multiprocessing.TimeoutError:
-                #             self.log('Process {} running'.format(i))
-                #             pass
-                #         except Exception as e:
-                #             self.log('Error in process', level='error')
-                #             self.log_exception(e)
-                #             self.process_pool[i] = self.pool.apply_async(output_worker_process, (process_queue, self.logger.get_file_name()))
-                #             self.log('Restarting Service {}'.format(i))
-                #
-                #     self.last_process_check = datetime.now()
+                if datetime.now() - timedelta(seconds=10) > self.last_process_check:
+                    self.log('Checking processes')
+                    for i, process in enumerate(self.process_pool):
+                        try:
+                            process.get(timeout=0.01)
+                        except multiprocessing.TimeoutError:
+                            self.log('Process {} running'.format(i))
+                            pass
+                        except Exception as e:
+                            self.log('Error in process', level='error')
+                            self.log_exception(e)
+                            self.process_pool[i] = self.pool.apply_async(output_worker_process, (process_queue, log_queue, i))
+                            self.log('Restarting Service {}'.format(i))
+
+                    self.last_process_check = datetime.now()
 
 
                 # takes item out of thread queue puts it into process queue
