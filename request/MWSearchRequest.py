@@ -17,7 +17,7 @@ TYPE_TO_INSTRUMENT = {
     'Bond': 'bonds',
     'Future': 'futures',
     'Rate': 'rates',
-    'Fund': 'funds',
+    'Fund': 'funds', #could be ETF as well
     'Benchmark': 'benchmarks',
     'Index': 'indexes',
     'CryptoCurrency': 'crypto-currencies',
@@ -51,6 +51,10 @@ class MWSearchRequest():
             instrument = 'unknown'
             if symbol['type'] in TYPE_TO_INSTRUMENT.keys():
                 instrument = TYPE_TO_INSTRUMENT[symbol['type']]
+
+            if 'ETF' in symbol['company'].split():
+                instrument = 'exchange-traded-funds'
+
             data = {
                 'exchange': symbol['exchangeIsoCode'],
                 'symbol': symbol['ticker'],

@@ -50,9 +50,6 @@ class SymbolRepository(StockDbBase):
     def insert(self, documents):
         new_documents = []
         for d in documents:
-            if 'country_code' not in d.keys():
-                self.db.find(COLLECTION_NAME, {'country': d['country']}, self._get_all_fields())
-
             new_document = {}
             for k, v in d.items():
                 new_key = SnakeCase.to_snake_case(k)
@@ -61,6 +58,10 @@ class SymbolRepository(StockDbBase):
                         new_key = new_key.replace('$', '')
                         v = v.upper()
                     new_document[new_key] = v
+
+            # if 'country_code' not in new_document.keys():
+            #     self.db.find(COLLECTION_NAME, {'country': d['country']}, self._get_all_fields())
+
             new_documents.append(new_document)
 
         for document in new_documents:

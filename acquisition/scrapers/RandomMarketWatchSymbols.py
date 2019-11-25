@@ -45,4 +45,10 @@ class RandomMarketWatchSymbols(BaseScraper):
         data = MWSearchRequest.parse_response(queue_item.get_response().get_data())
 
         if data:
-            Symbol_Repository.insert(data)
+            new_symbols = []
+            for d in data:
+                existing = list(Symbol_Repository.find(symbol=d['symbol'], exchange=d['exchange'], instrument_type=d['instrument_type']))
+                if len(existing) == 0:
+                    new_symbols.append(d)
+            if new_symbols:
+                Symbol_Repository.insert(new_symbols)

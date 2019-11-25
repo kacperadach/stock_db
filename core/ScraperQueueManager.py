@@ -46,6 +46,9 @@ class ScraperQueueManager(StockDbBase):
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
         self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper())
 
+        # self.priority_scrapers = (RandomMarketWatchSymbols(),)
+        # self.scrapers = ()
+
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
         self.request_counter = Counter()

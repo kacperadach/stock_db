@@ -54,11 +54,13 @@ class FinvizRequest():
             last_date = parsed_time
             news = tds[1]
             link = news.find('a').attrs['href']
+            headline = news.find('a').text
             source = news.find('span').text
             parsed_news.append({
                 'datetime': parsed_time,
                 'link': link,
-                'source': source
+                'source': source,
+                'headline': headline
             })
 
         parsed_data['news'] = parsed_news
