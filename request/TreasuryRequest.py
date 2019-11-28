@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup, SoupStrainer
 URL = 'https://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/TextView.aspx?data={}Year&year={}'
 TYPES = ('yield', 'billrates', 'longtermrate', 'realyield', 'reallongtermrate')
 
+# https://www.cnbc.com/bonds/
+
 class TreasuryRequestException(Exception):
     pass
 

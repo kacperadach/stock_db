@@ -84,10 +84,10 @@ def output_worker_process(process_queue, log_queue, process_number):
             if seconds_took > 5:
                 log(log_queue, process_number,
                     'Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
-    except Exception:
+    except Exception as e:
         log(log_queue, process_number, 'ERROR')
         log(log_queue, process_number, 'Unexpected error occurred: {}'.format(traceback.format_exc()))
-        sys.exit(1)
+        raise e
 
 
 if __name__ == "__main__":
