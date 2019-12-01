@@ -3,7 +3,7 @@ import re
 
 from core.StockDbBase import StockDbBase
 from core.data.uid import encrypt_unique_id
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from .SnakeCase import SnakeCase
 
 # normalize field names
@@ -25,7 +25,7 @@ class SymbolRepository(StockDbBase):
 
     def __init__(self):
         super(SymbolRepository, self).__init__()
-        self.db = Finance_DB
+        self.db = FinanceDB()
 
     def _get_all_fields(self):
         all_fields = deepcopy(ALL_FIELDS)

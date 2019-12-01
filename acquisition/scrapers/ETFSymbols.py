@@ -6,7 +6,7 @@ from core.StockDbBase import StockDbBase
 from core.market.Market import is_market_open
 from core.QueueItem import QueueItem
 from request.YahooFinanceSymbolRequest import YahooFinanceSymbolRequest, REGIONS
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 
 OFFSET_INTERVAL = 250
 COLLECTION_NAME = 'symbols'
@@ -21,7 +21,7 @@ class ETFSymbolScraper(StockDbBase):
         self.query_dict = {}
         self.counter = 0
         self.regions = deepcopy(REGIONS)
-        self.db = Finance_DB
+        self.db = FinanceDB()
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))

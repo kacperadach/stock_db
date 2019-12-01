@@ -2,7 +2,7 @@ from datetime import datetime
 
 from core.StockDbBase import StockDbBase
 from core.data.uid import decrypt_unique_id
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 
 COLLECTION_NAME = 'finviz'
 
@@ -19,7 +19,7 @@ class FinvizRepository(StockDbBase):
 
     def __init__(self):
         super(FinvizRepository, self).__init__()
-        self.db = Finance_DB
+        self.db = FinanceDB()
 
     def insert(self, data, meta, utc_timestamp):
         document = {

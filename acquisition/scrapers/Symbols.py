@@ -5,7 +5,7 @@ from pytz import timezone
 from core.StockDbBase import StockDbBase
 from request.YahooFinanceSymbolRequest import YahooFinanceSymbolRequest, REGIONS, SECTORS, QUOTE_TYPES
 from core.QueueItem import QueueItem
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 
 COLLECTION_NAME = 'symbols'
 OFFSET_INTERVAL = 100
@@ -24,7 +24,7 @@ class SymbolScraper(StockDbBase):
         self.regions = deepcopy(REGIONS)
         self.sectors = deepcopy(SECTORS)
         self.quote_types = deepcopy(QUOTE_TYPES)
-        self.db = Finance_DB
+        self.db = FinanceDB()
 
     def get_next_input(self):
         now = datetime.now(timezone('EST'))

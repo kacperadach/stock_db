@@ -27,6 +27,10 @@ class BaseScraper(StockDbBase):
     def process_data(self, queue_item):
         raise NotImplementedError('process_data')
 
+    @abstractmethod
+    def should_scrape(self, now):
+        return True
+
     # Scraper Core Logic
     @abstractmethod
     def get_next_input(self):
@@ -36,10 +40,9 @@ class BaseScraper(StockDbBase):
             self.symbols_cursor = self.get_symbols()
             # check if get_symbols returned iter
 
-        if self.symbols_cursor is not None:
+        if self.symbols_cursor is not None and self.should_scrape(now):
             try:
-                while 1:
-                    return self.get_queue_item(next(self.symbols_cursor))
+                return self.get_queue_item(next(self.symbols_cursor))
             except StopIteration:
                 self.last_scrape = now
                 self.symbols_cursor = None

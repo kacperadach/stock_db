@@ -17,14 +17,14 @@ class AppLogger():
 		self.log_path = path.join(BASE_PATH, 'logs', self.env)
 		self.file_name = file_name
 
-		self.logger = logging.getLogger(self.env)
+		self.logger = logging.getLogger(file_name)
 		if len(self.logger.handlers) == 0:
 			self._create_log_folders()
 			log_file_path = path.join(BASE_PATH, 'logs', self.env, self.file_name)
 
 			# logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s | %(levelname)7s | %(message)s')
 
-			self.logger = logging.getLogger(self.env)
+			# self.logger = logging.getLogger(self.env)
 			self.logger.setLevel(logging.DEBUG)
 			# logging.handlers.RotatingFileHandler()
 			handler = RotatingFileHandler(log_file_path, maxBytes=1024000 * 5, backupCount=2)

@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from core.StockDbBase import StockDbBase
 from core.data.uid import encrypt_unique_id
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from request.MarketWatchRequestConstants import INSTRUMENT_TYPES
 from .SnakeCase import SnakeCase
 
@@ -37,8 +37,7 @@ class QuoteRepository(StockDbBase):
 
     def __init__(self):
         super(QuoteRepository, self).__init__()
-        self.db = Finance_DB
-        self.locks = {}
+        self.db = FinanceDB()
 
     def _get_all_fields(self):
         all_fields = deepcopy(ALL_FIELDS)
@@ -252,8 +251,6 @@ class QuoteRepository(StockDbBase):
 
 class QuoteRepositoryException(Exception):
     pass
-
-Quote_Repository = QuoteRepository()
 
 # if __name__ == '__main__':
 #     Quote_Repository.request_quote('stocks', 'XNYS', 'A')

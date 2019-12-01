@@ -6,8 +6,8 @@ import time
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
 from core.market.Market import is_market_open
-from db.Finance import Finance_DB
-from core.data.QuoteRepository import Quote_Repository
+from db.Finance import FinanceDB
+from core.data.QuoteRepository import QuoteRepository
 from request.MarketWatchRequest import MarketWatchRequest
 from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
@@ -18,49 +18,23 @@ class MarketWatchLiveScraper(BaseScraper):
 
     def __init__(self, indicators=None):
         super(MarketWatchLiveScraper, self).__init__()
-        self.today = datetime.now(timezone('EST')).date()
-        self.db = Finance_DB
-        self.quote_repository = Quote_Repository
-        self.scrape_dict = {}
-        self.ignored_symbols = {}
+        self.db = FinanceDB()
+        self.quote_repository = QuoteRepository()
         if indicators is None:
             indicators = MarketWatchRequestIndicators(use_default=True)
         self.indicators = indicators
-        self.symbols_cursor = self.get_symbols()
 
-    def get_next_input(self):
-        now = datetime.now(timezone('EST'))
-
-        if now.date() != self.today:
-            self.today = now.date()
-            self.scrape_dict = {}
-            self.ignored_symbols = {}
-            self.symbols_cursor = self.get_symbols()
-
-        for symbol in self.symbols_cursor:
-            unique_id = self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['exchange'])
-            if unique_id in self.ignored_symbols:
-                continue
-            if unique_id not in self.scrape_dict.keys():
-                self.scrape_dict[unique_id] = now
-                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
-            elif (now - self.scrape_dict[unique_id]).total_seconds() >= LIVE_SCRAPE_PERIOD_SEC:
-                self.scrape_dict[unique_id] = now
-                mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
-                return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
-
-        self.get_symbols()
-
-    def get_unique_id(self, symbol, instrument_type, exchange):
-        return str(symbol) + str(instrument_type) +  str(exchange)
+    def get_queue_item(self, symbol):
+        mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
+        return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
 
     def process_data(self, queue_item):
+        if not queue_item.get_response().is_successful():
+            return
+
         data = MarketWatchRequest.parse_response(queue_item.get_response().get_data())
 
         if not data:
-            symbol = queue_item.get_metadata()['symbol']
-            self.ignored_symbols[self.get_unique_id(symbol['symbol'], symbol['instrument_type'], symbol['exchange'])] = True
             return
 
         metadata = queue_item.get_metadata()

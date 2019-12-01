@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import os
 import sys
 from pickle import dumps
 
@@ -18,6 +19,8 @@ class FinanceDBError(Exception):
 
 class FinanceDB(StockDbBase):
 
+	__client_dict = {}
+
 	def __init__(self):
 		super(FinanceDB, self).__init__()
 		App_Config.set_config(sys.argv)
@@ -25,15 +28,35 @@ class FinanceDB(StockDbBase):
 		self.user = self.credentials.get_user()
 		self.password = self.credentials.get_password()
 
-		env_vars =  DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
+		env_vars = DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
 
 		self.host = env_vars['FINANCE_DB_HOST']
 		self.port = int(env_vars['FINANCE_DB_PORT'])
 		self.db_name = env_vars['FINANCE_DB_NAME']
+
+		self.mongo_client = FinanceDB.get_client(self)
 		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host), self.port
-		connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host) + ':' + str(self.port)
-		self.log('mongodb://' + str(self.user) + ':' + '*****' + '@' + str(self.host) + ':' + str(self.port) + "-" + self.db_name)
-		self.mongo_client = MongoClient(connection_string, connect=False)[self.db_name]
+		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host) + ':' + str(self.port)
+		# # self.log('mongodb://' + str(self.user) + ':' + '*****' + '@' + str(self.host) + ':' + str(self.port) + "-" + self.db_name)
+		# self.mongo_client = MongoClient(connection_string, connect=False)[self.db_name]
+
+
+	@classmethod
+	def get_client(cls, s):
+		pid = os.getpid()
+		if pid not in cls.__client_dict.keys():
+			credentials = Credentials()
+			user = credentials.get_user()
+			password = credentials.get_password()
+			env_vars = DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
+
+			host = env_vars['FINANCE_DB_HOST']
+			port = int(env_vars['FINANCE_DB_PORT'])
+			db_name = env_vars['FINANCE_DB_NAME']
+			connection_string = 'mongodb://' + str(user) + ':' + str(password) + '@' + str(host) + ':' + str(port)
+			cls.log(s, 'New connection: {}'.format(pid))
+			cls.__client_dict[pid] = MongoClient(connection_string, connect=False)[db_name]
+		return cls.__client_dict[pid]
 
 	def get_db_params(self):
 		self.log("using db: {}".format(self.db_name))
@@ -110,5 +133,3 @@ class FinanceDB(StockDbBase):
 	def delete_many(self, collection_name, query):
 		collection = self.mongo_client.get_collection(collection_name)
 		collection.delete_many(query)
-
-Finance_DB = FinanceDB()

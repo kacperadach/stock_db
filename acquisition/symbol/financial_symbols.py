@@ -4,7 +4,7 @@ from datetime import datetime
 from random import shuffle
 
 from commodities import Commodities_Symbols
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from etfs import ETF
 from core.StockDbBase import StockDbBase
 
@@ -22,7 +22,7 @@ class FinancialSymbols(StockDbBase):
 		super(FinancialSymbols, self).__init__()
 		self.all_symbols = []
 		self.last_check = None
-		self.finance_db = Finance_DB
+		self.finance_db = FinanceDB()
 		self.ETF = ETF()
 		self._get_symbols()
 

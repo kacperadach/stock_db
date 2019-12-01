@@ -6,7 +6,7 @@ from DatabaseTest import database_test
 from .config import App_Config
 from .constants import DEV_ENV_VARS, PROD_ENV_VARS
 from core.ScraperQueueManager import ScraperQueueManager
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from db.MongoIndexer import MongoIndexer
 from logger import AppLogger
 
@@ -24,7 +24,7 @@ class MainService():
 		self._log(sys.argv)
 		self._log('Running application in {} environment'.format(self.env))
 		self.initialize_env_vars()
-		Finance_DB.get_db_params()
+		FinanceDB().get_db_params()
 		self.logger.log('+---------------------------------------------+')
 		self.logger.log('                                             ')
 		self.logger.log('    Service Started at {}      '.format(datetime.now().strftime('%H:%M %Y-%m-%d')))

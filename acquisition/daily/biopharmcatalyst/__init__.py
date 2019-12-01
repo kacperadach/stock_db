@@ -4,7 +4,7 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 
 FDA_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/fda-calendar'
 HIST_CATALYST_CALENDAR = 'https://www.biopharmcatalyst.com/calendars/historical-catalyst-calendar'
@@ -19,7 +19,7 @@ class BioPharmCatalyst():
 
     def __init__(self):
         self.task_name = 'BioPharmCatalyst'
-        self.finance_db = Finance_DB
+        self.finance_db = FinanceDB()
         self.discord = DiscordWebhook()
         self.fda_calendar = None
         self.last_checked = None

@@ -6,6 +6,7 @@ import multiprocessing
 import os
 from os import path
 
+from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
 from acquisition.scrapers.IndexLiveScraper import IndexLiveScraper
@@ -16,6 +17,7 @@ from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
 from core.OutputWorkerProcess import output_worker_process
 from core.ScraperQueue import ScraperQueue
 from core.data.ScraperRepository import Scraper_Repository
+from logger import AppLogger
 from request.base.RequestClient import RequestClient
 from .StockDbBase import StockDbBase
 from core.Counter import Counter
@@ -28,6 +30,7 @@ OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
 INPUT_REQUEST_DELAY = 0.1
 PROCESS_QUEUE_SIZE = 1000
+MAX_PROCESSES = 10
 
 """
 This class is in charge of:
@@ -44,10 +47,7 @@ class ScraperQueueManager(StockDbBase):
         super(ScraperQueueManager, self).__init__()
 
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
-        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper())
-
-        # self.priority_scrapers = (RandomMarketWatchSymbols(),)
-        # self.scrapers = ()
+        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
@@ -79,19 +79,18 @@ class ScraperQueueManager(StockDbBase):
             self.log('{} did not exist'.format(self.processing_file_path))
         open(self.processing_file_path, 'w+')
 
-        self.pool = multiprocessing.Pool(processes=OUTPUT_PROCESSES)
-        m = multiprocessing.Manager()
-        process_queue = m.Queue(maxsize=PROCESS_QUEUE_SIZE)
-        log_queue = m.Queue()
-        self.process_queue = process_queue
-        self.log_queue = log_queue
-        self.process_pool = []
-        for x in range(OUTPUT_PROCESSES):
-            self.process_pool.append(self.pool.apply_async(output_worker_process, (process_queue, log_queue, x)))
-        self.log("Created {} output processes".format(OUTPUT_PROCESSES))
+        self.pool = multiprocessing.Pool()
+        self.manager = multiprocessing.Manager()
+        self.process_queue = self.manager.Queue(maxsize=PROCESS_QUEUE_SIZE)
+        self.log_queue = self.manager.Queue()
+
+        self.manager.Event()
 
         self.last_process_check = datetime.min
         self.launch_queue_logger()
+        self.launch_process_checker()
+
+        self.processing_logger = AppLogger(file_name='processing.out')
         try:
             while not self.event.is_set():
                 allNone = True
@@ -110,38 +109,20 @@ class ScraperQueueManager(StockDbBase):
                             request_queue_input.callback = scraper.__class__.__name__
                             self.request_queue.put(request_queue_input)
 
-                if datetime.now() - timedelta(seconds=10) > self.last_process_check:
-                    self.log('Checking processes')
-                    for i, process in enumerate(self.process_pool):
-                        try:
-                            process.get(timeout=0.01)
-                        except multiprocessing.TimeoutError:
-                            self.log('Process {} running'.format(i))
-                            pass
-                        except Exception as e:
-                            self.log('Error in process', level='error')
-                            self.log_exception(e)
-                            self.process_pool[i] = self.pool.apply_async(output_worker_process, (process_queue, log_queue, i))
-                            self.log('Restarting Service {}'.format(i))
-
-                    self.last_process_check = datetime.now()
-
-
                 # takes item out of thread queue puts it into process queue
                 try:
                     while 1:
                         queue_item = self.output_queue.get(block=False)
-                        process_queue.put(queue_item)
+                        self.process_queue.put(queue_item)
                 except Empty:
                     pass
 
-                with open(self.processing_file_path, "a") as f:
-                    try:
-                        while 1:
-                            line = self.log_queue.get(block=False)
-                            f.write(line)
-                    except Empty:
-                        pass
+                try:
+                    while 1:
+                        line = self.log_queue.get(block=False)
+                        self.processing_logger.log(line)
+                except Empty:
+                    pass
                 sleep(INPUT_REQUEST_DELAY)
         except Exception as e:
             self.log_exception(e)
@@ -194,3 +175,61 @@ class ScraperQueueManager(StockDbBase):
             self.log_queue_item(queue_item)
             self.log_exception(e)
             self.event.set()
+
+    def launch_process_checker(self):
+        self.process_checker = Thread(target=self.check_processes)
+        self.process_checker.setDaemon(True)
+        self.process_checker.start()
+
+    def check_processes(self):
+        # initial create
+        self.process_pool = []
+        for x in range(OUTPUT_PROCESSES):
+            process_event = self.manager.Event()
+            self.process_pool.append(
+                (self.pool.apply_async(output_worker_process, (self.process_queue, self.log_queue, x, process_event)), process_event))
+        self.log("Created {} output processes".format(OUTPUT_PROCESSES))
+
+        while 1:
+            if datetime.now() - timedelta(seconds=10) > self.last_process_check:
+                self.log('Checking processes')
+                for i, process in enumerate(self.process_pool):
+                    if process is None:
+                        continue
+                    try:
+                        process[0].get(timeout=0.01)
+                    except multiprocessing.TimeoutError:
+                        self.log('Process {} running'.format(i))
+                        pass
+                    except Exception as e:
+                        self.log('Error in process', level='error')
+                        self.log_exception(e)
+                        process_event = self.manager.Event()
+                        self.process_pool[i] = (self.pool.apply_async(output_worker_process, (self.process_queue, self.log_queue, i, process_event)), process_event)
+                        self.log('Restarting Service {}'.format(i))
+
+                try:
+                    while 1:
+                        self.process_pool.remove(None)
+                except ValueError:
+                    pass
+
+                scale_interval = int(PROCESS_QUEUE_SIZE / (MAX_PROCESSES - OUTPUT_PROCESSES))
+                process_queue_size = self.process_queue.qsize()
+                additional_processes = int(process_queue_size / scale_interval)
+                process_pool_size = len(self.process_pool)
+
+                if process_pool_size < OUTPUT_PROCESSES + additional_processes:
+                    for i in range(process_pool_size, OUTPUT_PROCESSES + additional_processes):
+                        self.log('Scaling up: {}'.format(i))
+                        process_event = self.manager.Event()
+                        self.process_pool.append((self.pool.apply_async(output_worker_process, (self.process_queue, self.log_queue, i, process_event)), process_event))
+                elif process_pool_size > OUTPUT_PROCESSES + additional_processes:
+                    for i in range(OUTPUT_PROCESSES + additional_processes, process_pool_size):
+                        self.log('Scaling down: {}'.format(i))
+                        self.process_pool[i][1].set()
+                        self.process_pool[i] = None
+
+
+                self.last_process_check = datetime.now()
+            sleep(0.5)

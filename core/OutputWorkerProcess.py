@@ -1,8 +1,6 @@
 import sys
 import traceback
 from threading import Thread
-import signal
-from contextlib import contextmanager
 
 from queue import Empty
 from datetime import datetime
@@ -11,29 +9,9 @@ from time import sleep
 from acquisition.scrapers import ALL_SCRAPERS
 
 PROCESSING_TIMEOUT = 60
-MAX_RETRIES = 3
-#
-# def raise_timeout(signum, frame):
-#     raise TimeoutError
-#
-# @contextmanager
-# def timeout(seconds):
-#     # Register a function to raise a TimeoutError on the signal.
-#     signal.signal(signal.SIGALRM, raise_timeout)
-#     # Schedule the signal to be sent after ``time``.
-#     signal.alarm(seconds)
-#
-#     try:
-#         yield
-#     except TimeoutError:
-#         pass
-#     finally:
-#         # Unregister the signal so it won't be triggered
-#         # if the timeout is not reached.
-#         signal.signal(signal.SIGALRM, signal.SIG_IGN)
 
 def log(log_queue, process_number, message):
-    log_queue.put('{} | {} - {}\n'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))
+    log_queue.put('{} | {} - {}'.format(process_number, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), message))
 
 def process(log_queue, process_number, scraper, queue_item):
     try:
@@ -42,10 +20,13 @@ def process(log_queue, process_number, scraper, queue_item):
         log(log_queue, process_number, 'ERROR')
         log(log_queue, process_number, 'Error occurred while processing data for scraper {}: {}'.format(scraper, str(e)))
 
-def output_worker_process(process_queue, log_queue, process_number):
+def output_worker_process(process_queue, log_queue, process_number, process_event):
     log(log_queue, process_number, 'Started worker process')
     try:
         while 1:
+            if process_event.is_set():
+                raise RuntimeError('Process event set, terminating process')
+
             try:
                 queue_item = process_queue.get(block=False)
             except Empty:

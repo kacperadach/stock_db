@@ -1,5 +1,5 @@
 from core.StockDbBase import StockDbBase
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 
 COLLECTION_NAME = 'scraper_stats'
 
@@ -17,7 +17,7 @@ class ScraperRepository(StockDbBase):
 
     def __init__(self):
         super(ScraperRepository, self).__init__()
-        self.db = Finance_DB
+        self.db = FinanceDB()
 
     def save_request_interval(self, data):
         self.db.insert_one(COLLECTION_NAME, data)

@@ -3,7 +3,7 @@ from datetime import timedelta
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
 from core.data.FuturesRepository import FuturesRepository
-from core.data.QuoteRepository import Quote_Repository
+from core.data.QuoteRepository import QuoteRepository
 from request.MarketWatchRequest import MarketWatchRequest
 from request.MarketWatchRequestIndicators import MarketWatchRequestIndicators
 
@@ -17,7 +17,7 @@ class FuturesScraper(BaseScraper):
     def __init__(self):
         super(FuturesScraper, self).__init__()
         self.indicators = MarketWatchRequestIndicators(use_default=True)
-        self.quote_repository = Quote_Repository
+        self.quote_repository = QuoteRepository()
 
     def get_symbols(self):
         return iter(FuturesRepository.get_all_futures())

@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 
 from core.StockDbBase import StockDbBase
 from core.QueueItem import QueueItem
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from request.MarketWatchForexRequest import MarketWatchForexRequest
 from request.MarketWatchRequestConstants import CURRENCY_PAIRS_URL
 
@@ -16,7 +16,7 @@ REAL_TIME_SCRAPE_MINUTE_FREQ = 5
 class ForexScraper(StockDbBase):
     def __init__(self):
         super(ForexScraper, self).__init__()
-        self.db = Finance_DB
+        self.db = FinanceDB()
         self._reset()
 
     def _reset(self):

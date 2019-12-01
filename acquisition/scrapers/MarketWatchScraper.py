@@ -4,7 +4,7 @@ from pytz import timezone
 
 from core.StockDbBase import StockDbBase
 from core.QueueItem import QueueItem
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from request.MarketWatchRequest import MarketWatchRequest
 
 SYMBOL_COLLECTION = 'market_watch_symbols'
@@ -15,7 +15,7 @@ class MarketWatchScraper(StockDbBase):
     def __init__(self):
         super(MarketWatchScraper, self).__init__()
         self.today = datetime.now(timezone('EST')).date()
-        self.db = Finance_DB
+        self.db = FinanceDB()
         self.scrape_dict = {}
         self.symbols = []
         self.get_symbols()

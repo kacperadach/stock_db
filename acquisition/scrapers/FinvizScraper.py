@@ -3,7 +3,7 @@ from datetime import timedelta
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
 from core.data.FinvizRepository import Finviz_Repository
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from request.FinvizRequest import FinvizRequest
 
 SYMBOL_COLLECTION = 'market_watch_symbols'
@@ -12,7 +12,7 @@ class FinvizScraper(BaseScraper):
 
     def __init__(self):
         super(FinvizScraper, self).__init__()
-        self.db = Finance_DB
+        self.db = FinanceDB()
 
     def get_symbols(self):
         return self.db.find(SYMBOL_COLLECTION, {'country_code': 'US', 'instrument_type': {'$in': ['stocks', 'exchange-traded-funds']}}, {'symbol': 1, 'instrument_type': 1, 'exchange': 1, 'country': 1, 'country_code': 1})

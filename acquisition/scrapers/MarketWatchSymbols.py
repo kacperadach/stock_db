@@ -3,7 +3,7 @@ from pytz import timezone
 
 from core.StockDbBase import StockDbBase
 from core.QueueItem import QueueItem
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from request.MarketWatchSymbolsRequest import MarketWatchSymbolsRequest, TYPE_OPTIONS
 
 COLLECTION_NAME = 'market_watch_symbols'
@@ -12,7 +12,7 @@ class MarketWatchSymbols(StockDbBase):
 
     def __init__(self):
         super(MarketWatchSymbols, self).__init__()
-        self.symbol_repository = Finance_DB
+        self.symbol_repository = FinanceDB()
         self.today = datetime.now(timezone('EST'))
         self.scrape_dict = {}
         self.letter_options = MarketWatchSymbolsRequest.get_letter_options()

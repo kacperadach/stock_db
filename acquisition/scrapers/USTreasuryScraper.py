@@ -2,14 +2,14 @@ from datetime import datetime
 from pytz import timezone
 
 from core.StockDbBase import StockDbBase
-from db.Finance import Finance_DB
+from db.Finance import FinanceDB
 from request.TreasuryRequest import TreasuryRequest, TYPES
 from core.QueueItem import QueueItem
 
 class USTreasuryScraper(StockDbBase):
     def __init__(self):
         super(USTreasuryScraper, self).__init__()
-        self.db = Finance_DB
+        self.db = FinanceDB()
         self.scrape_dict = {}
         self.today = datetime.now(timezone('EST'))
 

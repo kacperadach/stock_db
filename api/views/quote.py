@@ -7,7 +7,7 @@ from pytz import timezone
 
 from acquisition.symbol.futures import FUTURES
 from core.data.FuturesRepository import FuturesRepository
-from core.data.QuoteRepository import Quote_Repository
+from core.data.QuoteRepository import QuoteRepository
 
 from cachetools import cached, TTLCache
 
@@ -19,11 +19,13 @@ DELTA_MAP = {
 
 cache = TTLCache(maxsize=1000, ttl=15)
 
+Quote_Repository = QuoteRepository()
+
 
 @cached(cache)
 def fetch_live_futures_quotes():
     symbols = list(map(lambda x: x['symbol'], FuturesRepository.get_all_futures()))
-    return Quote_Repository.get_live_quotes('market_watch_futures', symbols, '1d')
+    return QuoteRepository.get_live_quotes('market_watch_futures', symbols, '1d')
 
 def get_live_futures_quotes():
     return list(fetch_live_futures_quotes().values())
