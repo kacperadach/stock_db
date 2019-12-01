@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
-from core.data.SymbolRepository import Symbol_Repository
+from core.data.SymbolRepository import SymbolRepository
 
 from request.MWSearchRequest import MWSearchRequest
 
@@ -14,6 +14,7 @@ class RandomMarketWatchSymbols(BaseScraper):
 
     def __init__(self):
         super(RandomMarketWatchSymbols, self).__init__()
+        self.symbol_repository = SymbolRepository()
 
     def get_symbols(self):
         for i1 in alphabet:
@@ -47,8 +48,8 @@ class RandomMarketWatchSymbols(BaseScraper):
         if data:
             new_symbols = []
             for d in data:
-                existing = list(Symbol_Repository.find(symbol=d['symbol'], exchange=d['exchange'], instrument_type=d['instrument_type']))
+                existing = list(self.symbol_repository.find(symbol=d['symbol'], exchange=d['exchange'], instrument_type=d['instrument_type']))
                 if len(existing) == 0:
                     new_symbols.append(d)
             if new_symbols:
-                Symbol_Repository.insert(new_symbols)
+                self.symbol_repository.insert(new_symbols)

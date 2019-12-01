@@ -46,7 +46,7 @@ class ScraperQueueManager(StockDbBase):
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
 
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
+        self.priority_scrapers = ()
         self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)

@@ -3,7 +3,7 @@ from pytz import timezone
 
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
-from core.data.SymbolRepository import Symbol_Repository
+from core.data.SymbolRepository import SymbolRepository
 from request.MarketWatchSymbolsRequestV2 import MarketWatchSymbolsRequestV2
 from request.MarketWatchRequestConstants import COUNTRIES, INSTRUMENT_TYPES
 
@@ -16,7 +16,7 @@ class MarketWatchSymbolsV2(BaseScraper):
 
     def __init__(self):
         super(MarketWatchSymbolsV2, self).__init__()
-        self.symbol_repository = Symbol_Repository
+        self.symbol_repository = SymbolRepository()
         self.today = datetime.now(timezone('EST'))
 
     def get_time_delta(self):
@@ -71,7 +71,7 @@ class MarketWatchSymbolsV2(BaseScraper):
                 #     documents.append(d)
 
             if documents:
-                Symbol_Repository.insert(documents)
+                self.symbol_repository.insert(documents)
 
 if __name__ == '__main__':
     a = {'test': 'test'}

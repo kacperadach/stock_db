@@ -52,5 +52,3 @@ class FinvizRepository(StockDbBase):
             rating['datetime'] = str(rating['datetime'])
 
         return data
-
-Finviz_Repository = FinvizRepository()

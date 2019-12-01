@@ -72,37 +72,41 @@ class MarketWatchRequest():
 
     @staticmethod
     def get_symbol(symbol, instrument_type):
+        sym = symbol['symbol']
+        if ':' in sym:
+            sym = sym.split(':')[1]
+
         if instrument_type.lower() == 'rates':
             if symbol['country'] == 'Money Rates':
-                return 'INTERSTATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+                return 'INTERSTATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
             else:
-                return 'LOANRATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+                return 'LOANRATE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'funds':
-            return 'FUND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'FUND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'bonds':
-            return 'BOND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'BOND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'benchmarks':
-            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'american-depository-receipt-stocks':
-            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'exchange-traded-notes':
-            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'warrants':
-            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'stocks':
-            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'indexes':
-            return 'INDEX/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'INDEX/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'exchange-traded-funds':
-            return 'FUND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'FUND/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'currencies':
-            return 'CURRENCY/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'CURRENCY/{}/XTUP/{}'.format(symbol['country_code'], sym)
         elif instrument_type.lower() == 'crypto-currencies':
-            return 'CRYPTOCURRENCY/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'CRYPTOCURRENCY/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'real-estate-investment-trusts':
-            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'STOCK/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         elif instrument_type.lower() == 'futures':
-            return 'FUTURE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], symbol['symbol'])
+            return 'FUTURE/{}/{}/{}'.format(symbol['country_code'], symbol['exchange'], sym)
         else:
             raise MarketWatchRequestException('Invalid instrument type')
 

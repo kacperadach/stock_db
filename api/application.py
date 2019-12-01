@@ -19,7 +19,8 @@ from flask_socketio import SocketIO, send, emit
 from views.quote import get_quote, get_live_futures_quotes
 from views.scraper import get_stats
 
-from core.data.SymbolRepository import Symbol_Repository
+from core.data.SymbolRepository import SymbolRepository
+Symbol_Repository = SymbolRepository()
 
 app = Flask(__name__, static_folder='react_app/build')
 

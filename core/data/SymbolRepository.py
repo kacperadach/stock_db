@@ -82,8 +82,6 @@ class SymbolRepository(StockDbBase):
 class SymbolRepositoryException(Exception):
     pass
 
-Symbol_Repository = SymbolRepository()
-
 if __name__ == '__main__':
-    uid = Symbol_Repository.search('gdx')[0]['uid']
-    Symbol_Repository.decrypt_unique_id('QSAgICAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')
+    uid = SymbolRepository().search('gdx')[0]['uid']
+    SymbolRepository().decrypt_unique_id('QSAgICAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')

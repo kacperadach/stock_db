@@ -1,11 +1,13 @@
 import datetime
 
 from api.views.quote import get_quote
-from core.data.FinvizRepository import Finviz_Repository
+from core.data.FinvizRepository import FinvizRepository
 from core.data.FuturesRepository import FuturesRepository
-from core.data.SymbolRepository import Symbol_Repository
+from core.data.SymbolRepository import SymbolRepository
 from core.data.uid import decrypt_unique_id, encrypt_unique_id
 
+Symbol_Repository = SymbolRepository()
+Finviz_Repository = FinvizRepository()
 
 def fetch_fundamentals(uid):
     return Finviz_Repository.get(uid)

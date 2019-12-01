@@ -1,4 +1,4 @@
-from core.data.SymbolRepository import Symbol_Repository
+
 from db.Finance import FinanceDB
 
 if __name__ == "__main__":

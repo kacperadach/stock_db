@@ -1,9 +1,9 @@
-from core.data.SymbolRepository import Symbol_Repository
+from core.data.SymbolRepository import SymbolRepository
 from db.Finance import FinanceDB
 
 if __name__ == "__main__":
     print('deleting')
-    Symbol_Repository.delete_many({})
+    SymbolRepository().delete_many({})
     print('deleted')
 
     print('dropping indexes')
