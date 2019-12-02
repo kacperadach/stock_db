@@ -38,8 +38,8 @@ class MarketWatchLiveScraper(BaseScraper):
             return
 
         metadata = queue_item.get_metadata()
-        if metadata['symbol']['symbol'] != data['symbol']:
-            return
+        # if metadata['symbol']['symbol'] != data['symbol']:
+        #     return
 
         if 'time_interval' not in metadata.keys():
             raise RuntimeError('need time_interval in meta')

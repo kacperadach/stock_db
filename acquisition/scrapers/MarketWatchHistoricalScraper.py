@@ -40,7 +40,7 @@ class MarketWatchHistoricalScraper(BaseScraper):
             return
 
         metadata = queue_item.get_metadata()
-        if metadata['symbol']['symbol'] != data['symbol']:
-            return
+        # if metadata['symbol']['symbol'] != data['symbol']:
+        #     return
 
         self.quote_repository.insert(data, metadata)

@@ -75,6 +75,8 @@ class MarketWatchRequest():
         sym = symbol['symbol']
         if ':' in sym:
             sym = sym.split(':')[1]
+        if '-' in sym:
+            sym = sym.split('-')[0]
 
         if instrument_type.lower() == 'rates':
             if symbol['country'] == 'Money Rates':
