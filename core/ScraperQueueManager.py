@@ -85,8 +85,6 @@ class ScraperQueueManager(StockDbBase):
         self.process_queue = self.manager.Queue(maxsize=PROCESS_QUEUE_SIZE)
         self.log_queue = self.manager.Queue()
 
-        self.manager.Event()
-
         self.last_process_check = datetime.min
         self.launch_queue_logger()
         self.launch_process_checker()

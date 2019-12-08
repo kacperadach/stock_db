@@ -21,8 +21,8 @@ def process(log_queue, process_number, scraper, queue_item):
         log(log_queue, process_number, 'Error occurred while processing data for scraper {}: {}'.format(scraper, str(e)))
 
 def output_worker_process(process_queue, log_queue, process_number, process_event):
-    log(log_queue, process_number, 'Started worker process')
     try:
+        log(log_queue, process_number, 'Started worker process')
         while 1:
             if process_event.is_set():
                 raise RuntimeError('Process event set, terminating process')
@@ -63,8 +63,7 @@ def output_worker_process(process_queue, log_queue, process_number, process_even
 
             log(log_queue, process_number, '{} - processing took {}s: {}'.format(callback_scraper, seconds_took, queue_item.get_metadata()))
             if seconds_took > 5:
-                log(log_queue, process_number,
-                    'Slow output processing for metadata: {} - took {} seconds'.format(queue_item.get_metadata(), seconds_took))
+                log(log_queue, process_number, '{} - Slow output processing for metadata: {} - took {} seconds'.format(callback_scraper, queue_item.get_metadata(), seconds_took))
     except Exception as e:
         log(log_queue, process_number, 'ERROR')
         log(log_queue, process_number, 'Unexpected error occurred: {}'.format(traceback.format_exc()))
