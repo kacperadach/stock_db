@@ -25,13 +25,13 @@ from core.Counter import Counter
 from request.base.TorManager import TorManager
 
 URL_THREADS = 10
-OUTPUT_PROCESSES = 4
+OUTPUT_PROCESSES = 8
 REQUEST_QUEUE_SIZE = 20
 OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
 INPUT_REQUEST_DELAY = 0.1
 PROCESS_QUEUE_SIZE = 1000
-MAX_PROCESSES = 10
+MAX_PROCESSES = 8
 
 """
 This class is in charge of:
@@ -209,27 +209,27 @@ class ScraperQueueManager(StockDbBase):
                         self.process_pool[i] = (self.pool.apply_async(output_worker_process, (self.process_queue, self.log_queue, i, process_event)), process_event)
                         self.log('Restarting Service {}'.format(i))
 
-                try:
-                    while 1:
-                        self.process_pool.remove(None)
-                except ValueError:
-                    pass
+                # try:
+                #     while 1:
+                #         self.process_pool.remove(None)
+                # except ValueError:
+                #     pass
 
-                scale_interval = int(PROCESS_QUEUE_SIZE / (MAX_PROCESSES - OUTPUT_PROCESSES))
-                process_queue_size = self.process_queue.qsize()
-                additional_processes = int(process_queue_size / scale_interval)
-                process_pool_size = len(self.process_pool)
-
-                if process_pool_size < OUTPUT_PROCESSES + additional_processes:
-                    for i in range(process_pool_size, OUTPUT_PROCESSES + additional_processes):
-                        self.log('Scaling up: {}'.format(i))
-                        process_event = self.manager.Event()
-                        self.process_pool.append((self.pool.apply_async(output_worker_process, (self.process_queue, self.log_queue, i, process_event)), process_event))
-                elif process_pool_size > OUTPUT_PROCESSES + additional_processes:
-                    for i in range(OUTPUT_PROCESSES + additional_processes, process_pool_size):
-                        self.log('Scaling down: {}'.format(i))
-                        self.process_pool[i][1].set()
-                        self.process_pool[i] = None
+                # scale_interval = int(PROCESS_QUEUE_SIZE / (MAX_PROCESSES - OUTPUT_PROCESSES))
+                # process_queue_size = self.process_queue.qsize()
+                # additional_processes = int(process_queue_size / scale_interval)
+                # process_pool_size = len(self.process_pool)
+                #
+                # if process_pool_size < OUTPUT_PROCESSES + additional_processes:
+                #     for i in range(process_pool_size, OUTPUT_PROCESSES + additional_processes):
+                #         self.log('Scaling up: {}'.format(i))
+                #         process_event = self.manager.Event()
+                #         self.process_pool.append((self.pool.apply_async(output_worker_process, (self.process_queue, self.log_queue, i, process_event)), process_event))
+                # elif process_pool_size > OUTPUT_PROCESSES + additional_processes:
+                #     for i in range(OUTPUT_PROCESSES + additional_processes, process_pool_size):
+                #         self.log('Scaling down: {}'.format(i))
+                #         self.process_pool[i][1].set()
+                #         self.process_pool[i] = None
 
 
                 self.last_process_check = datetime.now()

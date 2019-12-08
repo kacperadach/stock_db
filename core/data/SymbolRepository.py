@@ -14,7 +14,8 @@ FIELD_NAMES = (
     'exchange',
     'country',
     'symbol',
-    'long_name'
+    'long_name',
+    'charting_symbol'
 )
 
 ALL_FIELDS = {x: 1 for x in FIELD_NAMES}

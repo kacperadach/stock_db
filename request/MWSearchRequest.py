@@ -62,7 +62,8 @@ class MWSearchRequest():
                 'country': symbol['country'],
                 'country_code': symbol['country'],
                 'instrument_type': instrument,
-                'from_search': True
+                'from_search': True,
+                'charting_symbol': symbol['chartingSymbol']
             }
             symbols.append(data)
 

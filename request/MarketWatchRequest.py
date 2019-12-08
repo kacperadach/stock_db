@@ -72,6 +72,9 @@ class MarketWatchRequest():
 
     @staticmethod
     def get_symbol(symbol, instrument_type):
+        if 'charting_symbol' in symbol.keys():
+            return symbol['charting_symbol']
+
         sym = symbol['symbol']
         if ':' in sym:
             sym = sym.split(':')[1]

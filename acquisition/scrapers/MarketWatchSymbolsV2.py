@@ -64,11 +64,9 @@ class MarketWatchSymbolsV2(BaseScraper):
                 if 'Sector' in d.keys():
                     if d['Sector'] == 'Exchange-Traded Funds':
                         d['instrument_type'] = 'exchange-traded-funds'
-                documents.append(d)
-
-                # cursor = Symbol_Repository.find(symbol=d['symbol'], exchange=d['Exchange'])
-                # if cursor.count() == 0:
-                #     documents.append(d)
+                existing = list(self.symbol_repository.find(symbol=d['symbol'], exchange=d['Exchange'], instrument_type=d['instrument_type']))
+                if len(existing) == 0:
+                    documents.append(d)
 
             if documents:
                 self.symbol_repository.insert(documents)

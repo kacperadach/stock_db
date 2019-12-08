@@ -51,5 +51,11 @@ class RandomMarketWatchSymbols(BaseScraper):
                 existing = list(self.symbol_repository.find(symbol=d['symbol'], exchange=d['exchange'], instrument_type=d['instrument_type']))
                 if len(existing) == 0:
                     new_symbols.append(d)
+                else:
+                    e = existing[0]
+                    if 'charting_symbol' not in e.keys() and 'charting_symbol' in d.keys():
+                        e['charting_symbol'] = d['charting_symbol']
+                        new_symbols.append(e)
+
             if new_symbols:
                 self.symbol_repository.insert(new_symbols)
