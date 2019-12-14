@@ -6,7 +6,7 @@ import multiprocessing
 import os
 from os import path
 
-from acquisition.scrapers import FxstreetScraper
+from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
@@ -47,7 +47,7 @@ class ScraperQueueManager(StockDbBase):
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
 
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper())
+        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper(), NasdaqOptionsScraper())
         self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)

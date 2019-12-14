@@ -199,7 +199,7 @@ class BondRequest():
         )
 
     @staticmethod
-    def     parse_response(response):
+    def parse_response(response):
         if int(response['responseErrorMessages'][0]['responseCode']) != 200 or len(response['responseErrorMessages']) > 1:
             return []
 

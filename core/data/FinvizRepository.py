@@ -32,7 +32,7 @@ class FinvizRepository(StockDbBase):
 
     def get(self, uid):
         symbol = decrypt_unique_id(uid)
-        if symbol['instrument_type'] not in ('stocks', 'exchange-traded-funds') or symbol['country_code'] != 'US':
+        if symbol['instrument_type'] not in ('stocks', 'exchange-traded-funds', 'exchange-traded-notes') or symbol['country_code'] != 'US':
             return {}
 
         d = list(self.db.find(COLLECTION_NAME, {'symbol': symbol['symbol'], 'exchange': symbol['exchange']}, ALL_FIELDS).sort('datetime_utc', -1).limit(1))

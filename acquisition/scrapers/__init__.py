@@ -1,5 +1,6 @@
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FxstreetScraper import FxstreetScraper
+from acquisition.scrapers.NasdaqOptionsScraper import NasdaqOptionsScraper
 from .FuturesScraper import FuturesScraper, Futures1mScraper
 from .IndexLiveScraper import IndexLiveScraper
 from .MarketWatchHistoricalScraper import MarketWatchHistoricalScraper
@@ -20,5 +21,6 @@ ALL_SCRAPERS = (
     RandomMarketWatchSymbols,
     FinvizScraper,
     BondScraper,
-    FxstreetScraper
+    FxstreetScraper,
+    NasdaqOptionsScraper
 )

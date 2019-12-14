@@ -31,7 +31,8 @@ COLLECTION_INDICES = {
     'fxstreet_economic': (MongoIndex(name='id', index={'id': 1}, unique=True),
                           MongoIndex(name='datetime_utc', index={'datetime_utc': 1}),
                           MongoIndex(name='event_id_datetime_utc', index={'event_id': 1, 'datetime_utc': 1}),
-                          MongoIndex(name='country_code_datetime_utc', index={'country_code': 1, 'datetime_utc': 1}))
+                          MongoIndex(name='country_code_datetime_utc', index={'country_code': 1, 'datetime_utc': 1})),
+    'nasdaq_options': (MongoIndex(name='symbol_exchange_datetime_utc', index={'symbol': 1, 'exchange': 1, 'datetime_utc': 1}), )
 }
 
 # todo fix indexes
