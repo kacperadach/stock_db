@@ -80,7 +80,7 @@ class ScraperQueueManager(StockDbBase):
             self.log('{} did not exist'.format(self.processing_file_path))
         open(self.processing_file_path, 'w+')
 
-        self.pool = multiprocessing.Pool()
+        self.pool = multiprocessing.Pool(MAX_PROCESSES)
         self.manager = multiprocessing.Manager()
         self.process_queue = self.manager.Queue(maxsize=PROCESS_QUEUE_SIZE)
         self.log_queue = self.manager.Queue()

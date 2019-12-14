@@ -49,7 +49,7 @@ class BaseScraper(StockDbBase):
         now = datetime.now(timezone('EST'))
 
         if self.symbols_cursor is None and self.last_scrape + self.get_time_delta() < now:
-            self.symbols_cursor = self.get_symbols()
+            self.symbols_cursor = iter(list(self.get_symbols()))
 
         if self.symbols_cursor is not None and self.should_scrape() and not self.rate_limiter.is_rate_limited():
             try:
