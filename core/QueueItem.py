@@ -8,7 +8,7 @@ class QueueItemException(Exception):
 
 class QueueItem:
 
-    def __init__(self, url, http_method, callback, symbol='', body=None, headers=None, metadata=None):
+    def __init__(self, url, http_method, callback=None, symbol='', body=None, headers=None, metadata=None):
         body = {} if body is None else body
         headers = {} if headers is None else headers
         metadata = {} if metadata is None else metadata

@@ -6,7 +6,7 @@ import multiprocessing
 import os
 from os import path
 
-from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper
+from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper, BarchartFinancialsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
@@ -48,7 +48,7 @@ class ScraperQueueManager(StockDbBase):
         super(ScraperQueueManager, self).__init__()
 
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper(), NasdaqOptionsScraper())
-        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper())
+        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper(), BarchartFinancialsScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
@@ -112,6 +112,12 @@ class ScraperQueueManager(StockDbBase):
                 try:
                     while 1:
                         queue_item = self.output_queue.get(block=False)
+                        if queue_item.callback is not None:
+                            for scraper in self.scrapers + self.priority_scrapers:
+                                if type(scraper).__name__ == queue_item.callback:
+                                    # use thread to non-block
+                                    # scraper.request_callback(queue_item)
+                                    Thread(target=scraper.request_callback, args=(queue_item,)).start()
                         self.process_queue.put(queue_item)
                 except Empty:
                     pass

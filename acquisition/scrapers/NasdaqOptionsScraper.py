@@ -18,7 +18,7 @@ class NasdaqOptionsScraper(BaseScraper):
 
     def get_queue_item(self, symbol):
         request = NasdaqOptionsRequest(symbol['symbol'], symbol['instrument_type'])
-        return QueueItem(url=request.get_url(), headers=request.get_headers(), http_method=request.get_http_method(), callback=__name__, metadata=symbol)
+        return QueueItem(url=request.get_url(), headers=request.get_headers(), http_method=request.get_http_method(), metadata=symbol)
 
     def get_time_delta(self):
         return timedelta(hours=4)

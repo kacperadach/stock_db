@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime, timedelta
 from pytz import timezone
 
@@ -9,8 +10,6 @@ from request.MarketWatchRequestConstants import COUNTRIES, INSTRUMENT_TYPES
 
 #https://quotes.wsj.com/company-list/a-z/W
 
-
-MAX_PAGES = 250
 
 class MarketWatchSymbolsV2(BaseScraper):
 
@@ -27,12 +26,11 @@ class MarketWatchSymbolsV2(BaseScraper):
             if instrument_type.lower() == 'futures':
                 continue
             for country in COUNTRIES:
-                for i in range(1, MAX_PAGES + 1):
-                    yield {
-                        'instrument_type': instrument_type,
-                        'country': country,
-                        'page': i
-                    }
+                yield {
+                    'instrument_type': instrument_type,
+                    'country': country,
+                    'page': 1
+                }
 
     def get_queue_item(self, symbol):
         page = symbol['page']
@@ -43,9 +41,15 @@ class MarketWatchSymbolsV2(BaseScraper):
         return QueueItem(
             url=request.get_url(),
             http_method=request.get_http_method(),
-            callback=__name__,
-            metadata={'page': page, 'country': country, 'instrument_type': instrument_type}
+            metadata={'page': page, 'country': country, 'instrument_type': instrument_type},
+            callback=__name__
         )
+
+    def request_callback(self, queue_item):
+        if MarketWatchSymbolsRequestV2.parse_response(queue_item.get_response().get_data()):
+            meta = deepcopy(queue_item.get_metadata())
+            meta['page'] += 1
+            self.additional_symbols.append(meta)
 
     def process_data(self, queue_item):
         if not queue_item.get_response().is_successful():

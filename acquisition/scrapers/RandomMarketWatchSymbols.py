@@ -37,7 +37,7 @@ class RandomMarketWatchSymbols(BaseScraper):
 
     def get_queue_item(self, symbol):
         request = MWSearchRequest(symbol)
-        return QueueItem(url=request.get_url(), http_method=request.get_http_method(), callback=self.process_data, metadata={'symbol': symbol})
+        return QueueItem(url=request.get_url(), http_method=request.get_http_method(), metadata={'symbol': symbol})
 
     def get_time_delta(self):
         return timedelta(days=3)

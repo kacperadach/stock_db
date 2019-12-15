@@ -20,7 +20,7 @@ class FinvizScraper(BaseScraper):
 
     def get_queue_item(self, symbol):
         finviz = FinvizRequest(symbol['symbol'])
-        return QueueItem(url=finviz.get_url(), http_method=finviz.get_http_method(), metadata=symbol, callback=__name__)
+        return QueueItem(url=finviz.get_url(), http_method=finviz.get_http_method(), metadata=symbol)
 
     def get_time_delta(self):
         return timedelta(hours=6)

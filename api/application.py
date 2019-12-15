@@ -16,8 +16,8 @@ monkey.patch_all()
 from flask import Flask, send_from_directory, render_template
 from flask_socketio import SocketIO, send, emit
 
-from views.quote import get_quote, get_live_futures_quotes
-from views.scraper import get_stats
+from .views.quote import get_quote, get_live_futures_quotes
+from .views.scraper import get_stats
 
 from core.data.SymbolRepository import SymbolRepository
 Symbol_Repository = SymbolRepository()
@@ -81,5 +81,5 @@ def run():
 
 if __name__ == '__main__':
     d = fetch_metadata('RkIgICAvWE5BUyAvVVMgIC9zdG9ja3MgICAg')
-    print d
+    print(d)
 

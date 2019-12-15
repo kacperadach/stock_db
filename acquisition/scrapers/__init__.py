@@ -1,3 +1,4 @@
+from acquisition.scrapers.BarchartFinancialsScraper import BarchartFinancialsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FxstreetScraper import FxstreetScraper
 from acquisition.scrapers.NasdaqOptionsScraper import NasdaqOptionsScraper
@@ -22,5 +23,6 @@ ALL_SCRAPERS = (
     FinvizScraper,
     BondScraper,
     FxstreetScraper,
-    NasdaqOptionsScraper
+    NasdaqOptionsScraper,
+    BarchartFinancialsScraper
 )

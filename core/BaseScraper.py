@@ -7,17 +7,15 @@ from pytz import timezone
 from core.RateLimiter import RateLimiter
 from core.StockDbBase import StockDbBase
 
-
-
 class BaseScraper(StockDbBase):
     MARKET_WATCH_SYMBOL_COLLECTION = 'market_watch_symbols'
-
-    last_scrape = timezone('EST').localize(datetime.min)
-    symbols_cursor = None
 
     def __init__(self):
         super(BaseScraper, self).__init__()
         self.rate_limiter = RateLimiter(self.requests_per_second())
+        self.last_scrape = timezone('EST').localize(datetime.min)
+        self.symbols_cursor = None
+        self.additional_symbols = []
 
     @abstractmethod
     def get_symbols(self):
@@ -43,6 +41,10 @@ class BaseScraper(StockDbBase):
     def requests_per_second(self):
         return sys.maxsize
 
+    @abstractmethod
+    def request_callback(self, queue_item):
+        pass
+
     # Scraper Core Logic
     @abstractmethod
     def get_next_input(self):
@@ -50,6 +52,9 @@ class BaseScraper(StockDbBase):
 
         if self.symbols_cursor is None and self.last_scrape + self.get_time_delta() < now:
             self.symbols_cursor = iter(list(self.get_symbols()))
+
+        if self.additional_symbols and not self.rate_limiter.is_rate_limited():
+            return self.get_queue_item(self.additional_symbols.pop(0))
 
         if self.symbols_cursor is not None and self.should_scrape() and not self.rate_limiter.is_rate_limited():
             try:

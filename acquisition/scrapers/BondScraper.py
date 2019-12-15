@@ -37,7 +37,6 @@ class BondScraper(BaseScraper):
             url=request.get_url(),
             headers=request.get_headers(),
             http_method=request.get_http_method(),
-            callback=__name__,
             metadata=symbol
         )
 

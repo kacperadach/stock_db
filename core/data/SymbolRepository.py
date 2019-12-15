@@ -66,11 +66,11 @@ class SymbolRepository(StockDbBase):
             new_documents.append(new_document)
 
         for document in new_documents:
-            self.db.insert_one(COLLECTION_NAME, document)
+            self.db.replace_one(COLLECTION_NAME, document, upsert=True)
 
     def search(self, symbol_search):
-        regex = re.compile('^'+ symbol_search.upper(), re.IGNORECASE)
-        search_results = list(self.db.find(COLLECTION_NAME, {'symbol': regex}, self._get_all_fields()).sort((['symbol', 1], ['country', -1])).limit(5))
+        regex = re.compile('^' + symbol_search.upper(), re.IGNORECASE)
+        search_results = list(self.db.find(COLLECTION_NAME, {'symbol': regex, 'country_code': 'US', 'instrument_type': {'$in': ['exchange-traded-funds', 'stocks', 'exchange-traded-notes']}}, self._get_all_fields()).sort((['symbol', 1], ['country', -1])).limit(5))
         for search_result in search_results:
             search_result['uid'] = encrypt_unique_id(search_result)
         return search_results
@@ -84,5 +84,5 @@ class SymbolRepositoryException(Exception):
     pass
 
 if __name__ == '__main__':
-    uid = SymbolRepository().search('gdx')[0]['uid']
-    SymbolRepository().decrypt_unique_id('QSAgICAvWE5ZUyAvVVMgIC9zdG9ja3MgICAg')
+    uid = SymbolRepository().search('gdx')
+    a = 1

@@ -20,8 +20,8 @@ INSTRUMENT_TYPE_MAP = {
 def encrypt_unique_id(symbol):
     unique_string = '/'.join(
         ['{:5}'.format(symbol['symbol']), '{:5}'.format(symbol['exchange']), '{:4}'.format(symbol['country_code']), '{:10}'.format(INSTRUMENT_TYPE_MAP.get(symbol['instrument_type']))])
-    encoded = base64.urlsafe_b64encode(unique_string)
-    return encoded
+    encoded = base64.urlsafe_b64encode(unique_string.encode('UTF-8'))
+    return str(encoded)
 
 
 def decrypt_unique_id(uid):

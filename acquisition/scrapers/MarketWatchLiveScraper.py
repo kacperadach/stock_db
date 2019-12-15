@@ -26,7 +26,7 @@ class MarketWatchLiveScraper(BaseScraper):
 
     def get_queue_item(self, symbol):
         mwr = MarketWatchRequest(symbol=symbol, step_interval='1m', instrument_type=symbol['instrument_type'], indicators=self.indicators)
-        return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), callback=__name__, metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
+        return QueueItem(url=mwr.get_url(), http_method=mwr.get_http_method(), headers=mwr.get_headers(), metadata={'symbol': symbol, 'time_interval': '1m', 'indicators': self.indicators})
 
     def process_data(self, queue_item):
         if not queue_item.get_response().is_successful():
