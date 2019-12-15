@@ -66,7 +66,9 @@ class SymbolRepository(StockDbBase):
             new_documents.append(new_document)
 
         for document in new_documents:
-            self.db.replace_one(COLLECTION_NAME, document, upsert=True)
+            self.db.replace_one(COLLECTION_NAME,
+                                {'symbol': document['symbol'], 'exchange': document['exchange'], 'instrument_type': document['instrument_type'], 'country_code': document['country_code']},
+                                document, upsert=True)
 
     def search(self, symbol_search):
         regex = re.compile('^' + symbol_search.upper(), re.IGNORECASE)
