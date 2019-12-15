@@ -62,7 +62,7 @@ class BarchartFinancialsRequest:
         if links:
             for l in links:
                 if l.text.lower() == 'next':
-                    return links[0].attrs['href'].split('=')[1]
+                    return l.attrs['href'].split('=')[1]
 
 
     @staticmethod
