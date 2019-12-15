@@ -27,14 +27,14 @@ class BarchartFinancialsScraper(BaseScraper):
                     }
 
     def get_queue_item(self, symbol):
-        request = BarchartFinancialsRequest(symbol['symbol'], symbol['document_type'], symbol['period'])
+        request = BarchartFinancialsRequest(symbol['symbol'], symbol['document_type'], symbol['period'], page=symbol['page'])
         return QueueItem(url=request.get_url(), headers=request.get_headers(), http_method=request.get_http_method(), callback=__name__, metadata=symbol)
 
     def get_time_delta(self):
         return timedelta(hours=20)
 
     def requests_per_second(self):
-        return 2
+        return 3
 
     def request_callback(self, queue_item):
         if not queue_item.get_response().is_successful():
