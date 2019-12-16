@@ -67,7 +67,10 @@ class BarchartFinancialsRequest:
 
     @staticmethod
     def parse_response(response):
-        rows = BeautifulSoup(response, 'html.parser').find('tbody').find_all('tr')
+        tbody = BeautifulSoup(response, 'html.parser').find('tbody')
+        if tbody is None:
+            return None
+        rows = tbody.find_all('tr')
         parsed_data = {}
         # parsed_rows = []
         header_stack = []

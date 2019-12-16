@@ -23,6 +23,9 @@ class NasdaqOptionsScraper(BaseScraper):
     def get_time_delta(self):
         return timedelta(hours=4)
 
+    def requests_per_second(self):
+        return 1
+
     def should_scrape(self):
         now = pytz.timezone('UTC').localize(datetime.utcnow())
         est = pytz.timezone('US/Eastern')
