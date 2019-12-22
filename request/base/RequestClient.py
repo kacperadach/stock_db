@@ -21,7 +21,7 @@ TOR_PROXIES = {
     'https': 'socks5h://localhost:{}'
 }
 
-MAX_RETRIES = 2
+MAX_RETRIES = 1
 TIMEOUT = 10
 REQUESTS_PER_NYM = 25
 

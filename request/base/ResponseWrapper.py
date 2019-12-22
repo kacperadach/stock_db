@@ -27,3 +27,9 @@ class ResponseWrapper():
                 else:
                     data = ""
         return data
+
+    def get_response_headers(self):
+        return dict(self.response.headers._store)
+
+    def get_response_cookies(self):
+        return self.response.cookies.get_dict()

@@ -3,11 +3,16 @@ import random
 import string
 from copy import deepcopy
 from datetime import datetime
+from urllib.parse import quote, unquote
 
 from request.base.ResponseWrapper import ResponseWrapper
 
-BASE_URL = 'https://www.barchart.com/proxies/core-api/v1/options/chain?symbol={}&fields=strikePrice%2ClastPrice%2CpercentFromLast%2CbidPrice%2Cmidpoint%2CaskPrice%2CpriceChange%2CpercentChange%2Cvolatility%2Cvolume%2CopenInterest%2CoptionType%2CdaysToExpiration%2CexpirationDate%2CtradeTime%2CsymbolCode%2CsymbolType&groupBy=optionType&raw=1&meta=field.shortName%2Cfield.type%2Cfield.description'
+BASE_URL = 'https://www.barchart.com/'
+BASE_OPTIONS_URL = BASE_URL + 'proxies/core-api/v1/options/chain?symbol={}&fields={}&groupBy=optionType&raw=1&meta=field.shortName%2Cfield.type%2Cfield.description'
 EXPIRATION_QUERY = '&expirationDate={}'
+FIELDS = ['symbolType', 'symbolCode', 'rho', 'percentFromLast', 'optionType', 'vega', 'delta', 'midpoint', 'gamma', 'priceChange', 'daysToExpiration', 'openInterest', 'lastPrice', 'theoretical', 'expirationDate', 'strikePrice', 'tradeTime', 'volume', 'askPrice', 'percentChange', 'theta', 'volatility', 'bidPrice']
+
+    # strikePrice,lastPrice,theoretical,volatility,delta,gamma,rho,theta,vega,volume,openInterest,optionType,daysToExpiration,expirationDate,tradeTime,symbolCode,symbolType
 
 #fields=strikePrice,lastPrice,percentFromLast,bidPrice,midpoint,askPrice,priceChange,percentChange,volatility,volume,openInterest,optionType,daysToExpiration,expirationDate,tradeTime,symbolCode,symbolType
 
@@ -19,35 +24,35 @@ EXPIRATION_QUERY = '&expirationDate={}'
 OPTIONS_REFERER = 'https://www.barchart.com/stocks/quotes/AAPL/options'
 REFERER_EXPIRATION_QUERY = '?expiration={}'
 
-HEADERS = {
-    'accept': 'application/json',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'en-US,en;q=0.9,pl;q=0.8',
-    'cache-control': 'no-cache',
-    'cookie': 'XSRF-TOKEN=eyJpdiI6IlB2TmxNb3NkbDJoU2pnZlE2MnRvMlE9PSIsInZhbHVlIjoibG9hWnAzckw4KzRUS3BTVVhwaFwvNFdOWndkU1RNK3BhU2phemx1eDhVODRtRUp2SFhYdVNrRzlZRlB0Zzl2TUsiLCJtYWMiOiJkODVkYTAxNmMxMjUxNDBjMWE2ZWQ1ZTU4ZDE1MDRkNDE5ODEwMjE4ZWNjYjQ0NzAwN2MxNmEzM2FhYjMzOGJmIn0%3D; laravel_session=eyJpdiI6IkhWdmlibEhiaXdaQWl0QnhcL2ZBMUdBPT0iLCJ2YWx1ZSI6IjZyNzJkRUs0dTRhd1JBS2hcL21VTWlwMkpRd2VHMnBNMm1ydXFBcmJwYTBSS0tLV0Rmd3hVR2VXd2x5QWJvSmduIiwibWFjIjoiYWNiNDZkODRhMWZmM2Q1NzY1NzNhN2JiMDdkYmY1ODA5MzdiOTFlYWMxM2QwMTU5MmFmZTk3MWU0OTI3MWY0ZSJ9; market=eyJpdiI6InFIbFVJckhNZXFFZk5PWmNZanI1b1E9PSIsInZhbHVlIjoiK2VKTXpMNGlGNzRRSVJZYUQyQWNPUT09IiwibWFjIjoiODIzOWQ5MGVhNjZiZjEyNDBjOGU3OTUxZjdlNTYwMzkxMTRkYWYxZjhlNWE3MjI4MzBlMzMyMmNjMDMwYmRjMyJ9',
-    'pragma': 'no-cache',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-    'x-xsrf-token': 'eyJpdiI6IlB2TmxNb3NkbDJoU2pnZlE2MnRvMlE9PSIsInZhbHVlIjoibG9hWnAzckw4KzRUS3BTVVhwaFwvNFdOWndkU1RNK3BhU2phemx1eDhVODRtRUp2SFhYdVNrRzlZRlB0Zzl2TUsiLCJtYWMiOiJkODVkYTAxNmMxMjUxNDBjMWE2ZWQ1ZTU4ZDE1MDRkNDE5ODEwMjE4ZWNjYjQ0NzAwN2MxNmEzM2FhYjMzOGJmIn0='
-}
-
-# eyJpdiI6Inl6b2pcL0NJVEp0OW9DKzRBdmc5OFRRPT0iLCJ2YWx1ZSI6IkRtbmViSW1GMDVwWkJ6XC9xemdRaW1pMkJXdWpaUWR0SFZSUzhrR0pRR0NOSEJxd2tCWkx4TEN5TEcxaWFNRzNuIiwibWFjIjoiY2I1ZmI3ZmY4NzM5M2NkODZhZGVjOWEyOGQwYzlhYTEyNDM0ZjQxMDk4ZDcxNmRjZTQ4YjgyMTZmMGI3NDEyNSJ9
-# eyJpdiI6Ik1GRm1QQ3BHU1M3SnJNelViTW5jeGc9PSIsInZhbHVlIjoiNkdha1NuZkxSSEthSG5NeTd2ZUhGanFheVdhMnByXC9hakJWZ29vSEFxNk5RNzVXZFZSSDRTVzdJUnVZdEpXMzEiLCJtYWMiOiIzZTA0YjNhMjdjZDI1ZTA1MDVjZTBiMzhjYzc4OWJiYTczOTQ4NGYzNzk0Mjk1OGJiYjBjY2RkODk1NzM4N2FhIn0=
-# eyJpdiI6Ikh3Tk1DalZncW0wTHdoM00yRDZWbmc9PSIsInZhbHVlIjoiakpsZFwvRjZwQllZbVMzQ2JrcGdtZTZJU1dkR1c2SVlQUWVkeHhoUUlnZTlpczQzV3FRNm5GYk9SKzc5S1VXbkoiLCJtYWMiOiI3NTcxYjhkOWRhZWMwNDU0NmIwMjllMTlmMjFlMmJlNWRlYzk4MjMyZGU4ZTI5MTJkYmE4NzFlN2IzNmRkNGEwIn0%3D
-
 # HEADERS = {
 #     'accept': 'application/json',
 #     'accept-encoding': 'gzip, deflate, br',
 #     'accept-language': 'en-US,en;q=0.9,pl;q=0.8',
 #     'cache-control': 'no-cache',
-#     'cookie': 'XSRF-TOKEN={}; laravel_session=eyJpdiI6IkhWdmlibEhiaXdaQWl0QnhcL2ZBMUdBPT0iLCJ2YWx1ZSI6IjZyNzJkRUs0dTRhd1JBS2hcL21VTWlwMkpRd2VHMnBNMm1ydXFBcmJwYTBSS0tLV0Rmd3hVR2VXd2x5QWJvSmduIiwibWFjIjoiYWNiNDZkODRhMWZmM2Q1NzY1NzNhN2JiMDdkYmY1ODA5MzdiOTFlYWMxM2QwMTU5MmFmZTk3MWU0OTI3MWY0ZSJ9; market=eyJpdiI6InFIbFVJckhNZXFFZk5PWmNZanI1b1E9PSIsInZhbHVlIjoiK2VKTXpMNGlGNzRRSVJZYUQyQWNPUT09IiwibWFjIjoiODIzOWQ5MGVhNjZiZjEyNDBjOGU3OTUxZjdlNTYwMzkxMTRkYWYxZjhlNWE3MjI4MzBlMzMyMmNjMDMwYmRjMyJ9',
+#     'cookie': 'XSRF-TOKEN=eyJpdiI6IlB2TmxNb3NkbDJoU2pnZlE2MnRvMlE9PSIsInZhbHVlIjoibG9hWnAzckw4KzRUS3BTVVhwaFwvNFdOWndkU1RNK3BhU2phemx1eDhVODRtRUp2SFhYdVNrRzlZRlB0Zzl2TUsiLCJtYWMiOiJkODVkYTAxNmMxMjUxNDBjMWE2ZWQ1ZTU4ZDE1MDRkNDE5ODEwMjE4ZWNjYjQ0NzAwN2MxNmEzM2FhYjMzOGJmIn0%3D; laravel_session=eyJpdiI6IkhWdmlibEhiaXdaQWl0QnhcL2ZBMUdBPT0iLCJ2YWx1ZSI6IjZyNzJkRUs0dTRhd1JBS2hcL21VTWlwMkpRd2VHMnBNMm1ydXFBcmJwYTBSS0tLV0Rmd3hVR2VXd2x5QWJvSmduIiwibWFjIjoiYWNiNDZkODRhMWZmM2Q1NzY1NzNhN2JiMDdkYmY1ODA5MzdiOTFlYWMxM2QwMTU5MmFmZTk3MWU0OTI3MWY0ZSJ9; market=eyJpdiI6InFIbFVJckhNZXFFZk5PWmNZanI1b1E9PSIsInZhbHVlIjoiK2VKTXpMNGlGNzRRSVJZYUQyQWNPUT09IiwibWFjIjoiODIzOWQ5MGVhNjZiZjEyNDBjOGU3OTUxZjdlNTYwMzkxMTRkYWYxZjhlNWE3MjI4MzBlMzMyMmNjMDMwYmRjMyJ9',
 #     'pragma': 'no-cache',
 #     'sec-fetch-mode': 'cors',
 #     'sec-fetch-site': 'same-origin',
 #     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
-#     'x-xsrf-token': '{}'
+#     'x-xsrf-token': 'eyJpdiI6IlB2TmxNb3NkbDJoU2pnZlE2MnRvMlE9PSIsInZhbHVlIjoibG9hWnAzckw4KzRUS3BTVVhwaFwvNFdOWndkU1RNK3BhU2phemx1eDhVODRtRUp2SFhYdVNrRzlZRlB0Zzl2TUsiLCJtYWMiOiJkODVkYTAxNmMxMjUxNDBjMWE2ZWQ1ZTU4ZDE1MDRkNDE5ODEwMjE4ZWNjYjQ0NzAwN2MxNmEzM2FhYjMzOGJmIn0='
 # }
+
+# eyJpdiI6Inl6b2pcL0NJVEp0OW9DKzRBdmc5OFRRPT0iLCJ2YWx1ZSI6IkRtbmViSW1GMDVwWkJ6XC9xemdRaW1pMkJXdWpaUWR0SFZSUzhrR0pRR0NOSEJxd2tCWkx4TEN5TEcxaWFNRzNuIiwibWFjIjoiY2I1ZmI3ZmY4NzM5M2NkODZhZGVjOWEyOGQwYzlhYTEyNDM0ZjQxMDk4ZDcxNmRjZTQ4YjgyMTZmMGI3NDEyNSJ9
+# eyJpdiI6Ik1GRm1QQ3BHU1M3SnJNelViTW5jeGc9PSIsInZhbHVlIjoiNkdha1NuZkxSSEthSG5NeTd2ZUhGanFheVdhMnByXC9hakJWZ29vSEFxNk5RNzVXZFZSSDRTVzdJUnVZdEpXMzEiLCJtYWMiOiIzZTA0YjNhMjdjZDI1ZTA1MDVjZTBiMzhjYzc4OWJiYTczOTQ4NGYzNzk0Mjk1OGJiYjBjY2RkODk1NzM4N2FhIn0=
+# eyJpdiI6Ikh3Tk1DalZncW0wTHdoM00yRDZWbmc9PSIsInZhbHVlIjoiakpsZFwvRjZwQllZbVMzQ2JrcGdtZTZJU1dkR1c2SVlQUWVkeHhoUUlnZTlpczQzV3FRNm5GYk9SKzc5S1VXbkoiLCJtYWMiOiI3NTcxYjhkOWRhZWMwNDU0NmIwMjllMTlmMjFlMmJlNWRlYzk4MjMyZGU4ZTI5MTJkYmE4NzFlN2IzNmRkNGEwIn0%3D
+
+HEADERS = {
+    'accept': 'application/json',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'en-US,en;q=0.9,pl;q=0.8',
+    'cache-control': 'no-cache',
+    'cookie': 'XSRF-TOKEN={}; laravel_session={}; market={}',
+    'pragma': 'no-cache',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+    'x-xsrf-token': '{}'
+}
 
 XSRF_LENGTH = 244
 
@@ -57,19 +62,51 @@ class BarchartOptionsRequestException(Exception):
     pass
 
 
+class BarchartAuthRequest:
+
+    def __init__(self):
+        pass
+
+    def get_url(self):
+        return BASE_URL
+
+    def get_http_method(self):
+        return 'GET'
+
+    def get_headers(self):
+        headers = deepcopy(HEADERS)
+        headers['referer'] = BASE_URL
+        del headers['x-xsrf-token']
+        del headers['cookie']
+        return headers
+
+    def get_body(self):
+        return None
+
+    @staticmethod
+    def parse_response(response):
+        return response.get_response_cookies()
+
+
 class BarchartOptionsRequest:
 
-    def __init__(self, symbol, expiration_date=None):
-        self.symbol = symbol
+    def __init__(self, symbol, xsrf, laravel_session, market, expiration_date=None):
         if expiration_date is not None:
             try:
                 datetime.strptime(expiration_date, '%Y-%m-%d')
             except Exception:
                 raise BarchartOptionsRequestException('invalid expiration_date string')
+        self.symbol = symbol
         self.expiration_date = expiration_date
+        self.xsrf = xsrf
+        self.laravel_session = laravel_session
+        self.market = market
 
     def get_http_method(self):
         return 'GET'
+
+    def get_body(self):
+        return None
 
     def get_headers(self):
         headers = deepcopy(HEADERS)
@@ -77,16 +114,13 @@ class BarchartOptionsRequest:
         if self.expiration_date is not None:
             referer += deepcopy(REFERER_EXPIRATION_QUERY).format(self.expiration_date)
         headers['referer'] = referer
-
-        # # xsrf = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(XSRF_LENGTH))
-        # xsrf = 'eyJpdiI6Ik1GRm1QQ3BHU1M3SnJNelViTW5jeGc9PSIsInZhbHVlIjoiNkdha1NuZkxSSEthSG5NeTd2ZUhGanFheVdhMnByXC9hakJWZ29vSEFxNk5RNzVXZFZSSDRTVzdJUnVZdEpXMzEiLCJtYWMiOiIzZTA0YjNhMjdjZDI1ZTA1MDVjZTBiMzhjYzc4OWJiYTczOTQ4NGYzNzk0Mjk1OGJiYjBjY2RkODk1NzM4N2FhIn1'
-        # headers['cookie'] = headers['cookie'].format(xsrf)
-        # headers['x-xsrf-token'] = xsrf
+        headers['x-xsrf-token'] = unquote(self.xsrf)
+        headers['cookie'] = headers['cookie'].format(self.xsrf, self.laravel_session, self.market)
         return headers
 
     def get_url(self):
-        base = deepcopy(BASE_URL)
-        base = base.format(self.symbol)
+        base = deepcopy(BASE_OPTIONS_URL)
+        base = base.format(self.symbol, quote(',').join(FIELDS))
         if self.expiration_date is not None:
             base += deepcopy(EXPIRATION_QUERY).format(self.expiration_date)
         return base
@@ -98,9 +132,9 @@ class BarchartOptionsRequest:
             if 'expirations' in response['meta'].keys():
                 data['expirations'] = response['meta']['expirations']
             if 'isMonthly' in response['meta'].keys():
-                data['isMonthly'] = response['meta']['isMonthly']
+                data['is_monthly'] = response['meta']['isMonthly']
 
-        if 'data' in response.keys():
+        if 'data' in response.keys() and isinstance(response['data'], dict):
             if 'Call' in response['data'].keys():
                 calls = []
                 for call in response['data']['Call']:
@@ -117,15 +151,26 @@ class BarchartOptionsRequest:
                     else:
                         raise BarchartOptionsRequestException('no raw')
                 data['puts'] = puts
+
+        data['expiration'] = None
+        if 'calls' in data.keys() and data['calls']:
+            data['expiration'] = data['calls'][0]['expirationDate']
+        if 'puts' in data.keys() and data['puts'] and data['expiration'] is None:
+            data['expiration'] = data['puts'][0]['expirationDate']
+
+        if data['expiration'] is not None:
+            data['expiration'] = datetime.strptime(data['expiration'], '%Y-%m-%d')
         return data
 
 
 if __name__ == '__main__':
-    # a = 'eyJpdiI6IlB2TmxNb3NkbDJoU2pnZlE2MnRvMlE9PSIsInZhbHVlIjoibG9hWnAzckw4KzRUS3BTVVhwaFwvNFdOWndkU1RNK3BhU2phemx1eDhVODRtRUp2SFhYdVNrRzlZRlB0Zzl2TUsiLCJtYWMiOiJkODVkYTAxNmMxMjUxNDBjMWE2ZWQ1ZTU4ZDE1MDRkNDE5ODEwMjE4ZWNjYjQ0NzAwN2MxNmEzM2FhYjMzOGJmIn0='
-    # b = 1
-
     import requests
-    r = BarchartOptionsRequest('AAPL', '2019-12-20')
+    r = BarchartAuthRequest()
+    response = requests.get(r.get_url(), headers=r.get_headers())
+    rw = ResponseWrapper(response)
+    cookies = BarchartAuthRequest.parse_response(rw)
+
+    r = BarchartOptionsRequest('KL', cookies['XSRF-TOKEN'], cookies['laravel_session'], cookies['market'])
     response = requests.get(r.get_url(), headers=r.get_headers())
     rw = ResponseWrapper(response)
     BarchartOptionsRequest.parse_response(rw.get_data())

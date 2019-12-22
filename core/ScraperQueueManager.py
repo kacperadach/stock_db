@@ -7,6 +7,7 @@ import os
 from os import path
 
 from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper, BarchartFinancialsScraper
+from acquisition.scrapers.BarchartOptionsScraper import BarchartOptionsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FinvizScraper import FinvizScraper
 from acquisition.scrapers.FuturesScraper import FuturesScraper, Futures1mScraper
@@ -47,7 +48,7 @@ class ScraperQueueManager(StockDbBase):
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
 
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper(), NasdaqOptionsScraper())
+        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper(), NasdaqOptionsScraper(), BarchartOptionsScraper())
         self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper(), BarchartFinancialsScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
