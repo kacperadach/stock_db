@@ -47,7 +47,6 @@ class TorClient(StockDbBase):
                 self.controller.signal(Signal.NEWNYM)
                 self.log('Found new NYM')
                 return True
-        self.log('Could not find new NYM')
         return False
 
     def test(self):

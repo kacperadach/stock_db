@@ -27,8 +27,6 @@ class MarketWatchRequestException(Exception):
 
 class MarketWatchRequest():
     def __init__(self, symbol, instrument_type, step_interval, indicators=None):
-        if instrument_type not in INSTRUMENT_TYPES:
-            raise MarketWatchRequestException('invalid instrument_type : {}'.format(instrument_type))
         if step_interval not in STEP_TRANSLATION.keys():
             raise MarketWatchRequestException('Invalid step interval supplied: {}'.format(step_interval))
 

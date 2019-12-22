@@ -36,8 +36,3 @@ class BarchartFinancialsRepository:
                                  },
                                 document,
                                 upsert=True)
-
-
-
-
-

@@ -78,8 +78,11 @@ class RequestClient(StockDbBase):
                 raise MemoryError
             retries += 1
 
-            if response is not None and response.status_code == 200:
-                break
+            if response is not None:
+                if response.status_code == 200:
+                    break
+                else:
+                    self.log('{} - response received: {}'.format(response.status_code, url.strip()))
             if self.use_tor:
                 self.tor_client.new_nym()
         self.request_counter += retries

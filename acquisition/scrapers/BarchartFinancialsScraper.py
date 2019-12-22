@@ -33,9 +33,6 @@ class BarchartFinancialsScraper(BaseScraper):
     def get_time_delta(self):
         return timedelta(hours=20)
 
-    def requests_per_second(self):
-        return 3
-
     def request_callback(self, queue_item):
         if not queue_item.get_response().is_successful():
             return

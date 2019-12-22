@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 
+from core.data.NasdaqOptionsRepository import NasdaqOptionsRepository
 from request.base.ResponseWrapper import ResponseWrapper
 
 BASE = 'https://api.nasdaq.com/api/quote/{}/option-chain?assetclass={}&limit=0'
@@ -26,8 +27,6 @@ HEADERS = {
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-site'
 }
-
-
 
 
 class NasdaqOptionsRequestException(Exception):
@@ -91,8 +90,9 @@ class NasdaqOptionsRequest:
 
 
 if __name__ == '__main__':
-    r = NasdaqOptionsRequest('AAPL', 'stocks')
+    r = NasdaqOptionsRequest('DES', 'exchange-traded-funds')
     import requests
     response = requests.get(r.get_url(), headers=r.get_headers())
     rw = ResponseWrapper(response)
-    NasdaqOptionsRequest.parse_response(rw.get_data())
+    data = NasdaqOptionsRequest.parse_response(rw.get_data())
+    NasdaqOptionsRepository().get_symbols()

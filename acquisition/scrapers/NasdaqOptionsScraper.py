@@ -45,9 +45,6 @@ class NasdaqOptionsScraper(BaseScraper):
         return est_now.hour <= 5 or est_now.hour >= 19
 
     def process_data(self, queue_item):
-        if not queue_item.get_response().is_successful():
-            return
-
         data = NasdaqOptionsRequest.parse_response(queue_item.get_response().get_data())
         if any(data.values()):
             self.nasdaq_options_repository.insert(data, queue_item.get_metadata(), queue_item.get_utc_time())
