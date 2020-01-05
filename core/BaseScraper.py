@@ -52,7 +52,7 @@ class BaseScraper(StockDbBase):
         try:
             self.request_callback(queue_item)
         except Exception:
-            log_queue.put('Error occurred in callback:\n' + traceback.format_exc())
+            log_queue.put('Error occurred in callback for metadata {}:\n'.format(queue_item.get_metadata()) + traceback.format_exc())
 
     # Scraper Core Logic
     @abstractmethod
