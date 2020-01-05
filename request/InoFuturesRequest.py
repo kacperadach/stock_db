@@ -274,8 +274,13 @@ class InoFuturesOptionsChainRequest:
                     symbol_link = qp.split('=')[1]
                     break
 
+            try:
+                expiration = datetime.strptime(tds[0].text, '%Y-%m-%d')
+            except Exception:
+                continue
+
             options.append({
-                'expiration': datetime.strptime(tds[0].text, '%Y-%m-%d'),
+                'expiration': expiration,
                 'strike': tds[1].text,
                 'type': 'call' if symbol[-1] == 'C' else 'put',
                 'symbol': symbol,
@@ -319,9 +324,16 @@ if __name__ == '__main__':
     # a = 1
 
     #ICE_@KRA
-    request = InoFuturesRequest('NYMEX_SO.N20.1850C', 'hour')
+    # request = InoFuturesRequest('NYMEX_SO.N20.1850C', 'hour')
+    # response = requests.get(url=request.get_url(), headers=request.get_headers())
+    # rw = ResponseWrapper(response)
+    # data = InoFuturesRequest.parse_response(rw.get_data())
+    # a = 1
+
+    # {'type': 'options_chain', 'contract': {'contract_link': 'CME_6E.Z20', 'contract': '6E.Z20', 'spread': False, 'date': datetime.datetime(2020, 12, 1, 0, 0), 'spread_date': None, 'name': 'EURO FX'}}
+    request = InoFuturesOptionsChainRequest('CME_6E.Z20')
     response = requests.get(url=request.get_url(), headers=request.get_headers())
     rw = ResponseWrapper(response)
-    data = InoFuturesRequest.parse_response(rw.get_data())
+    InoFuturesOptionsChainRequest.parse_response(rw.get_data())
     a = 1
 

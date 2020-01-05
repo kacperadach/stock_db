@@ -61,7 +61,7 @@ class BarchartFinancialsRequest:
 
         if links:
             for l in links:
-                if l.text.lower() == 'next':
+                if l.text.lower() == 'next' and '=' in l.attrs['href']:
                     return l.attrs['href'].split('=')[1]
 
 
@@ -119,11 +119,13 @@ class BarchartFinancialsRequest:
 if __name__ == '__main__':
    #{'period': 'quarterly', 'document_type': 'cash-flow', 'symbol': 'AOMFF', 'exchange': 'OOTC', 'page': 1}
     # {'period': 'annual', 'document_type': 'income-statement', 'symbol': 'ABCZF', 'exchange': 'OOTC', 'page': 1}
+
+   # {'period': 'annual', 'document_type': 'income-statement', 'symbol': 'C', 'exchange': 'XNYS', 'page': '7'}
     import requests
     # for period in PERIODS:
     #     for document_type in DOCUMENT_TYPES:
-    r = BarchartFinancialsRequest('AOMFF', 'cash-flow', 'quarterly')
+    r = BarchartFinancialsRequest('C', 'income-statement', 'annual', page=7)
     response = requests.get(r.get_url(), headers=r.get_headers(), allow_redirects=False)
     rw = ResponseWrapper(response)
-    data = BarchartFinancialsRequest.parse_response(rw.get_data())
+    data = BarchartFinancialsRequest.get_next_page(rw.get_data())
     a = 1

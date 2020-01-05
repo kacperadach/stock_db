@@ -58,6 +58,6 @@ class MarketWatchSymbolsRequestV2():
 
 if __name__ == '__main__':
     import requests
-    request = MarketWatchSymbolsRequestV2('united-states', 1)
+    request = MarketWatchSymbolsRequestV2('malta', 1, 'benchmarks')
     req = requests.get(request.get_url())
     MarketWatchSymbolsRequestV2.parse_response(req.content)
