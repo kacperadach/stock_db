@@ -6,7 +6,7 @@ import multiprocessing
 import os
 from os import path
 
-from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper, BarchartFinancialsScraper
+from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper, BarchartFinancialsScraper, InoFuturesScraper
 from acquisition.scrapers.BarchartOptionsScraper import BarchartOptionsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FinvizScraper import FinvizScraper
@@ -25,12 +25,12 @@ from .StockDbBase import StockDbBase
 from core.Counter import Counter
 from request.base.TorManager import TorManager
 
-URL_THREADS = 10
+URL_THREADS = 12
 OUTPUT_PROCESSES = 8
 REQUEST_QUEUE_SIZE = 20
 OUTPUT_QUEUE_SIZE = 100
 QUEUE_LOG_FREQ_SEC = 10
-INPUT_REQUEST_DELAY = 0.1
+INPUT_REQUEST_DELAY = 0.01
 PROCESS_QUEUE_SIZE = 1000
 MAX_PROCESSES = 8
 
@@ -48,8 +48,8 @@ class ScraperQueueManager(StockDbBase):
     def __init__(self, use_tor=True):
         super(ScraperQueueManager, self).__init__()
 
-        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), Futures1mScraper(), NasdaqOptionsScraper(), BarchartOptionsScraper())
-        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper(), BarchartFinancialsScraper())
+        self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), BarchartOptionsScraper())
+        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper(), BarchartFinancialsScraper(), InoFuturesScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
@@ -90,6 +90,8 @@ class ScraperQueueManager(StockDbBase):
         self.launch_queue_logger()
         self.launch_process_checker()
 
+        self.callback_error_queue = Queue()
+
         self.processing_logger = AppLogger(file_name='processing.out')
         try:
             while not self.event.is_set():
@@ -117,8 +119,8 @@ class ScraperQueueManager(StockDbBase):
                             for scraper in self.scrapers + self.priority_scrapers:
                                 if type(scraper).__name__ == queue_item.callback:
                                     # use thread to non-block
-                                    # scraper.request_callback(queue_item)
-                                    Thread(target=scraper.request_callback, args=(queue_item,)).start()
+                                    # scraper.callback(queue_item, self.callback_error_queue)
+                                    Thread(target=scraper.callback, args=(queue_item, self.callback_error_queue)).start()
                         self.process_queue.put(queue_item)
                 except Empty:
                     pass
@@ -127,6 +129,13 @@ class ScraperQueueManager(StockDbBase):
                     while 1:
                         line = self.log_queue.get(block=False)
                         self.processing_logger.log(line)
+                except Empty:
+                    pass
+
+                try:
+                    while 1:
+                        line = self.callback_error_queue.get(block=False)
+                        self.log(line)
                 except Empty:
                     pass
                 sleep(INPUT_REQUEST_DELAY)
@@ -166,9 +175,9 @@ class ScraperQueueManager(StockDbBase):
             while 1:
                 queue_item = self.request_queue.get()
                 if queue_item.get_http_method() == 'GET':
-                    response = request_client.get(queue_item.get_url(), headers=queue_item.get_headers())
+                    response = request_client.get(queue_item.get_url(), headers=queue_item.get_headers(), timeout=queue_item.get_timeout())
                 else:
-                    response = request_client.post(queue_item.get_url(), queue_item.get_body(), headers=queue_item.get_headers())
+                    response = request_client.post(queue_item.get_url(), queue_item.get_body(), headers=queue_item.get_headers(), timeout=queue_item.get_timeout())
                 self.request_counter.increment()
                 if response.status_code == 200:
                     self.successful_request_counter.increment()

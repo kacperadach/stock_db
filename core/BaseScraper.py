@@ -1,5 +1,6 @@
 import sys
 from abc import abstractmethod
+import traceback
 
 from datetime import datetime
 from pytz import timezone
@@ -44,6 +45,14 @@ class BaseScraper(StockDbBase):
     @abstractmethod
     def request_callback(self, queue_item):
         pass
+
+    # dont override
+    @abstractmethod
+    def callback(self, queue_item, log_queue):
+        try:
+            self.request_callback(queue_item)
+        except Exception:
+            log_queue.put('Error occurred in callback:\n' + traceback.format_exc())
 
     # Scraper Core Logic
     @abstractmethod

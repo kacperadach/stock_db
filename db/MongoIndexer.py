@@ -34,7 +34,11 @@ COLLECTION_INDICES = {
                           MongoIndex(name='country_code_datetime_utc', index={'country_code': 1, 'datetime_utc': 1})),
     'nasdaq_options': (MongoIndex(name='symbol_exchange_datetime_utc', index={'symbol': 1, 'exchange': 1, 'datetime_utc': 1}), ),
     'barchart_financials': (MongoIndex(name='symbol_exchange_document_type_period_date', index={'symbol': 1, 'exchange': 1, 'document_type': 1, 'period': 1, 'date': 1}, unique=True), ),
-    'barchart_options': (MongoIndex(name='symbol_expiration_datetime_utc', index={'symbol': 1, 'expiration': 1, 'datetime_utc': 1}), )
+    'barchart_options': (MongoIndex(name='symbol_expiration_datetime_utc', index={'symbol': 1, 'expiration': 1, 'datetime_utc': 1}), ),
+    'ino_futures': (MongoIndex(name='contract_period_trading_date', index={'contract': 1, 'period': 1, 'trading_date': 1}, unique=True),
+                    MongoIndex(name='contract_type_trading_date', index={'contract_type': 1, 'trading_date': 1})),
+    'ino_futures_options': (MongoIndex(name='option_trading_date', index={'option': 1, 'trading_date': 1}, unique=True),
+                            MongoIndex(name='contract_trading_date', index={'contract': 1, 'trading_date': 1}))
 }
 
 # todo fix indexes

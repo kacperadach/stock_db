@@ -1,4 +1,6 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
+
+import pytz
 
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
@@ -24,6 +26,24 @@ class FinvizScraper(BaseScraper):
 
     def get_time_delta(self):
         return timedelta(hours=6)
+
+    def should_scrape(self):
+        now = pytz.timezone('UTC').localize(datetime.utcnow())
+        est = pytz.timezone('US/Eastern')
+        est_now = now.astimezone(est)
+
+        scrape_date = est_now.date()
+        if est_now.hour <= 5:
+            scrape_date = (est_now - timedelta(days=1)).date()
+
+        last_scrape_date = self.last_scrape.date()
+        if self.last_scrape.hour <= 5 and self.last_scrape.year > 1:
+            last_scrape_date = (self.last_scrape - timedelta(days=1)).date()
+
+        if scrape_date <= last_scrape_date:
+            return False
+
+        return est_now.hour <= 5 or est_now.hour >= 19
 
     def process_data(self, queue_item):
         if not queue_item.get_response().is_successful():

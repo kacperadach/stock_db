@@ -2,6 +2,7 @@ from acquisition.scrapers.BarchartFinancialsScraper import BarchartFinancialsScr
 from acquisition.scrapers.BarchartOptionsScraper import BarchartOptionsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FxstreetScraper import FxstreetScraper
+from acquisition.scrapers.InoFuturesScraper import InoFuturesScraper
 from acquisition.scrapers.NasdaqOptionsScraper import NasdaqOptionsScraper
 from .FuturesScraper import FuturesScraper, Futures1mScraper
 from .IndexLiveScraper import IndexLiveScraper
@@ -26,5 +27,6 @@ ALL_SCRAPERS = (
     FxstreetScraper,
     NasdaqOptionsScraper,
     BarchartFinancialsScraper,
-    BarchartOptionsScraper
+    BarchartOptionsScraper,
+    InoFuturesScraper
 )

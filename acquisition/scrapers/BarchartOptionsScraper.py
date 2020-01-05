@@ -6,7 +6,7 @@ import pytz
 from core.BaseScraper import BaseScraper
 from core.QueueItem import QueueItem
 from core.data.BarchartOptionsRepository import BarchartOptionsRepository
-from request.BarchartOptionsRequest import BarchartAuthRequest, BarchartOptionsRequest
+from request.BarchartOptionsRequest import BarchartAuthRequest, BarchartOptionsRequest, AUTH_COOKIES
 
 
 class BarchartOptionsScraper(BaseScraper):
@@ -69,7 +69,8 @@ class BarchartOptionsScraper(BaseScraper):
         if 'cookies' not in queue_item.get_metadata():
             cookies = BarchartAuthRequest.parse_response(queue_item.get_response())
             meta = deepcopy(queue_item.get_metadata())
-            meta['cookies'] = cookies
+            if all(k in cookies for k in AUTH_COOKIES):
+                meta['cookies'] = cookies
             self.additional_symbols.append(meta)
         elif 'expiration' not in queue_item.get_metadata():
             data = BarchartOptionsRequest.parse_response(queue_item.get_response().get_data())

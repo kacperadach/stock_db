@@ -17,6 +17,7 @@ class TorManager(StockDbBase):
         self.tor_path = Credentials().get_tor_path()
 
     def get_data_directory(self, x):
+        # return '/Users/kadach/TorData/Tor{}'.format(x)
         return path.join(path.split(path.split(self.tor_path)[0])[0], 'Data', 'Tor{}'.format(x))
 
     def start_instances(self):

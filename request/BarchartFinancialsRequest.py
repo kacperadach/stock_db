@@ -103,7 +103,10 @@ class BarchartFinancialsRequest:
                     temp = parsed_data[date]
                     for header in header_stack:
                         temp = temp[header]
-                    val = values[index].replace(',', '').replace('$', '')
+                    try:
+                        val = values[index].replace(',', '').replace('$', '')
+                    except Exception:
+                        pass
                     if val == 'N/A':
                         val = ''
                     else:
@@ -114,11 +117,13 @@ class BarchartFinancialsRequest:
 
 
 if __name__ == '__main__':
+   #{'period': 'quarterly', 'document_type': 'cash-flow', 'symbol': 'AOMFF', 'exchange': 'OOTC', 'page': 1}
+    # {'period': 'annual', 'document_type': 'income-statement', 'symbol': 'ABCZF', 'exchange': 'OOTC', 'page': 1}
     import requests
-    for period in PERIODS:
-        for document_type in DOCUMENT_TYPES:
-            r = BarchartFinancialsRequest('AAPL', document_type, period)
-            response = requests.get(r.get_url(), headers=r.get_headers())
-            rw = ResponseWrapper(response)
-            data = BarchartFinancialsRequest.parse_response(rw.get_data())
-            a = 1
+    # for period in PERIODS:
+    #     for document_type in DOCUMENT_TYPES:
+    r = BarchartFinancialsRequest('AOMFF', 'cash-flow', 'quarterly')
+    response = requests.get(r.get_url(), headers=r.get_headers(), allow_redirects=False)
+    rw = ResponseWrapper(response)
+    data = BarchartFinancialsRequest.parse_response(rw.get_data())
+    a = 1

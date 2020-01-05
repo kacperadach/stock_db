@@ -2,13 +2,14 @@ from request.base.ResponseWrapper import ResponseWrapper
 import time
 
 HTTP_METHODS = ('GET', 'POST')
+TIMEOUT = 10
 
 class QueueItemException(Exception):
     pass
 
 class QueueItem:
 
-    def __init__(self, url, http_method, callback=None, symbol='', body=None, headers=None, metadata=None):
+    def __init__(self, url, http_method, callback=None, symbol='', body=None, headers=None, metadata=None, timeout=TIMEOUT):
         body = {} if body is None else body
         headers = {} if headers is None else headers
         metadata = {} if metadata is None else metadata
@@ -24,13 +25,14 @@ class QueueItem:
         self.metadata = metadata
         self.response = None
         self.response_time = None
+        self.timeout = timeout
 
     def __repr__(self):
         return self.symbol + ': ' + str(self.metadata)
 
     @staticmethod
-    def from_request(request, callback, metadata=None):
-        return QueueItem(request.get_url(), request.get_http_method(), callback, body=request.get_body(), headers=request.get_headers(), metadata=metadata)
+    def from_request(request, callback, metadata=None, timeout=TIMEOUT):
+        return QueueItem(request.get_url(), request.get_http_method(), callback, body=request.get_body(), headers=request.get_headers(), metadata=metadata, timeout=timeout)
 
     def get_http_method(self):
         return self.http_method
@@ -63,3 +65,6 @@ class QueueItem:
 
     def get_response(self):
         return self.response
+
+    def get_timeout(self):
+        return self.timeout

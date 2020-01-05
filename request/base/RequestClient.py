@@ -57,12 +57,12 @@ class RequestClient(StockDbBase):
             proxies[key] = value.format(self.tor_client.SocksPort)
         return proxies
 
-    def get(self, url, headers={}):
+    def get(self, url, headers={}, timeout=TIMEOUT):
         response = None
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.get(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), timeout=(TIMEOUT, TIMEOUT))
+                response = requests.get(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), timeout=(timeout, timeout), allow_redirects=False)
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None
@@ -91,12 +91,12 @@ class RequestClient(StockDbBase):
             self.request_counter = 0
         return ResponseWrapper(response)
 
-    def post(self, url, data, headers={}):
+    def post(self, url, data, headers={}, timeout=TIMEOUT):
         response = None
         retries = 0
         while retries < self.max_retries:
             try:
-                response = requests.post(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), data=json.dumps(data), timeout=TIMEOUT)
+                response = requests.post(url.strip(), headers=self._get_headers(headers), proxies=self._get_proxies(), data=json.dumps(data), timeout=(timeout, timeout))
             except ConnectionError:
                 self.log('ConnectionError occurred')
                 response = None
