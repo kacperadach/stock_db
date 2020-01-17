@@ -61,7 +61,7 @@ class BarchartFinancialsRequest:
 
         if links:
             for l in links:
-                if l.text.lower() == 'next' and '=' in l.attrs['href']:
+                if l.text.lower() == 'next' and '=' in l.attrs['href'] and len(l.attrs['href'].split('=')) > 1:
                     return l.attrs['href'].split('=')[1]
 
 
@@ -124,8 +124,12 @@ if __name__ == '__main__':
     import requests
     # for period in PERIODS:
     #     for document_type in DOCUMENT_TYPES:
-    r = BarchartFinancialsRequest('C', 'income-statement', 'annual', page=7)
+    r = BarchartFinancialsRequest('CABN', 'balance-sheet', 'annual', page=1)
     response = requests.get(r.get_url(), headers=r.get_headers(), allow_redirects=False)
     rw = ResponseWrapper(response)
     data = BarchartFinancialsRequest.get_next_page(rw.get_data())
     a = 1
+
+# File "/root/stock_db/request/BarchartFinancialsRequest.py", line 65, in get_next_page
+#     return l.attrs['href'].split('=')[1]
+# IndexError: list index out of range

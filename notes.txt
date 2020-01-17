@@ -35,3 +35,5 @@ https://ts-api.cnbc.com/harmony/app/bars/US3M/1D/20171004000000/20190821000000/a
 https://www.marketwatch.com/investing/stock/lyft/financials/cash-flow
 
 https://apps.newyorkfed.org/markets/autorates/rates-search-page?rateType=R3
+
+https://www.newyorkfed.org/markets/data-hub

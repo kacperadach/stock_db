@@ -23,7 +23,7 @@ class BarchartOptionsScraper(BaseScraper):
         if 'expiration' in symbol.keys():
             cookies = symbol['cookies']
             request = BarchartOptionsRequest(symbol['symbol'], cookies['XSRF-TOKEN'], cookies['laravel_session'], cookies['market'], symbol['expiration'])
-            return QueueItem.from_request(request, None, symbol)
+            return QueueItem.from_request(request, __name__, symbol)
         elif 'cookies' in symbol.keys():
             cookies = symbol['cookies']
             request = BarchartOptionsRequest(symbol['symbol'], cookies['XSRF-TOKEN'], cookies['laravel_session'], cookies['market'])
@@ -63,9 +63,13 @@ class BarchartOptionsScraper(BaseScraper):
         return est_now.hour <= 5 or est_now.hour >= 19
 
     def requests_per_second(self):
-        return 10
+        return 5
 
     def request_callback(self, queue_item):
+        # rate limited
+        if queue_item.get_response().status_code == 429:
+            self.additional_symbols.append(queue_item.get_metadat())
+
         if 'cookies' not in queue_item.get_metadata():
             cookies = BarchartAuthRequest.parse_response(queue_item.get_response())
             meta = deepcopy(queue_item.get_metadata())

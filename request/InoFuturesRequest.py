@@ -331,9 +331,46 @@ if __name__ == '__main__':
     # a = 1
 
     # {'type': 'options_chain', 'contract': {'contract_link': 'CME_6E.Z20', 'contract': '6E.Z20', 'spread': False, 'date': datetime.datetime(2020, 12, 1, 0, 0), 'spread_date': None, 'name': 'EURO FX'}}
-    request = InoFuturesOptionsChainRequest('CME_6E.Z20')
+    request = InoFuturesOptionsChainRequest('ICE_@CT.N20')
     response = requests.get(url=request.get_url(), headers=request.get_headers())
     rw = ResponseWrapper(response)
     InoFuturesOptionsChainRequest.parse_response(rw.get_data())
     a = 1
+
+    # Error
+    # occurred in callback
+    # for metadata {'type': 'options_chain',
+    #               'contract': {'contract_link': 'ICE_@CT.N20', 'contract': '@CT.N20', 'spread': False,
+    #                            'date': datetime.datetime(2020, 7, 1, 0, 0), 'spread_date': None, 'name': 'COTTON #2'}}:
+    #     Traceback(most
+    #     recent
+    #     call
+    #     last):
+    #     File
+    #     "/root/stock_db/core/BaseScraper.py", line
+    #     53, in callback
+    #     self.request_callback(queue_item)
+    # File
+    # "/root/stock_db/acquisition/scrapers/InoFuturesScraper.py", line
+    # 115, in request_callback
+    # options = InoFuturesOptionsChainRequest.parse_response(queue_item.get_response().get_data())
+    # File
+    # "/root/stock_db/request/InoFuturesRequest.py", line
+    # 278, in parse_response
+    # expiration = datetime.strptime(tds[0].text, '%Y-%m-%d')
+    # File
+    # "/usr/lib/python3.6/_strptime.py", line
+    # 565, in _strptime_datetime
+    # tt, fraction = _strptime(data_string, format)
+    # File
+    # "/usr/lib/python3.6/_strptime.py", line
+    # 362, in _strptime
+    # (data_string, format))
+    # ValueError: time
+    # data
+    # ''
+    # does
+    # not match
+    # format
+    # '%Y-%m-%d'
 

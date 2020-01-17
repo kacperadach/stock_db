@@ -59,3 +59,8 @@ class RandomMarketWatchSymbols(BaseScraper):
 
             if new_symbols:
                 self.symbol_repository.insert(new_symbols)
+
+#
+# ERROR
+# 2020-01-06 16:01:47,923 |    INFO | 3 | 06/01/2020 16:01:46 - Error occurred while processing data for scraper <acquisition.scrapers.RandomMarketWatchSymbols.RandomMarketWatchSymbols object at 0x7f98d8616e10>: 'str' object has no attribute 'keys'
+# 2020-01-06 16:01:47,944 |    INFO | 3 | 06/01/2020 16:01:46 - RandomMarketWatchSymbols - processing took 0.06552s: {'symbol': 'dekk'}
