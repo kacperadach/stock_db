@@ -6,7 +6,7 @@ import multiprocessing
 import os
 from os import path
 
-from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper, BarchartFinancialsScraper, InoFuturesScraper
+from acquisition.scrapers import FxstreetScraper, NasdaqOptionsScraper, BarchartFinancialsScraper, InoFuturesScraper, YchartsScraper
 from acquisition.scrapers.BarchartOptionsScraper import BarchartOptionsScraper
 from acquisition.scrapers.BondScraper import BondScraper
 from acquisition.scrapers.FinvizScraper import FinvizScraper
@@ -49,7 +49,7 @@ class ScraperQueueManager(StockDbBase):
         super(ScraperQueueManager, self).__init__()
 
         self.priority_scrapers = (MarketWatchRequestLiveScraper(), IndexLiveScraper(), FuturesScraper(), BarchartOptionsScraper())
-        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper(), BarchartFinancialsScraper(), InoFuturesScraper())
+        self.scrapers = (RandomMarketWatchSymbols(), MarketWatchSymbolsV2(), MarketWatchHistoricalScraper(), FinvizScraper(), BondScraper(), FxstreetScraper(), BarchartFinancialsScraper(), InoFuturesScraper(), YchartsScraper())
 
         self.request_queue = ScraperQueue(REQUEST_QUEUE_SIZE)
         self.output_queue = Queue(maxsize=OUTPUT_QUEUE_SIZE)
@@ -127,15 +127,13 @@ class ScraperQueueManager(StockDbBase):
 
                 try:
                     while 1:
-                        line = self.log_queue.get(block=False)
-                        self.processing_logger.log(line)
+                        self.processing_logger.log(self.log_queue.get(block=False))
                 except Empty:
                     pass
 
                 try:
                     while 1:
-                        line = self.callback_error_queue.get(block=False)
-                        self.log(line)
+                        self.log(self.callback_error_queue.get(block=False))
                 except Empty:
                     pass
                 sleep(INPUT_REQUEST_DELAY)

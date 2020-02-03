@@ -76,6 +76,8 @@ class RequestClient(StockDbBase):
                 self.log('MemoryError occurred')
                 self.log('url: {}'.format(url))
                 raise MemoryError
+            except Exception as e:
+                self.log('Unknown error occurred during request: {}\n{}'.format(e, url))
             retries += 1
 
             if response is not None:
@@ -106,6 +108,8 @@ class RequestClient(StockDbBase):
             except ReadTimeout:
                 self.log('{} timed out after {} seconds'.format(url, TIMEOUT))
                 response = None
+            except Exception as e:
+                self.log('Unknown error occurred during request: {}\n{}'.format(e, url))
             retries += 1
 
             if response is not None and response.status_code == 200:

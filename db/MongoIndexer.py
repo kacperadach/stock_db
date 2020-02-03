@@ -38,7 +38,9 @@ COLLECTION_INDICES = {
     'ino_futures': (MongoIndex(name='contract_period_trading_date', index={'contract': 1, 'period': 1, 'trading_date': 1}, unique=True),
                     MongoIndex(name='contract_type_trading_date', index={'contract_type': 1, 'trading_date': 1})),
     'ino_futures_options': (MongoIndex(name='option_trading_date', index={'option': 1, 'trading_date': 1}, unique=True),
-                            MongoIndex(name='contract_trading_date', index={'contract': 1, 'trading_date': 1}))
+                            MongoIndex(name='contract_trading_date', index={'contract': 1, 'trading_date': 1})),
+    'ycharts_indicators': (MongoIndex(name='id_trading_date', index={'id': 1, 'trading_date': 1}, unique=True),
+                           MongoIndex(name='category_name', index={'category': 1, 'name': 1}))
 }
 
 # todo fix indexes

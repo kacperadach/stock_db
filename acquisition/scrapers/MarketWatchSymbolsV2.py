@@ -77,3 +77,45 @@ class MarketWatchSymbolsV2(BaseScraper):
 
 if __name__ == '__main__':
     a = {'test': 'test'}
+
+    # ScraperQueueManager: Error
+    # occurred in callback
+    # for metadata {'page': 1, 'country': 'japan', 'instrument_type': 'exchange-traded-notes'}:
+    #     Traceback(most
+    #     recent
+    #     call
+    #     last):
+    #     File
+    #     "/root/stock_db/core/BaseScraper.py", line
+    #     53, in callback
+    #     self.request_callback(queue_item)
+    # File
+    # "/root/stock_db/acquisition/scrapers/MarketWatchSymbolsV2.py", line
+    # 49, in request_callback
+    # if MarketWatchSymbolsRequestV2.parse_response(queue_item.get_response().get_data()):
+    #     File
+    # "/root/stock_db/request/MarketWatchSymbolsRequestV2.py", line
+    # 34, in parse_response
+    # bs = BeautifulSoup(response, 'html.parser', parse_only=SoupStrainer('table'))
+    # File
+    # "/usr/local/lib/python3.6/dist-packages/bs4/__init__.py", line
+    # 310, in __init__
+    # markup, from_encoding, exclude_encodings = exclude_encodings)):
+    # File
+    # "/usr/local/lib/python3.6/dist-packages/bs4/builder/_htmlparser.py", line
+    # 248, in prepare_markup
+    # exclude_encodings = exclude_encodings)
+    # File
+    # "/usr/local/lib/python3.6/dist-packages/bs4/dammit.py", line
+    # 381, in __init__
+    # markup, override_encodings, is_html, exclude_encodings)
+    # File
+    # "/usr/local/lib/python3.6/dist-packages/bs4/dammit.py", line
+    # 249, in __init__
+    # self.markup, self.sniffed_encoding = self.strip_byte_order_mark(markup)
+    # File
+    # "/usr/local/lib/python3.6/dist-packages/bs4/dammit.py", line
+    # 309, in strip_byte_order_mark
+    # elif data[:3] == b'\xef\xbb\xbf':
+    # TypeError: unhashable
+    # type: 'slice'
