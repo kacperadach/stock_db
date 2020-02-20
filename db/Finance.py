@@ -28,11 +28,12 @@ class FinanceDB(StockDbBase):
 		self.user = self.credentials.get_user()
 		self.password = self.credentials.get_password()
 
-		env_vars = DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
+		# env_vars = DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
 
-		self.host = env_vars['FINANCE_DB_HOST']
-		self.port = int(env_vars['FINANCE_DB_PORT'])
-		self.db_name = env_vars['FINANCE_DB_NAME']
+
+		self.host = os.environ['FINANCE_DB_HOST']
+		self.port = int(os.environ['FINANCE_DB_PORT'])
+		self.db_name = os.environ['FINANCE_DB_NAME']
 
 		self.mongo_client = FinanceDB.get_client(self)
 		# connection_string = 'mongodb://' + str(self.user) + ':' + str(self.password) + '@' + str(self.host), self.port

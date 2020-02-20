@@ -230,3 +230,24 @@ if __name__ == '__main__':
             start = start - timedelta(days=365)
         else:
             break
+
+
+# ScraperQueueManager: Error occurred in callback for metadata {'type': 'indicator_id', 'indicator': {'link': '/indicators/us_arts_entertainment_and_recreation_corporate_profits_after_tax_yearly', 'name': 'US Arts, Entertainment, and Recreation Corporate Profits After Tax'}, 'category': {'link': '/indicators/categories/components_of_gdp', 'category': 'National Accounts'}}:
+# Traceback (most recent call last):
+#   File "/root/stock_db/core/BaseScraper.py", line 53, in callback
+#     self.request_callback(queue_item)
+#   File "/root/stock_db/acquisition/scrapers/YchartsScraper.py", line 66, in request_callback
+#     id = YchartIndicatorIdRequest.parse_response(queue_item.get_response().get_data())
+#   File "/root/stock_db/request/YchartsIndicatorsRequest.py", line 141, in parse_response
+#     div = BeautifulSoup(response, 'html.parser', parse_only=SoupStrainer('div', {'class': 'watchlistInlineFrame'}))
+#   File "/usr/local/lib/python3.6/dist-packages/bs4/__init__.py", line 310, in __init__
+#     markup, from_encoding, exclude_encodings=exclude_encodings)):
+#   File "/usr/local/lib/python3.6/dist-packages/bs4/builder/_htmlparser.py", line 248, in prepare_markup
+#     exclude_encodings=exclude_encodings)
+#   File "/usr/local/lib/python3.6/dist-packages/bs4/dammit.py", line 381, in __init__
+#     markup, override_encodings, is_html, exclude_encodings)
+#   File "/usr/local/lib/python3.6/dist-packages/bs4/dammit.py", line 249, in __init__
+#     self.markup, self.sniffed_encoding = self.strip_byte_order_mark(markup)
+#   File "/usr/local/lib/python3.6/dist-packages/bs4/dammit.py", line 309, in strip_byte_order_mark
+#     elif data[:3] == b'\xef\xbb\xbf':
+# TypeError: unhashable type: 'slice'
