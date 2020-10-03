@@ -28,7 +28,7 @@ class FinanceDB(StockDbBase):
 		self.user = self.credentials.get_user()
 		self.password = self.credentials.get_password()
 
-		# env_vars = DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
+		env_vars = DEV_ENV_VARS if App_Config.env == 'dev' else PROD_ENV_VARS
 
 
 		self.host = os.environ['FINANCE_DB_HOST']

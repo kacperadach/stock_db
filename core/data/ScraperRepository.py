@@ -30,7 +30,3 @@ class ScraperRepository(StockDbBase):
             new_data.append(d)
         return new_data
 
-Scraper_Repository = ScraperRepository()
-
-if __name__ == '__main__':
-    Scraper_Repository.get_recent()

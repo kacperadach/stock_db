@@ -18,7 +18,6 @@ from acquisition.scrapers.MarketWatchHistoricalScraper import MarketWatchHistori
 from acquisition.scrapers.MarketWatchSymbolsV2 import MarketWatchSymbolsV2
 from core.OutputWorkerProcess import output_worker_process
 from core.ScraperQueue import ScraperQueue
-from core.data.ScraperRepository import Scraper_Repository
 from logger import AppLogger
 from request.base.RequestClient import RequestClient
 from .StockDbBase import StockDbBase
@@ -154,7 +153,6 @@ class ScraperQueueManager(StockDbBase):
                 data = {'datetime_utc': new_now, 'request_queue_size': self.request_queue.get_size(), 'output_queue_size': self.output_queue.qsize(), 'process_queue_size': self.process_queue.qsize(),
                     'requests': self.request_counter.get(), 'successful_requests': self.successful_request_counter.get(), 'failed_requests': self.failed_request_counter.get(),
                     'requests_per_second': rps}
-                Scraper_Repository.save_request_interval(data)
                 self.log('Request Queue Size: {}'.format(data['request_queue_size']))
                 self.log('Output Queue Size: {}'.format(data['output_queue_size']))
                 self.log('Process Queue Size: {}'.format(data['process_queue_size']))
